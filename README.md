@@ -1,14 +1,14 @@
-# CoppeliaSim
+# CoppeliaSim 4.6.0
+
+This version works with ROS1
 
 This need to be cloned inside Locosim folder to be able to use tractor_simulator.py
 
 
 
-to install for ROS2:
+to install for ROS2 (ros2 compile only with version 4.5.1 and with clang):
 
-1) checkout branch ros2
-
-2) unzip CoppeliaSim_Edu_V4_5_1_rev4_Ubuntu22_04.tar.xz (ros2 compile only with version 4.5.1 and with clang)
+1) checkout branch ros2 (Coppelia 4.5.1)
 
 3) remove ros_packages folder
 
