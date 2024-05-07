@@ -15,66 +15,74 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.setObjectQuaternion</h2>
-    <p>Sets the quaternion of an object. Dynamically simulated objects, together with their
-hierarchy tree, are dynamically reset (this however does not apply to static shapes)</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simSetObjectQuaternion" id="simSetObjectQuaternion"></a>simSetObjectQuaternion / sim.setObjectQuaternion  </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Sets the quaternion of an object. Dynamically simulated objects, together with their hierarchy tree, will be dynamically reset (this however does not apply to static shapes). See also <a href="simGetObjectQuaternion.htm">sim.getObjectQuaternion</a> and the section about <a href="../positionOrientationTransformation.htm">positions, orientations and transformations</a></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simSetObjectQuaternion(int objectHandle,int relativeToObjectHandle,const double* quaternion)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>objectHandle</strong>: handle of the object. Combine with sim.handleflag_wxyzquat to provide the quaternion as (w,x,y,z) order instead of (x,y,z,w) order. Can also be combined with sim.handleflag_reljointbaseframe (see next argument)</div>
+<div><strong>relativeToObjectHandle</strong>: indicates relative to which reference frame the orientation is specified. Specify sim.handle_world to set the absolute orientation, sim.handle_parent to set the orientation relative to the object's parent, or an object handle relative to whose reference frame the orientation is specified.  If this handle is the handle of a joint, then the quaternion is applied relative to the joint's moving frame (unless <strong>objectHandle</strong> is combined with sim.handleflag_reljointbaseframe, in which case the quaternion is applied relative to the joint's base frame).<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.setObjectQuaternion(int objectHandle, list quaternion, 
-                        int relativeToObjectHandle = sim.handle_world)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.setObjectQuaternion(int objectHandle, float[4] quaternion, 
-                        int relativeToObjectHandle = sim.handle_world)</code>
-    </div>
+<div><strong>quaternion</strong>: the quaternion</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>sim.setObjectQuaternion(int objectHandle,int relativeToObjectHandle,float[4] quaternion)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div></td> 
+</tr> 
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>objectHandle</strong>: handle of the object. Combine with sim.handleflag_wxyzquat to provide the quaternion as [qw qx qy qz] order instead of [qx qy qz qw] order. Can also be combined with sim.handleflag_reljointbaseframe</li>
-                <li><strong>quaternion</strong>: the quaternion (array of 4 values [qx qy qz qw])
-                <li><strong>relativeToObjectHandle</strong>: indicates relative to which reference frame the orientation is specified. Specify sim.handle_world to set the absolute orientation, sim.handle_parent to set the orientation relative to the object's parent, or an object handle relative to whose reference frame the orientation is specified. If this handle is the handle of a joint, then the quaternion is applied relative to the joint's moving frame (unless <strong>objectHandle</strong> is combined with sim.handleflag_reljointbaseframe, in which case the quaternion is applied relative to the joint's base frame)</li></li>
-            </ul>
-        
-</div>
+ 
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
 
-<div class="regApiSection">
 
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGetObjectQuaternion.htm">sim.getObjectQuaternion</a></li>
-<li><a href="../positionOrientationTransformation.htm">positions, orientations and transformations</a></li>
-</ul>
-</p>
-
-</td>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>sim.setObjectQuaternion(int objectHandle,int relativeToObjectHandle,list quaternion)</td>
 </tr>
+
+</table> 
+
+<br>
+</td>
+
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

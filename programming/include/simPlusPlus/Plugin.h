@@ -28,15 +28,12 @@
 #endif /* __linux || __APPLE__ */
 
 #include <simLib/simExp.h> // for SIM_DLLEXPORT
-#include <simLib/simTypes.h> // for SIM_DLLEXPORT
-
-#ifdef HAVE_JSONCONS
-#include <jsoncons/json.hpp>
-#endif // HAVE_JSONCONS
 
 namespace sim
 {
-    extern sim::PluginInfo *pluginInfo;
+    extern std::string pluginName;
+    extern int pluginVersion;
+    extern std::string pluginNameAndVersion;
 
     struct InstancePassFlags
     {
@@ -57,14 +54,6 @@ namespace sim
         bool scriptErased;
     };
 
-    struct EventInfo
-    {
-        std::string event;
-        long seq;
-        long uid;
-        int handle;
-    };
-
     class Plugin
     {
     public:
@@ -76,88 +65,91 @@ namespace sim
         void setVerbosity(int i);
         int getVerbosity();
         void init();
+        virtual void onStart();
+        virtual void onEnd();
+        virtual void * onMessage(int message, int *auxData, void *customData, int *replyData) final;
+        virtual LIBRARY loadSimLibrary();
 
-        virtual LIBRARY loadSimLibrary(const char *coppeliaSimLibPath);
-
-        virtual void onInit();
-        virtual void onCleanup();
-        virtual void onMsg(SSimMsg *msg) final;
-        virtual void onUIInit();
-        virtual void onUICleanup();
-        virtual void onUIMsg(SSimMsg_ui *msg) final;
-
+        virtual void onInstancePass(const InstancePassFlags &flags, bool first);
         virtual void onInstancePass(const InstancePassFlags &flags);
+        virtual void onFirstInstancePass(const InstancePassFlags &flags);
+        virtual void onLastInstancePass();
         virtual void onInstanceSwitch(int sceneID);
         virtual void onInstanceAboutToSwitch(int sceneID);
+        virtual void onMenuItemSelected(int itemHandle, int itemState);
+        virtual void onBroadcast(int header, int messageID);
         virtual void onSceneSave();
         virtual void onModelSave();
+        virtual void onModuleOpen(char *name);
+        virtual void onModuleHandle(char *name);
+        virtual void onModuleHandleInSensingPart(char *name);
+        virtual void onModuleClose(char *name);
+        virtual void onRenderingPass();
+        virtual void onBeforeRendering();
+        virtual void onImageFilterEnumReset();
+        virtual void onImageFilterEnumerate(int &headerID, int &filterID, std::string &name);
+        virtual void onImageFilterAdjustParams(int headerID, int filterID, int bufferSize, void *buffer, int &editedBufferSize, void *&editedBuffer);
+        virtual std::vector<float> onImageFilterProcess(int headerID, int filterID, int resX, int resY, int visionSensorHandle, float *inputImage, float *depthImage, float *workImage, float *bufferImage1, float *bufferImage2, float *outputImage, void *filterParamBuffer, int &triggerDetectionn);
         virtual void onAboutToUndo();
         virtual void onUndo();
         virtual void onAboutToRedo();
         virtual void onRedo();
+        virtual void onScriptIconDblClick(int objectHandle, int &dontOpenEditor);
         virtual void onSimulationAboutToStart();
         virtual void onSimulationAboutToEnd();
         virtual void onSimulationEnded();
+        virtual void onKeyPress(int key, int mods);
+        virtual void onBannerClicked(int bannerID);
+        virtual void onRefreshDialogs(int refreshDegree);
         virtual void onSceneLoaded();
         virtual void onModelLoaded();
+        virtual void onGuiPass();
+        virtual void onMainScriptAboutToBeCalled(int &out);
+        virtual void onRMLPos();
+        virtual void onRMLVel();
+        virtual void onRMLStep();
+        virtual void onRMLRemove();
+        virtual void onPathPlanningPlugin();
+        virtual void onColladaPlugin();
+        virtual void onOpenGL(int programIndex, int renderingAttributes, int cameraHandle, int viewIndex);
+        virtual void onOpenGLFrame(int sizeX, int sizeY, int &out);
+        virtual void onOpenGLCameraView(int sizeX, int sizeY, int viewIndex, int &out);
+        virtual void onProxSensorSelectDown(int objectID, float *clickedPoint, float *normalVector);
+        virtual void onProxSensorSelectUp(int objectID, float *clickedPoint, float *normalVector);
+        virtual void onPickSelectDown(int objectID);
         virtual void onScriptStateDestroyed(int scriptID);
-        virtual void onSimulationBeforeInit();
-        virtual void onSimulationAfterInit();
-        virtual void onSimulationBeforeActuation();
-        virtual void onSimulationAfterActuation();
-        virtual void onSimulationBeforeSensing();
-        virtual void onSimulationAfterSensing();
-        virtual void onSimulationBeforeCleanup();
-        virtual void onSimulationAfterCleanup();
-        virtual void onEvents(void *data, size_t size);
-#ifdef HAVE_JSONCONS
-        virtual void onEvent(const jsoncons::json &event);
-        virtual void onEvent(const EventInfo &info, const jsoncons::json &data);
-        virtual void onObjectAdded(const EventInfo &info, const jsoncons::json &data);
-        virtual void onObjectChanged(const EventInfo &info, const jsoncons::json &data);
-        virtual void onObjectRemoved(const EventInfo &info, const jsoncons::json &data);
-        virtual void onDrawingObjectAdded(const EventInfo &info, const jsoncons::json &data);
-        virtual void onDrawingObjectChanged(const EventInfo &info, const jsoncons::json &data);
-        virtual void onDrawingObjectRemoved(const EventInfo &info, const jsoncons::json &data);
-        virtual void onEnvironmentChanged(const EventInfo &info, const jsoncons::json &data);
-        virtual void onAppSettingsChanged(const EventInfo &info, const jsoncons::json &data);
-        virtual void onSimulationChanged(const EventInfo &info, const jsoncons::json &data);
-        virtual void onAppSession(const EventInfo &info, const jsoncons::json &data);
-        virtual void onGenesisBegin(const EventInfo &info, const jsoncons::json &data);
-        virtual void onGenesisEnd(const EventInfo &info, const jsoncons::json &data);
-#endif // HAVE_JSONCONS
-
-        virtual void onUIPass();
-        virtual void onUIMenuItemSelected(int itemHandle, int itemState);
 
     private:
+        bool firstInstancePass = true;
         std::string name_;
     };
 }
 
-#define SIM_PLUGIN(className_) \
+#define SIM_PLUGIN(pluginName_, pluginVersion_, className_) \
 namespace sim { \
+LIBRARY lib; \
 ::className_ *plugin; \
-sim::PluginInfo *pluginInfo; \
+std::string pluginName; \
+std::string pluginNameAndVersion; \
+int pluginVersion; \
 } \
-SIM_DLLEXPORT int simInit(SSimInit *initInfo) \
+SIM_DLLEXPORT unsigned char simStart(void *reservedPointer, int reservedInt) \
 { \
     try \
     { \
-        sim::pluginInfo = new sim::PluginInfo; \
-        sim::pluginInfo->name = PLUGIN_NAME; \
-        sim::pluginInfo->version = PLUGIN_VERSION; \
-        sim::pluginInfo->nameAndVersion = sim::pluginInfo->name; \
-        if(sim::pluginInfo->version > 0) \
+        sim::pluginName = pluginName_; \
+        sim::pluginVersion = pluginVersion_; \
+        sim::pluginNameAndVersion = pluginName_; \
+        if(pluginVersion_ > 0) \
         { \
-            sim::pluginInfo->nameAndVersion += "-"; \
-            sim::pluginInfo->nameAndVersion += std::to_string(sim::pluginInfo->version); \
+            sim::pluginNameAndVersion += "-"; \
+            sim::pluginNameAndVersion += std::to_string(pluginVersion_); \
         } \
         sim::plugin = new className_; \
-        sim::plugin->setName(sim::pluginInfo->name); \
-        sim::pluginInfo->lib = sim::plugin->loadSimLibrary(initInfo->coppeliaSimLibPath); \
-        sim::plugin->onInit(); \
-        return std::max(1, sim::pluginInfo->version); \
+        sim::plugin->setName(pluginName_); \
+        sim::lib = sim::plugin->loadSimLibrary(); \
+        sim::plugin->onStart(); \
+        return std::max(1, sim::pluginVersion); \
     } \
     catch(std::exception &ex) \
     { \
@@ -165,13 +157,13 @@ SIM_DLLEXPORT int simInit(SSimInit *initInfo) \
         return 0; \
     } \
 } \
-SIM_DLLEXPORT void simCleanup() \
+SIM_DLLEXPORT void simEnd() \
 { \
     try \
     { \
         if(sim::plugin) \
         { \
-            sim::plugin->onCleanup(); \
+            sim::plugin->onEnd(); \
             delete sim::plugin; \
             sim::plugin = nullptr; \
         } \
@@ -180,67 +172,22 @@ SIM_DLLEXPORT void simCleanup() \
     { \
         sim::addLog(sim_verbosity_errors, ex.what()); \
     } \
-    unloadSimLibrary(sim::pluginInfo->lib); \
-    delete sim::pluginInfo; \
-    sim::pluginInfo = nullptr; \
+    unloadSimLibrary(sim::lib); \
 } \
-SIM_DLLEXPORT void simMsg(SSimMsg *msg) \
+SIM_DLLEXPORT void * simMessage(int message, int *auxiliaryData, void *customData, int *replyData) \
 { \
     try \
     { \
         if(sim::plugin) \
         { \
-            return sim::plugin->onMsg(msg); \
+            return sim::plugin->onMessage(message, auxiliaryData, customData, replyData); \
         } \
     } \
     catch(std::exception &ex) \
     { \
         sim::addLog(sim_verbosity_errors, ex.what()); \
     } \
-}
-#define SIM_UI_PLUGIN(className_) \
-SIM_PLUGIN(className_); \
-SIM_DLLEXPORT void simInit_ui() \
-{ \
-    try \
-    { \
-        if(sim::plugin) \
-        { \
-            return sim::plugin->onUIInit(); \
-        } \
-    } \
-    catch(std::exception &ex) \
-    { \
-        sim::addLog(sim_verbosity_errors, ex.what()); \
-    } \
-} \
-SIM_DLLEXPORT void simCleanup_ui() \
-{ \
-    try \
-    { \
-        if(sim::plugin) \
-        { \
-            return sim::plugin->onUICleanup(); \
-        } \
-    } \
-    catch(std::exception &ex) \
-    { \
-        sim::addLog(sim_verbosity_errors, ex.what()); \
-    } \
-} \
-SIM_DLLEXPORT void simMsg_ui(SSimMsg_ui *msg) \
-{ \
-    try \
-    { \
-        if(sim::plugin) \
-        { \
-            return sim::plugin->onUIMsg(msg); \
-        } \
-    } \
-    catch(std::exception &ex) \
-    { \
-        sim::addLog(sim_verbosity_errors, ex.what()); \
-    } \
+    return 0L; \
 }
 
 #endif // SIMPLUSPLUS_PLUGIN_H_INCLUDED

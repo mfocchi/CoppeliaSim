@@ -31,8 +31,7 @@
 
 <p><a name="genericFunction" id="genericFunction"></a><strong>Using the generic function simxCallScriptFunction</strong>: instead of extending the functions that the B0-based remote API offers, one can  use the generic B0-based remote API function <a href="b0RemoteApi-cpp.htm#simxCallScriptFunction">simxCallScriptFunction</a>: this will call a CoppeliaSim script function, which can then execute any type of operation locally, then return data. For instance:</p>
 
-<code class="hljs language-lua coppelia-coppeliasim-script">--lua
-
+<code class="hljs language-lua coppelia-coppeliasim-script">
 function myFunctionName(args)
     for i=1,#args,1 do
         print('Argument '..i..' is :')
@@ -46,7 +45,8 @@ end</code>
 
 <p>The B0-based remote API client application would then call above script function in following manner (e.g. via a Python script):</p>
 
-<code class="hljs language-python coppelia-b0-remote-api-client">import b0RemoteApi
+<code class="hljs language-python coppelia-b0-remote-api-client">
+import b0RemoteApi
 
 with b0RemoteApi.RemoteApiClient('b0RemoteApi_pythonClient','b0RemoteApi') as client:    
     args=['Hello World!',[1,2,3],59]
@@ -80,18 +80,6 @@ with b0RemoteApi.RemoteApiClient('b0RemoteApi_pythonClient','b0RemoteApi') as cl
 </div>  
   
   
-<link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 
 </html>

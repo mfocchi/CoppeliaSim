@@ -1,4 +1,3 @@
-local simEigen = loadPlugin 'simEigen';
-(require 'simEigen-typecheck')(simEigen)
+local simEigen={}
 
 return simEigen

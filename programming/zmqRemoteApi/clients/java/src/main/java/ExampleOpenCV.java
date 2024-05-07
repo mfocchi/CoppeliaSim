@@ -52,10 +52,10 @@ public class ExampleOpenCV
         var visionSensorHandle = sim.getObject("/VisionSensor");
         var passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
 
-        sim.setStepping(true);
+        client.setStepping(true);
         sim.startSimulation();
 
-        double startTime = sim.getSimulationTime();
+        float startTime = sim.getSimulationTime();
         int skip = 2;
         while(sim.getSimulationTime() - startTime < 5)
         {
@@ -82,7 +82,7 @@ public class ExampleOpenCV
             var icon = new ImageIcon(img);
             lbl.setIcon(icon);
 
-            sim.step();
+            client.step();
         }
         sim.stopSimulation();
     }

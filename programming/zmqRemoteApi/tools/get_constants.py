@@ -8,7 +8,7 @@ if __name__ == '__main__':
     try:
         import json
 
-        from coppeliasim_zmqremoteapi_client import RemoteAPIClient
+        from zmqRemoteApi import RemoteAPIClient
 
         client = RemoteAPIClient()
 

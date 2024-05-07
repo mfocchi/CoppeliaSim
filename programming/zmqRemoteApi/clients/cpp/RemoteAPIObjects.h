@@ -10,10 +10,24 @@ namespace RemoteAPIObject
     public:
         sim(RemoteAPIClient *client);
 
-#include "sim-deprecated.h"
-#include "sim-special.h"
-
-        void acquireLock();
+        // DEPRECATED START
+        double getJointMaxForce(int64_t jointHandle);
+        void setJointMaxForce(int64_t objectHandle, double forceOrTorque);
+        int64_t createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision = {});
+        void removeObject(int64_t objectHandle);
+        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepthBuffer(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
+        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
+        void setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image);
+        std::vector<int64_t> getObjectSelection();
+        void setObjectSelection(std::vector<double> objectHandles);
+        // DEPRECATED END
+        
+        // SPECIAL START
+        std::optional<std::vector<uint8_t>> getStringSignal(std::string signalName);
+        std::optional<int64_t> getInt32Signal(std::string signalName);
+        std::optional<double> getFloatSignal(std::string signalName);
+        // SPECIAL END
+        
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         int64_t addDrawingObjectItem(int64_t drawingObjectHandle, std::vector<double> itemData);
         void addForce(int64_t shapeHandle, std::vector<double> position, std::vector<double> force);
@@ -26,7 +40,7 @@ namespace RemoteAPIObject
         void addParticleObjectItem(int64_t objectHandle, std::vector<double> itemData);
         void addReferencedHandle(int64_t objectHandle, int64_t referencedHandle);
         int64_t addScript(int64_t scriptType);
-        int64_t adjustView(int64_t viewHandleOrIndex, int64_t objectHandle, int64_t options, std::optional<std::string> viewLabel = {});
+        int64_t adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel = {});
         int64_t alignShapeBB(int64_t shapeHandle, std::vector<double> pose);
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
         int64_t announceSceneContentChange();
@@ -40,6 +54,7 @@ namespace RemoteAPIObject
         std::vector<double> buildMatrix(std::vector<double> position, std::vector<double> eulerAngles);
         std::vector<double> buildMatrixQ(std::vector<double> position, std::vector<double> quaternion);
         std::vector<double> buildPose(std::vector<double> position, std::vector<double> eulerAnglesOrAxis, std::optional<int64_t> mode = {}, std::optional<std::vector<double>> axis2 = {});
+        json callScriptFunction(std::string functionName, int64_t scriptHandle, std::optional<json> inArg = {});
         int64_t cameraFitToView(int64_t viewHandleOrIndex, std::optional<std::vector<int64_t>> objectHandles = {}, std::optional<int64_t> options = {}, std::optional<double> scaling = {});
         std::vector<json> changeEntityColor(int64_t entityHandle, std::vector<double> newColor, std::optional<int64_t> colorComponent = {});
         std::tuple<int64_t, std::vector<int64_t>> checkCollision(int64_t entity1Handle, int64_t entity2Handle);
@@ -76,7 +91,7 @@ namespace RemoteAPIObject
         void destroyCollection(int64_t collectionHandle);
         void destroyGraphCurve(int64_t graphHandle, int64_t curveId);
         int64_t duplicateGraphCurveToStatic(int64_t graphHandle, int64_t curveId, std::optional<std::string> curveName = {});
-        std::tuple<int64_t, json> executeScriptString(std::string stringToExecute, int64_t scriptHandle);
+        std::tuple<int64_t, json> executeScriptString(std::string stringAtScriptName, int64_t scriptHandleOrType);
         void exportMesh(int64_t fileformat, std::string pathAndFilename, int64_t options, double scalingFactor, std::vector<double> vertices, std::vector<int64_t> indices);
         int64_t floatingViewAdd(double posX, double posY, double sizeX, double sizeY, int64_t options);
         int64_t floatingViewRemove(int64_t floatingViewHandle);
@@ -84,10 +99,9 @@ namespace RemoteAPIObject
         int64_t generateTextShape(std::string txt, std::optional<std::vector<double>> color = {}, std::optional<double> height = {}, std::optional<bool> centered = {}, std::optional<std::string> alphabetLocation = {});
         std::tuple<std::vector<double>, std::vector<double>> generateTimeOptimalTrajectory(std::vector<double> path, std::vector<double> pathLengths, std::vector<double> minMaxVel, std::vector<double> minMaxAccel, std::optional<int64_t> trajPtSamples = {}, std::optional<std::string> boundaryCondition = {}, std::optional<double> timeout = {});
         std::vector<double> getAlternateConfigs(std::vector<int64_t> jointHandles, std::vector<double> inputConfig, std::optional<int64_t> tipHandle = {}, std::optional<std::vector<double>> lowLimits = {}, std::optional<std::vector<double>> ranges = {});
-        std::vector<std::string> getApiFunc(int64_t scriptHandle, std::string apiWord);
-        std::string getApiInfo(int64_t scriptHandle, std::string apiWord);
+        std::vector<std::string> getApiFunc(int64_t scriptHandleOrType, std::string apiWord);
+        std::string getApiInfo(int64_t scriptHandleOrType, std::string apiWord);
         std::vector<double> getArrayParam(int64_t parameter);
-        double getAutoYieldDelay();
         bool getBoolParam(int64_t parameter);
         double getClosestPosOnPath(std::vector<double> path, std::vector<double> pathLengths, std::vector<double> absPt);
         std::vector<int64_t> getCollectionObjects(int64_t collectionHandle);
@@ -116,12 +130,13 @@ namespace RemoteAPIObject
         double getJointTargetVelocity(int64_t objectHandle);
         int64_t getJointType(int64_t objectHandle);
         double getJointVelocity(int64_t jointHandle);
-        std::string getLastInfo();
         std::tuple<int64_t, std::vector<double>, std::vector<double>, std::vector<double>> getLightParameters(int64_t lightHandle);
         int64_t getLinkDummy(int64_t dummyHandle);
         std::vector<std::string> getMatchingPersistentDataTags(std::string pattern);
         std::vector<double> getMatrixInverse(std::vector<double> matrix);
         int64_t getModelProperty(int64_t objectHandle);
+        std::string getModuleInfo(std::string moduleName, int64_t infoType);
+        std::tuple<std::string, int64_t> getModuleName(int64_t index);
         bool getNamedBoolParam(std::string name);
         double getNamedFloatParam(std::string name);
         int64_t getNamedInt32Param(std::string name);
@@ -137,13 +152,13 @@ namespace RemoteAPIObject
         double getObjectFloatParam(int64_t objectHandle, int64_t parameterID);
         void getObjectFromUid(int64_t uid, std::optional<json> options = {});
         int64_t getObjectInt32Param(int64_t objectHandle, int64_t parameterID);
-        std::vector<double> getObjectMatrix(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
-        std::vector<double> getObjectOrientation(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
+        std::vector<double> getObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle);
+        std::vector<double> getObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectParent(int64_t objectHandle);
-        std::vector<double> getObjectPose(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
-        std::vector<double> getObjectPosition(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
+        std::vector<double> getObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle);
+        std::vector<double> getObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectProperty(int64_t objectHandle);
-        std::vector<double> getObjectQuaternion(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
+        std::vector<double> getObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle);
         std::vector<int64_t> getObjectSel();
         double getObjectSizeFactor(int64_t ObjectHandle);
         int64_t getObjectSpecialProperty(int64_t objectHandle);
@@ -158,15 +173,12 @@ namespace RemoteAPIObject
         std::vector<double> getPathInterpolatedConfig(std::vector<double> path, std::vector<double> pathLengths, double t, std::optional<json> method = {}, std::optional<std::vector<int64_t>> types = {});
         std::tuple<std::vector<double>, double> getPathLengths(std::vector<double> path, int64_t dof, std::optional<std::string> distCallback = {});
         std::vector<std::string> getPersistentDataTags();
-        std::string getPluginInfo(std::string pluginName, int64_t infoType);
-        std::string getPluginName(int64_t index);
         std::tuple<double, int64_t, int64_t, double> getPointCloudOptions(int64_t pointCloudHandle);
         std::vector<double> getPointCloudPoints(int64_t pointCloudHandle);
         std::vector<double> getPoseInverse(std::vector<double> pose);
         std::tuple<std::vector<double>, std::vector<int64_t>> getQHull(std::vector<double> verticesIn);
         std::vector<double> getQuaternionFromMatrix(std::vector<double> matrix);
         double getRandom(std::optional<int64_t> seed = {});
-        bool getRealTimeSimulation();
         std::vector<int64_t> getReferencedHandles(int64_t objectHandle);
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
@@ -182,13 +194,12 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<double>> getShapeColor(int64_t shapeHandle, std::string colorName, int64_t colorComponent);
         std::tuple<int64_t, int64_t, std::vector<double>> getShapeGeomInfo(int64_t shapeHandle);
         std::tuple<std::vector<double>, std::vector<double>> getShapeInertia(int64_t shapeHandle);
-        double getShapeMassAndInertia(int64_t shapeHandle);
+        double getShapeMass(int64_t shapeHandle);
         std::tuple<std::vector<double>, std::vector<int64_t>, std::vector<double>> getShapeMesh(int64_t shapeHandle);
         int64_t getShapeTextureId(int64_t shapeHandle);
         json getShapeViz(int64_t shapeHandle, int64_t itemIndex);
         std::string getSignalName(int64_t signalIndex, int64_t signalType);
         int64_t getSimulationState();
-        bool getSimulationStopping();
         double getSimulationTime();
         double getSimulationTimeStep();
         std::tuple<int64_t, std::vector<int64_t>, std::vector<int64_t>> getSimulatorMessage();
@@ -196,7 +207,11 @@ namespace RemoteAPIObject
         std::string getStringParam(int64_t parameter);
         double getSystemTime();
         std::tuple<int64_t, std::vector<int64_t>> getTextureId(std::string textureName);
+        bool getThreadAutomaticSwitch();
+        bool getThreadExistRequest();
         int64_t getThreadId();
+        bool getThreadSwitchAllowed();
+        int64_t getThreadSwitchTiming();
         std::vector<std::string> getUserVariables();
         std::tuple<std::vector<double>, std::vector<double>> getVelocity(int64_t shapeHandle);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepth(int64_t sensorHandle, std::optional<int64_t> options = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
@@ -207,7 +222,6 @@ namespace RemoteAPIObject
         int64_t handleChildScripts(int64_t callType);
         int64_t handleDynamics(double deltaTime);
         int64_t handleEmbeddedScripts(int64_t callType);
-        void handleExtCalls();
         void handleGraph(int64_t objectHandle, double simulationTime);
         void handleJointMotion();
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> handleProximitySensor(int64_t sensorHandle);
@@ -217,7 +231,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<double>, std::vector<double>> handleVisionSensor(int64_t sensorHandle);
         std::tuple<std::vector<double>, std::vector<int64_t>> importMesh(int64_t fileformat, std::string pathAndFilename, int64_t options, double identicalVerticeTolerance, double scalingFactor);
         int64_t importShape(int64_t fileformat, std::string pathAndFilename, int64_t options, double identicalVerticeTolerance, double scalingFactor);
-        void initScript(int64_t scriptHandle);
+        bool initScript(int64_t scriptHandle);
         int64_t insertObjectIntoOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options, std::optional<std::vector<double>> color = {}, std::optional<int64_t> tag = {});
         int64_t insertObjectIntoPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double gridSize, std::optional<std::vector<double>> color = {}, std::optional<double> duplicateTolerance = {});
         int64_t insertPointsIntoPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, std::optional<std::vector<double>> color = {}, std::optional<double> duplicateTolerance = {});
@@ -231,6 +245,7 @@ namespace RemoteAPIObject
         void launchExecutable(std::string filename, std::optional<std::string> parameters = {}, std::optional<int64_t> showStatus = {});
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> loadImage(int64_t options, std::string filename);
         int64_t loadModel(std::string filename);
+        int64_t loadModule(std::string filenameAndPath, std::string pluginName);
         void loadScene(std::string filename);
         std::vector<double> matrixToPose(std::vector<double> matrix);
         int64_t moduleEntry(int64_t handle, std::optional<std::string> label = {}, std::optional<int64_t> state = {});
@@ -246,7 +261,7 @@ namespace RemoteAPIObject
         std::vector<uint8_t> packUInt16Table(std::vector<int64_t> uint16Numbers, std::optional<int64_t> startUint16Index = {}, std::optional<int64_t> uint16Count = {});
         std::vector<uint8_t> packUInt32Table(std::vector<int64_t> uint32Numbers, std::optional<int64_t> startUInt32Index = {}, std::optional<int64_t> uint32Count = {});
         std::vector<uint8_t> packUInt8Table(std::vector<int64_t> uint8Numbers, std::optional<int64_t> startUint8Index = {}, std::optional<int64_t> uint8count = {});
-        void pauseSimulation();
+        int64_t pauseSimulation();
         std::vector<uint8_t> persistentDataRead(std::string dataTag);
         void persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options = {});
         std::vector<double> poseToMatrix(std::vector<double> pose);
@@ -261,7 +276,9 @@ namespace RemoteAPIObject
         std::vector<uint8_t> readTexture(int64_t textureId, int64_t options, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {});
         std::tuple<int64_t, std::vector<double>, std::vector<double>> readVisionSensor(int64_t sensorHandle);
         int64_t refreshDialogs(int64_t refreshDegree);
-        void releaseLock();
+        int64_t registerScriptFuncHook(std::string funcToHook, std::string userFunc, bool execBefore);
+        int64_t registerScriptFunction(std::string funcNameAtPluginName, std::string callTips);
+        int64_t registerScriptVariable(std::string varNameAtPluginName);
         int64_t relocateShapeFrame(int64_t shapeHandle, std::vector<double> pose);
         void removeDrawingObject(int64_t drawingObjectHandle);
         int64_t removeModel(int64_t objectHandle);
@@ -293,7 +310,6 @@ namespace RemoteAPIObject
         std::vector<uint8_t> serialRead(int64_t portHandle, int64_t dataLengthToRead, bool blockingOperation, std::optional<std::vector<uint8_t>> closingString = {}, std::optional<double> timeout = {});
         int64_t serialSend(int64_t portHandle, std::vector<uint8_t> data);
         void setArrayParam(int64_t parameter, std::vector<double> arrayOfValues);
-        void setAutoYieldDelay(double dt);
         void setBoolParam(int64_t parameter, bool boolState);
         void setEngineBoolParam(int64_t paramId, int64_t objectHandle, bool boolParam);
         void setEngineFloatParam(int64_t paramId, int64_t objectHandle, double floatParam);
@@ -315,6 +331,7 @@ namespace RemoteAPIObject
         void setLightParameters(int64_t lightHandle, int64_t state, std::vector<double> reserved, std::vector<double> diffusePart, std::vector<double> specularPart);
         void setLinkDummy(int64_t dummyHandle, int64_t linkDummyHandle);
         void setModelProperty(int64_t objectHandle, int64_t property);
+        void setModuleInfo(std::string moduleName, int64_t infoType, std::string info);
         void setNamedBoolParam(std::string name, bool value);
         void setNamedFloatParam(std::string name, double value);
         void setNamedInt32Param(std::string name, int64_t value);
@@ -326,18 +343,17 @@ namespace RemoteAPIObject
         void setObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID, std::vector<double> params);
         void setObjectFloatParam(int64_t objectHandle, int64_t parameterID, double parameter);
         void setObjectInt32Param(int64_t objectHandle, int64_t parameterID, int64_t parameter);
-        void setObjectMatrix(int64_t objectHandle, std::vector<double> matrix, std::optional<int64_t> relativeToObjectHandle = {});
-        void setObjectOrientation(int64_t objectHandle, std::vector<double> eulerAngles, std::optional<int64_t> relativeToObjectHandle = {});
+        void setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
+        void setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles);
         void setObjectParent(int64_t objectHandle, int64_t parentObjectHandle, std::optional<bool> keepInPlace = {});
-        void setObjectPose(int64_t objectHandle, std::vector<double> pose, std::optional<int64_t> relativeToObjectHandle = {});
-        void setObjectPosition(int64_t objectHandle, std::vector<double> position, std::optional<int64_t> relativeToObjectHandle = {});
+        void setObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose);
+        void setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position);
         void setObjectProperty(int64_t objectHandle, int64_t property);
-        void setObjectQuaternion(int64_t objectHandle, std::vector<double> quaternion, std::optional<int64_t> relativeToObjectHandle = {});
+        void setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion);
         void setObjectSel(std::vector<int64_t> objectHandles);
         void setObjectSpecialProperty(int64_t objectHandle, int64_t property);
         void setObjectStringParam(int64_t objectHandle, int64_t parameterID, std::vector<uint8_t> parameter);
         void setPage(int64_t pageIndex);
-        void setPluginInfo(std::string pluginName, int64_t infoType, std::string info);
         void setPointCloudOptions(int64_t pointCloudHandle, double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize);
         void setReferencedHandles(int64_t objectHandle, std::vector<int64_t> referencedHandles);
         void setScriptInt32Param(int64_t scriptHandle, int64_t parameterID, int64_t parameter);
@@ -348,16 +364,17 @@ namespace RemoteAPIObject
         void setShapeMass(int64_t shapeHandle, double mass);
         void setShapeMaterial(int64_t shapeHandle, int64_t materialIdOrShapeHandle);
         void setShapeTexture(int64_t shapeHandle, int64_t textureId, int64_t mappingMode, int64_t options, std::vector<double> uvScaling, std::optional<std::vector<double>> position = {}, std::optional<std::vector<double>> orientation = {});
-        int64_t setStepping(bool enabled);
         void setStringParam(int64_t parameter, std::string stringState);
         void setStringSignal(std::string signalName, std::vector<uint8_t> signalValue);
+        int64_t setThreadAutomaticSwitch(bool automaticSwitch);
+        int64_t setThreadSwitchAllowed(bool allowed);
+        void setThreadSwitchTiming(int64_t dtInMs);
         void setVisionSensorImg(int64_t sensorHandle, std::vector<uint8_t> image, std::optional<int64_t> options = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
-        void startSimulation();
-        void step();
-        void stopSimulation(std::optional<bool> wait = {});
+        int64_t startSimulation();
+        int64_t stopSimulation();
         int64_t subtractObjectFromOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options);
         int64_t subtractObjectFromPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double tolerance);
-        int64_t testCB(int64_t a, std::string cb, int64_t b);
+        void switchThread();
         std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>> textEditorClose(int64_t handle);
         std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>, bool> textEditorGetInfo(int64_t handle);
         int64_t textEditorOpen(std::string initText, std::string properties);
@@ -365,6 +382,7 @@ namespace RemoteAPIObject
         std::vector<uint8_t> transformBuffer(std::vector<uint8_t> inBuffer, int64_t inFormat, double multiplier, double offset, int64_t outFormat);
         void transformImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options);
         std::vector<int64_t> ungroupShape(int64_t shapeHandle);
+        int64_t unloadModule(int64_t pluginHandle);
         std::vector<double> unpackDoubleTable(std::vector<uint8_t> data, std::optional<int64_t> startDoubleIndex = {}, std::optional<int64_t> doubleCount = {}, std::optional<int64_t> additionalByteOffset = {});
         std::vector<double> unpackFloatTable(std::vector<uint8_t> data, std::optional<int64_t> startFloatIndex = {}, std::optional<int64_t> floatCount = {}, std::optional<int64_t> additionalByteOffset = {});
         std::vector<int64_t> unpackInt32Table(std::vector<uint8_t> data, std::optional<int64_t> startInt32Index = {}, std::optional<int64_t> int32Count = {}, std::optional<int64_t> additionalByteOffset = {});
@@ -380,7 +398,6 @@ namespace RemoteAPIObject
         void writeCustomTableData(int64_t handle, std::string tagName, json theTable, std::optional<json> options = {});
         void writeTexture(int64_t textureId, int64_t options, std::vector<uint8_t> textureData, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {}, std::optional<double> interpol = {});
         std::tuple<double, double, double> yawPitchRollToAlphaBetaGamma(double yawAngle, double pitchAngle, double rollAngle);
-        void yield();
 
 #ifndef addonscriptcall_cleanup
         const int addonscriptcall_cleanup = 1;
@@ -528,12 +545,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef boolparam_dynamics_handling_enabled
         const int boolparam_dynamics_handling_enabled = 6;
-#endif
-#ifndef boolparam_execunsafe
-        const int boolparam_execunsafe = 58;
-#endif
-#ifndef boolparam_execunsafeext
-        const int boolparam_execunsafeext = 59;
 #endif
 #ifndef boolparam_exit_request
         const int boolparam_exit_request = 41;
@@ -876,6 +887,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef cameraintparam_pov_focal_blur
         const int cameraintparam_pov_focal_blur = 9004;
+#endif
+#ifndef cameraintparam_remotecameramode
+        const int cameraintparam_remotecameramode = 9012;
 #endif
 #ifndef cameraintparam_rendering_attributes
         const int cameraintparam_rendering_attributes = 9003;
@@ -1222,9 +1236,6 @@ namespace RemoteAPIObject
 #ifndef dummyfloatparam_size
         const int dummyfloatparam_size = 10003;
 #endif
-#ifndef dummyintparam_dummytype
-        const int dummyintparam_dummytype = 10000;
-#endif
 #ifndef dummyintparam_follow_path
         const int dummyintparam_follow_path = 10001;
 #endif
@@ -1236,21 +1247,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef dummylink_dyntendon
         const int dummylink_dyntendon = 7;
-#endif
-#ifndef dummystringparam_assemblytag
-        const int dummystringparam_assemblytag = 10004;
-#endif
-#ifndef dummytype_assembly
-        const int dummytype_assembly = 9;
-#endif
-#ifndef dummytype_default
-        const int dummytype_default = 8;
-#endif
-#ifndef dummytype_dynloopclosure
-        const int dummytype_dynloopclosure = 0;
-#endif
-#ifndef dummytype_dyntendon
-        const int dummytype_dyntendon = 7;
 #endif
 #ifndef dynmat_default
         const int dynmat_default = 2310013;
@@ -2557,9 +2553,6 @@ namespace RemoteAPIObject
 #ifndef objectproperty_dontshowasinsidemodel
         const int objectproperty_dontshowasinsidemodel = 256;
 #endif
-#ifndef objectproperty_hiddenforsimulation
-        const int objectproperty_hiddenforsimulation = 65536;
-#endif
 #ifndef objectproperty_hierarchyhiddenmodelchild
         const int objectproperty_hierarchyhiddenmodelchild = 32768;
 #endif
@@ -2667,9 +2660,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef objintparam_collection_self_collision_indicator
         const int objintparam_collection_self_collision_indicator = 27;
-#endif
-#ifndef objintparam_hierarchycolor
-        const int objintparam_hierarchycolor = 38;
 #endif
 #ifndef objintparam_illumination_handle
         const int objintparam_illumination_handle = 32;
@@ -2857,21 +2847,6 @@ namespace RemoteAPIObject
 #ifndef physics_vortex
         const int physics_vortex = 2;
 #endif
-#ifndef plugininfo_builddatestr
-        const int plugininfo_builddatestr = 1;
-#endif
-#ifndef plugininfo_extversionint
-        const int plugininfo_extversionint = 2;
-#endif
-#ifndef plugininfo_extversionstr
-        const int plugininfo_extversionstr = 0;
-#endif
-#ifndef plugininfo_statusbarverbosity
-        const int plugininfo_statusbarverbosity = 4;
-#endif
-#ifndef plugininfo_verbosity
-        const int plugininfo_verbosity = 3;
-#endif
 #ifndef primitiveshape_capsule
         const int primitiveshape_capsule = 8;
 #endif
@@ -3049,9 +3024,6 @@ namespace RemoteAPIObject
 #ifndef scriptexecorder_normal
         const int scriptexecorder_normal = 1;
 #endif
-#ifndef scriptintparam_autorestartonerror
-        const int scriptintparam_autorestartonerror = 7;
-#endif
 #ifndef scriptintparam_enabled
         const int scriptintparam_enabled = 4;
 #endif
@@ -3064,9 +3036,6 @@ namespace RemoteAPIObject
 #ifndef scriptintparam_handle
         const int scriptintparam_handle = 3;
 #endif
-#ifndef scriptintparam_lang
-        const int scriptintparam_lang = 6;
-#endif
 #ifndef scriptintparam_objecthandle
         const int scriptintparam_objecthandle = 5;
 #endif
@@ -3078,9 +3047,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef scriptstringparam_name
         const int scriptstringparam_name = 1;
-#endif
-#ifndef scriptstringparam_nameext
-        const int scriptstringparam_nameext = 3;
 #endif
 #ifndef scriptstringparam_text
         const int scriptstringparam_text = 2;
@@ -3238,18 +3204,6 @@ namespace RemoteAPIObject
 #ifndef shapestringparam_color_name
         const int shapestringparam_color_name = 3023;
 #endif
-#ifndef shapestringparam_colorname
-        const int shapestringparam_colorname = 3032;
-#endif
-#ifndef sim_lang_lua
-        const int sim_lang_lua = 0;
-#endif
-#ifndef sim_lang_python
-        const int sim_lang_python = 1;
-#endif
-#ifndef sim_lang_undefined
-        const int sim_lang_undefined = -1;
-#endif
 #ifndef simulation_advancing
         const int simulation_advancing = 16;
 #endif
@@ -3291,9 +3245,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef stringparam_additionalpythonpath
         const int stringparam_additionalpythonpath = 135;
-#endif
-#ifndef stringparam_addondir
-        const int stringparam_addondir = 143;
 #endif
 #ifndef stringparam_addonpath
         const int stringparam_addonpath = 131;
@@ -3340,9 +3291,6 @@ namespace RemoteAPIObject
 #ifndef stringparam_importexportdir
         const int stringparam_importexportdir = 130;
 #endif
-#ifndef stringparam_legacymachinetag
-        const int stringparam_legacymachinetag = 142;
-#endif
 #ifndef stringparam_logfilter
         const int stringparam_logfilter = 124;
 #endif
@@ -3369,9 +3317,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef stringparam_resourcesdir
         const int stringparam_resourcesdir = 141;
-#endif
-#ifndef stringparam_sandboxlang
-        const int stringparam_sandboxlang = 144;
 #endif
 #ifndef stringparam_scene_name
         const int stringparam_scene_name = 15;
@@ -3475,9 +3420,6 @@ namespace RemoteAPIObject
 #ifndef syscb_customcallback4
         const int syscb_customcallback4 = 23;
 #endif
-#ifndef syscb_data
-        const int syscb_data = 45;
-#endif
 #ifndef syscb_dyn
         const int syscb_dyn = 40;
 #endif
@@ -3505,9 +3447,6 @@ namespace RemoteAPIObject
 #ifndef syscb_resume
         const int syscb_resume = 10;
 #endif
-#ifndef syscb_selchange
-        const int syscb_selchange = 44;
-#endif
 #ifndef syscb_sensing
         const int syscb_sensing = 7;
 #endif
@@ -3516,9 +3455,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef syscb_suspended
         const int syscb_suspended = 8;
-#endif
-#ifndef syscb_thread
-        const int syscb_thread = 43;
 #endif
 #ifndef syscb_trigger
         const int syscb_trigger = 31;
@@ -3616,9 +3552,6 @@ namespace RemoteAPIObject
 #ifndef visionfloatparam_pov_blur_distance
         const int visionfloatparam_pov_blur_distance = 1014;
 #endif
-#ifndef visionintparam_depthignored
-        const int visionintparam_depthignored = 1020;
-#endif
 #ifndef visionintparam_disabled_light_components
         const int visionintparam_disabled_light_components = 1006;
 #endif
@@ -3645,9 +3578,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef visionintparam_resolution_y
         const int visionintparam_resolution_y = 1003;
-#endif
-#ifndef visionintparam_rgbignored
-        const int visionintparam_rgbignored = 1020;
 #endif
 #ifndef visionintparam_windowed_pos_x
         const int visionintparam_windowed_pos_x = 1011;
@@ -4086,180 +4016,6 @@ namespace RemoteAPIObject
 #endif
     };
 
-    class simAssimp
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simAssimp(RemoteAPIClient *client);
-
-        void exportMeshes(json allVertices, json allIndices, std::string filename, std::string formatId, std::optional<double> scaling = {}, std::optional<int64_t> upVector = {}, std::optional<int64_t> options = {});
-        void exportShapes(std::vector<int64_t> shapeHandles, std::string filename, std::string formatId, std::optional<double> scaling = {}, std::optional<int64_t> upVector = {}, std::optional<int64_t> options = {});
-        void exportShapesDlg(std::string filename, std::vector<int64_t> shapeHandles);
-        std::tuple<std::string, std::string, std::string> getExportFormat(int64_t index);
-        std::tuple<std::string, std::string> getImportFormat(int64_t index);
-        std::tuple<json, json> importMeshes(std::string filenames, std::optional<double> scaling = {}, std::optional<int64_t> upVector = {}, std::optional<int64_t> options = {});
-        std::vector<int64_t> importShapes(std::string filenames, std::optional<int64_t> maxTextureSize = {}, std::optional<double> scaling = {}, std::optional<int64_t> upVector = {}, std::optional<int64_t> options = {});
-        std::vector<int64_t> importShapesDlg(std::string filename);
-
-    };
-
-    class simBubble
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simBubble(RemoteAPIClient *client);
-
-        int64_t create(std::vector<int64_t> motorJointHandles, int64_t sensorHandle, std::vector<double> backRelativeVelocities);
-        bool destroy(int64_t bubbleRobHandle);
-        bool start(int64_t bubbleRobHandle);
-        bool stop(int64_t bubbleRobHandle);
-
-    };
-
-    class simCHAI3D
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simCHAI3D(RemoteAPIClient *client);
-
-        int64_t addConstraintPlane(int64_t deviceIndex, std::vector<double> position, std::vector<double> normal, double Kp, double Kv, double Fmax);
-        int64_t addConstraintPoint(int64_t deviceIndex, std::vector<double> position, double Kp, double Kv, double Fmax);
-        int64_t addConstraintSegment(int64_t deviceIndex, std::vector<double> point, std::vector<double> segment, double Kp, double Kv, double Fmax);
-        int64_t addShape(std::vector<double> vertices, std::vector<int64_t> indices, std::vector<double> position, std::vector<double> orientation, double stiffnessFactor);
-        int64_t readButtons(int64_t deviceIndex);
-        std::vector<double> readForce(int64_t deviceIndex);
-        std::vector<double> readPosition(int64_t deviceIndex);
-        void removeObject(int64_t objectID);
-        void reset();
-        int64_t start(int64_t deviceIndex, double toolRadius, double workspaceRadius);
-        void updateConstraint(int64_t objectID, std::vector<double> positionA, std::vector<double> positionB, double Kp, double Kv, double Fmax);
-        void updateShape(int64_t objectID, std::vector<double> position, std::vector<double> orientation, double stiffnessFactor);
-
-    };
-
-    class simCam
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simCam(RemoteAPIClient *client);
-
-        int64_t grab(int64_t deviceIndex, int64_t visionSensorHandle);
-        std::string info(int64_t deviceIndex);
-        std::tuple<int64_t, int64_t, int64_t> start(int64_t deviceIndex, int64_t resX, int64_t resY);
-        int64_t stop(int64_t deviceIndex);
-
-    };
-
-    class simGLTF
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simGLTF(RemoteAPIClient *client);
-
-        int64_t animationFrameCount();
-        void clear();
-        void exportAllObjects();
-        void exportAnimation();
-        int64_t exportObject(int64_t objectHandle);
-        void exportObjects(std::vector<int64_t> objectHandles);
-        void exportSelectedObjects();
-        int64_t exportShape(int64_t shapeHandle, std::optional<int64_t> parentHandle = {}, std::optional<int64_t> parentNodeIndex = {});
-        std::tuple<int64_t, std::string> getExportTextureFormat();
-        std::tuple<bool, std::string, std::string> loadASCII(std::string filepath);
-        std::tuple<bool, std::string, std::string> loadBinary(std::string filepath);
-        void recordAnimation(bool enable);
-        bool saveASCII(std::string filepath);
-        bool saveBinary(std::string filepath);
-        std::string serialize();
-        void setExportTextureFormat(int64_t textureFormat);
-
-    };
-
-    class simGeom
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simGeom(RemoteAPIClient *client);
-
-        int64_t copyMesh(int64_t meshHandle);
-        int64_t copyOctree(int64_t octreeHandle);
-        int64_t copyPtcloud(int64_t ptcloudHandle);
-        int64_t createMesh(std::vector<double> vertices, std::vector<int64_t> indices, std::optional<std::vector<double>> meshOriginPos = {}, std::optional<std::vector<double>> meshOriginQuaternion = {}, std::optional<double> maxTriangleEdgeLength = {}, std::optional<int64_t> maxTriangleCountInLeafObb = {});
-        int64_t createMeshFromSerializationData(std::string data);
-        int64_t createOctreeFromColorPoints(std::vector<double> points, std::optional<std::vector<double>> octreeOriginPos = {}, std::optional<std::vector<double>> octreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<std::vector<double>> colors = {}, std::optional<std::vector<int64_t>> userData = {});
-        int64_t createOctreeFromMesh(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::optional<std::vector<double>> octreeOriginPos = {}, std::optional<std::vector<double>> octreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<std::vector<int64_t>> pointColor = {}, std::optional<int64_t> userData = {});
-        int64_t createOctreeFromOctree(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::optional<std::vector<double>> newOctreeOriginPos = {}, std::optional<std::vector<double>> newOctreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<std::vector<int64_t>> pointColor = {}, std::optional<int64_t> userData = {});
-        int64_t createOctreeFromPoints(std::vector<double> points, std::optional<std::vector<double>> octreeOriginPos = {}, std::optional<std::vector<double>> octreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<std::vector<int64_t>> pointColor = {}, std::optional<int64_t> userData = {});
-        int64_t createOctreeFromSerializationData(std::string data);
-        int64_t createPtcloudFromColorPoints(std::vector<double> points, std::optional<std::vector<double>> octreeOriginPos = {}, std::optional<std::vector<double>> octreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<int64_t> maxPtsInCell = {}, std::optional<std::vector<double>> colors = {}, std::optional<double> proximityTolerance = {});
-        int64_t createPtcloudFromPoints(std::vector<double> points, std::optional<std::vector<double>> octreeOriginPos = {}, std::optional<std::vector<double>> octreeOriginQuaternion = {}, std::optional<double> maxCellSize = {}, std::optional<int64_t> maxPtsInCell = {}, std::optional<std::vector<int64_t>> pointColor = {}, std::optional<double> proximityTolerance = {});
-        int64_t createPtcloudFromSerializationData(std::string data);
-        void destroyMesh(int64_t meshHandle);
-        void destroyOctree(int64_t octreeHandle);
-        void destroyPtcloud(int64_t ptcloudHandle);
-        std::tuple<double, std::vector<double>, std::vector<double>> getBoxBoxDistance(std::vector<double> box1Pos, std::vector<double> box1Quaternion, std::vector<double> box1HalfSize, std::vector<double> box2Pos, std::vector<double> box2Quaternion, std::vector<double> box2HalfSize, bool boxesAreSolid);
-        std::tuple<double, std::vector<double>> getBoxPointDistance(std::vector<double> boxPos, std::vector<double> boxQuaternion, std::vector<double> boxHalfSize, bool boxIsSolid, std::vector<double> point);
-        std::tuple<double, std::vector<double>, std::vector<double>> getBoxSegmentDistance(std::vector<double> boxPos, std::vector<double> boxQuaternion, std::vector<double> boxHalfSize, bool boxIsSolid, std::vector<double> segmentPt1, std::vector<double> segmentPt2, std::optional<bool> altRoutine = {});
-        std::tuple<double, std::vector<double>, std::vector<double>> getBoxTriangleDistance(std::vector<double> boxPos, std::vector<double> boxQuaternion, std::vector<double> boxHalfSize, bool boxIsSolid, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<bool> altRoutine = {});
-        std::tuple<bool, std::vector<int64_t>, std::vector<double>> getMeshMeshCollision(int64_t mesh1Handle, std::vector<double> mesh1Pos, std::vector<double> mesh1Quaternion, int64_t mesh2Handle, std::vector<double> mesh2Pos, std::vector<double> mesh2Quaternion, std::optional<std::vector<int64_t>> cache = {}, std::optional<bool> returnIntersections = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getMeshMeshDistance(int64_t mesh1Handle, std::vector<double> mesh1Pos, std::vector<double> mesh1Quaternion, int64_t mesh2Handle, std::vector<double> mesh2Pos, std::vector<double> mesh2Quaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<bool, std::vector<int64_t>> getMeshOctreeCollision(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getMeshOctreeDistance(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<double, std::vector<double>, int64_t> getMeshPointDistance(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::vector<double> point, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getMeshPtcloudDistance(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<bool, int64_t, std::vector<double>> getMeshSegmentCollision(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::vector<double> segmentPt1, std::vector<double> segmentPt2, std::optional<int64_t> cache = {}, std::optional<bool> returnIntersections = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getMeshSegmentDistance(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::vector<double> segmentPt1, std::vector<double> segmentPt2, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::string getMeshSerializationData(int64_t meshHandle);
-        std::tuple<bool, int64_t, std::vector<double>> getMeshTriangleCollision(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<int64_t> cache = {}, std::optional<bool> returnIntersections = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getMeshTriangleDistance(int64_t meshHandle, std::vector<double> meshPos, std::vector<double> meshQuaternion, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<bool, std::vector<int64_t>> getOctreeOctreeCollision(int64_t octree1Handle, std::vector<double> octree1Pos, std::vector<double> octree1Quaternion, int64_t octree2Handle, std::vector<double> octree2Pos, std::vector<double> octree2Quaternion, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getOctreeOctreeDistance(int64_t octree1Handle, std::vector<double> octree1Pos, std::vector<double> octree1Quaternion, int64_t octree2Handle, std::vector<double> octree2Pos, std::vector<double> octree2Quaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<bool, int64_t> getOctreePointCollision(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> point, std::optional<int64_t> cache = {});
-        std::tuple<double, std::vector<double>, int64_t> getOctreePointDistance(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> point, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<bool, std::vector<int64_t>> getOctreePtcloudCollision(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getOctreePtcloudDistance(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<bool, int64_t> getOctreeSegmentCollision(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> segPt1, std::vector<double> segPt2, std::optional<int64_t> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getOctreeSegmentDistance(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> segPt1, std::vector<double> segPt2, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::string getOctreeSerializationData(int64_t octreeHandle);
-        std::tuple<bool, int64_t> getOctreeTriangleCollision(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<int64_t> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getOctreeTriangleDistance(int64_t octreeHandle, std::vector<double> octreePos, std::vector<double> octreeQuaternion, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<std::vector<double>, std::vector<double>, std::vector<int64_t>> getOctreeVoxels(int64_t octreeHandle);
-        std::tuple<double, std::vector<double>, int64_t> getPtcloudPointDistance(int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::vector<double> point, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<std::vector<double>, std::vector<double>> getPtcloudPoints(int64_t ptcloudHandle, std::optional<double> subsetProportion = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, std::vector<int64_t>> getPtcloudPtcloudDistance(int64_t ptcloud1Handle, std::vector<double> ptcloud1Pos, std::vector<double> ptcloud1Quaternion, int64_t ptcloud2Handle, std::vector<double> ptcloud2Pos, std::vector<double> ptcloud2Quaternion, std::optional<double> distanceThreshold = {}, std::optional<std::vector<int64_t>> cache = {});
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getPtcloudSegmentDistance(int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::vector<double> segPt1, std::vector<double> segPt2, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::string getPtcloudSerializationData(int64_t octreeHandle);
-        std::tuple<double, std::vector<double>, std::vector<double>, int64_t> getPtcloudTriangleDistance(int64_t ptcloudHandle, std::vector<double> ptcloudPos, std::vector<double> ptcloudQuaternion, std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::optional<double> distanceThreshold = {}, std::optional<int64_t> cache = {});
-        std::tuple<double, std::vector<double>> getSegmentPointDistance(std::vector<double> segmentPt1, std::vector<double> segmentPt2, std::vector<double> point);
-        std::tuple<double, std::vector<double>, std::vector<double>> getSegmentSegmentDistance(std::vector<double> segment1Pt1, std::vector<double> segment1Pt2, std::vector<double> segment2Pt1, std::vector<double> segment2Pt2);
-        std::vector<double> getTransformedPoints(std::vector<double> points, std::vector<double> position, std::vector<double> quaternion);
-        std::tuple<double, std::vector<double>> getTrianglePointDistance(std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::vector<double> point);
-        std::tuple<double, std::vector<double>, std::vector<double>> getTriangleSegmentDistance(std::vector<double> triPt1, std::vector<double> triPt2, std::vector<double> triPt3, std::vector<double> segmentPt1, std::vector<double> segmentPt2);
-        std::tuple<double, std::vector<double>, std::vector<double>> getTriangleTriangleDistance(std::vector<double> tri1Pt1, std::vector<double> tri1Pt2, std::vector<double> tri1Pt3, std::vector<double> tri2Pt1, std::vector<double> tri2Pt2, std::vector<double> tri2Pt3);
-        void scaleMesh(int64_t meshHandle, double scaleFactor);
-        void scaleOctree(int64_t octreeHandle, double scaleFactor);
-        void scalePtcloud(int64_t ptcloudHandle, double scaleFactor);
-
-    };
-
-    class simICP
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simICP(RemoteAPIClient *client);
-
-        std::vector<double> match(int64_t model_handle, int64_t template_handle, std::optional<double> outlier_treshold = {});
-        std::vector<double> matchToShape(int64_t model_handle, int64_t template_handle, std::optional<double> outlier_treshold = {});
-
-    };
-
     class simIK
     {
     protected:
@@ -4308,10 +4064,10 @@ namespace RemoteAPIObject
         int64_t getJointType(int64_t environmentHandle, int64_t jointHandle);
         double getJointWeight(int64_t environmentHandle, int64_t jointHandle);
         int64_t getObjectHandle(int64_t environmentHandle, std::string objectName);
-        std::vector<double> getObjectMatrix(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
+        std::vector<double> getObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectParent(int64_t environmentHandle, int64_t objectHandle);
-        std::vector<double> getObjectPose(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
-        std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
+        std::vector<double> getObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
+        std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectType(int64_t environmentHandle, int64_t objectHandle);
         std::tuple<int64_t, std::string, bool, int64_t> getObjects(int64_t environmentHandle, int64_t index);
         int64_t getTargetDummy(int64_t environmentHandle, int64_t dummyHandle);
@@ -4334,345 +4090,127 @@ namespace RemoteAPIObject
         void setJointPosition(int64_t environmentHandle, int64_t jointHandle, double position);
         void setJointScrewLead(int64_t environmentHandle, int64_t jointHandle, double lead);
         void setJointWeight(int64_t environmentHandle, int64_t jointHandle, double weight);
-        void setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, std::vector<double> matrix, std::optional<int64_t> relativeToObjectHandle = {});
+        void setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
         void setObjectParent(int64_t environmentHandle, int64_t objectHandle, int64_t parentObjectHandle, std::optional<bool> keepInPlace = {});
-        void setObjectPose(int64_t environmentHandle, int64_t objectHandle, std::vector<double> pose, std::optional<int64_t> relativeToObjectHandle = {});
-        void setObjectTransformation(int64_t environmentHandle, int64_t objectHandle, std::vector<double> position, std::vector<double> eulerOrQuaternion, std::optional<int64_t> relativeToObjectHandle = {});
+        void setObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose);
+        void setObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position, std::vector<double> eulerOrQuaternion);
         void setSphericalJointMatrix(int64_t environmentHandle, int64_t jointHandle, std::vector<double> matrix);
         void setSphericalJointRotation(int64_t environmentHandle, int64_t jointHandle, std::vector<double> eulerOrQuaternion);
         void setTargetDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t targetDummyHandle);
         void syncFromSim(int64_t environmentHandle, std::vector<int64_t> ikGroups);
         void syncToSim(int64_t environmentHandle, std::vector<int64_t> ikGroups);
 
-    };
-
-    class simLDraw
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simLDraw(RemoteAPIClient *client);
-
-        std::vector<int64_t> import(std::string filePath);
-
-    };
-
-    class simLuaCmd
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simLuaCmd(RemoteAPIClient *client);
-
-        void clearHistory();
-        void setExecWrapper(std::string wrapperFunc);
-        void setVisible(bool b);
-
-    };
-
-    class simMTB
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simMTB(RemoteAPIClient *client);
-
-        bool connectInput(int64_t inputMtbServerHandle, int64_t inputBitNumber, int64_t outputMtbServerHandle, int64_t outputBitNumber, int64_t connectionType);
-        bool disconnectInput(int64_t inputMtbServerHandle, int64_t inputBitNumber);
-        std::vector<int64_t> getInput(int64_t mtbServerHandle);
-        std::vector<double> getJoints(int64_t mtbServerHandle);
-        std::vector<int64_t> getOutput(int64_t mtbServerHandle);
-        bool setInput(int64_t mtbServerHandle, std::vector<int64_t> inputValues);
-        std::tuple<int64_t, std::string> startServer(std::string mtbServerExecutable, int64_t portNumber, std::vector<uint8_t> program, std::vector<double> jointPositions, std::vector<double> velocities);
-        std::tuple<int64_t, std::string> step(int64_t mtbServerHandle, double timeStep);
-        bool stopServer(int64_t mtbServerHandle);
-
-    };
-
-    class simMujoco
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simMujoco(RemoteAPIClient *client);
-
-        int64_t composite(std::string xml, json info);
-        json getCompositeInfo(int64_t injectionId, int64_t what);
-        int64_t injectXML(std::string xml, std::string element, json info);
-        void removeXML(int64_t injectionId);
-
-    };
-
-    class simOpenMesh
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simOpenMesh(RemoteAPIClient *client);
-
-        std::tuple<std::vector<double>, std::vector<int64_t>> getDecimated(std::vector<double> vertices, std::vector<int64_t> indices, int64_t maxVertices, int64_t maxTriangles);
-
-    };
-
-    class simPython
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simPython(RemoteAPIClient *client);
-
-        json call(std::string scriptStateHandle, std::string func, json args);
-        std::string create();
-        void destroy(std::string scriptStateHandle);
-        std::vector<int64_t> getVersion();
-        json run(std::string scriptStateHandle, std::string code);
-
-    };
-
-    class simQHull
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simQHull(RemoteAPIClient *client);
-
-        std::tuple<std::vector<double>, std::vector<int64_t>> compute(std::vector<double> vertices, bool generateIndices);
-        int64_t computeShape(std::vector<int64_t> handles);
-
-    };
-
-    class simROS2
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simROS2(RemoteAPIClient *client);
-
-        void actionClientTreatUInt8ArrayAsString(std::string actionClientHandle);
-        void actionServerActionAbort(std::string actionServerHandle, std::string goalUUID, json result);
-        void actionServerActionCanceled(std::string actionServerHandle, std::string goalUUID, json result);
-        void actionServerActionExecute(std::string actionServerHandle, std::string goalUUID);
-        bool actionServerActionIsActive(std::string actionServerHandle, std::string goalUUID);
-        bool actionServerActionIsCanceling(std::string actionServerHandle, std::string goalUUID);
-        bool actionServerActionIsExecuting(std::string actionServerHandle, std::string goalUUID);
-        void actionServerActionSucceed(std::string actionServerHandle, std::string goalUUID, json result);
-        void actionServerPublishFeedback(std::string actionServerHandle, std::string goalUUID, json feedback);
-        void actionServerTreatUInt8ArrayAsString(std::string actionServerHandle);
-        json call(std::string clientHandle, json request);
-        bool cancelLastGoal(std::string actionClientHandle);
-        void clientTreatUInt8ArrayAsString(std::string clientHandle);
-        std::string createActionClient(std::string actionName, std::string actionType, std::string goalResponseCallback, std::string feedbackCallback, std::string resultCallback);
-        std::string createActionServer(std::string actionName, std::string actionType, std::string handleGoalCallback, std::string handleCancelCallback, std::string handleAcceptedCallback);
-        std::string createClient(std::string serviceName, std::string serviceType);
-        json createInterface(std::string type);
-        std::string createPublisher(std::string topicName, std::string topicType, std::optional<int64_t> queueSize = {}, std::optional<bool> latch = {});
-        std::string createService(std::string serviceName, std::string serviceType, std::string serviceCallback);
-        std::string createSubscription(std::string topicName, std::string topicType, std::string topicCallback, std::optional<int64_t> queueSize = {});
-        void deleteParam(std::string name);
-        json getInterfaceConstants(std::string type);
-        std::tuple<bool, bool> getParamBool(std::string name, std::optional<bool> defaultValue = {});
-        std::tuple<bool, double> getParamDouble(std::string name, std::optional<double> defaultValue = {});
-        std::tuple<bool, int64_t> getParamInt(std::string name, std::optional<int64_t> defaultValue = {});
-        std::tuple<bool, std::string> getParamString(std::string name, std::optional<std::string> defaultValue = {});
-        void getSimulationTime();
-        void getSystemTime();
-        json getTime(std::optional<int64_t> clock_type = {});
-        bool hasParam(std::string name);
-        std::string imageTransportCreatePublisher(std::string topicName, std::optional<int64_t> queueSize = {});
-        std::string imageTransportCreateSubscription(std::string topicName, std::string topicCallback, std::optional<int64_t> queueSize = {});
-        void imageTransportPublish(std::string publisherHandle, std::vector<uint8_t> data, int64_t width, int64_t height, std::string frame_id);
-        void imageTransportShutdownPublisher(std::string publisherHandle);
-        void imageTransportShutdownSubscription(std::string subscriptionHandle);
-        void importInterface(std::string name);
-        void publish(std::string publisherHandle, json message);
-        void publisherTreatUInt8ArrayAsString(std::string publisherHandle);
-        bool sendGoal(std::string actionClientHandle, json goal);
-        void sendTransform(json transform);
-        void sendTransforms(json transforms);
-        void serviceTreatUInt8ArrayAsString(std::string serviceHandle);
-        void setParamBool(std::string name, bool value);
-        void setParamDouble(std::string name, double value);
-        void setParamInt(std::string name, int64_t value);
-        void setParamString(std::string name, std::string value);
-        void shutdownActionClient(std::string actionClientHandle);
-        void shutdownActionServer(std::string actionServerHandle);
-        void shutdownClient(std::string clientHandle);
-        void shutdownPublisher(std::string publisherHandle);
-        void shutdownService(std::string serviceHandle);
-        void shutdownSubscription(std::string subscriptionHandle);
-        void subscriptionTreatUInt8ArrayAsString(std::string subscriptionHandle);
-        std::vector<std::string> supportedInterfaces();
-        void timeFromFloat(double t);
-        void timeToFloat(json t);
-        bool waitForService(std::string clientHandle, double timeout);
-
-    };
-
-    class simRRS1
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simRRS1(RemoteAPIClient *client);
-
-        int64_t CANCEL_EVENT(std::vector<uint8_t> rcsHandle, int64_t eventId);
-        int64_t CANCEL_FLYBY_CRITERIA(std::vector<uint8_t> rcsHandle, int64_t paramNumber);
-        int64_t CANCEL_MOTION(std::vector<uint8_t> rcsHandle);
-        int64_t CONTINUE_MOTION(std::vector<uint8_t> rcsHandle);
-        std::tuple<int64_t, std::vector<uint8_t>, std::string> CONTROLLER_POSITION_TO_MATRIX(std::vector<uint8_t> rcsHandle, std::string contrPos);
-        int64_t DEBUG(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> debugFlags, int64_t opcodeSelect, std::string logFileName);
-        int64_t DEFINE_EVENT(std::vector<uint8_t> rcsHandle, int64_t eventId, int64_t targetId, double resolution, int64_t typeOfEvent, std::vector<double> eventSpec);
-        std::tuple<int64_t, std::string> EXTENDED_SERVICE(std::vector<uint8_t> rcsHandle, std::string inData);
-        std::tuple<int64_t, std::string, int64_t, std::string, std::vector<uint8_t>, std::vector<uint8_t>> GET_CELL_FRAME(std::vector<uint8_t> rcsHandle, int64_t storage, int64_t firstNext, std::string frameId);
-        std::tuple<int64_t, int64_t> GET_CURRENT_TARGETID(std::vector<uint8_t> rcsHandle);
-        std::tuple<int64_t, int64_t, double> GET_EVENT(std::vector<uint8_t> rcsHandle, int64_t eventNumber);
-        std::tuple<int64_t, std::vector<uint8_t>, std::vector<uint8_t>, std::string, std::vector<uint8_t>, int64_t> GET_FORWARD_KINEMATIC(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> jointPos);
-        std::tuple<int64_t, std::vector<uint8_t>> GET_HOME_JOINT_POSITION(std::vector<uint8_t> rcsHandle);
-        std::tuple<int64_t, std::vector<uint8_t>, std::vector<uint8_t>, int64_t> GET_INVERSE_KINEMATIC(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> cartPos, std::vector<uint8_t> jointPos, std::string configuration, std::vector<uint8_t> outputFormat);
-        std::tuple<int64_t, int64_t, std::string> GET_MESSAGE(std::vector<uint8_t> rcsHandle, int64_t messageNumber);
-        std::tuple<int64_t, std::vector<uint8_t>, std::vector<uint8_t>, std::string, double, std::vector<uint8_t>, int64_t, int64_t> GET_NEXT_STEP(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> outputFormat);
-        std::tuple<int64_t, std::string, std::string, int64_t> GET_RCS_DATA(std::vector<uint8_t> rcsHandle, int64_t storage, int64_t firstNext, std::string paramId);
-        std::tuple<int64_t, std::string, std::string, std::string> GET_ROBOT_STAMP(std::vector<uint8_t> rcsHandle);
-        std::tuple<int64_t, std::vector<uint8_t>, int64_t, int64_t, int64_t> INITIALIZE(int64_t robotNumber, std::string robotPathName, std::string modulePathName, std::string manipulatorType, int64_t CarrrsVersion, int64_t debug);
-        std::tuple<int64_t, int64_t> LOAD_RCS_DATA(std::vector<uint8_t> rcsHandle);
-        std::tuple<int64_t, std::string> MATRIX_TO_CONTROLLER_POSITION(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> cartPos, std::string configuration);
-        int64_t MODIFY_CELL_FRAME(std::vector<uint8_t> rcsHandle, int64_t storage, std::string frameId, std::vector<uint8_t> frameData);
-        int64_t MODIFY_RCS_DATA(std::vector<uint8_t> rcsHandle, int64_t storage, std::string paramId, std::string paramContents);
-        std::tuple<int64_t, int64_t> RESET(std::vector<uint8_t> rcsHandle, int64_t resetLevel);
-        int64_t REVERSE_MOTION(std::vector<uint8_t> rcsHandle, double distance);
-        int64_t SAVE_RCS_DATA(std::vector<uint8_t> rcsHandle);
-        int64_t SELECT_DOMINANT_INTERPOLATION(std::vector<uint8_t> rcsHandle, int64_t dominantIntType, int64_t dominantIntParam);
-        int64_t SELECT_FLYBY_CRITERIA(std::vector<uint8_t> rcsHandle, int64_t paramNumber);
-        int64_t SELECT_FLYBY_MODE(std::vector<uint8_t> rcsHandle, int64_t flyByOn);
-        int64_t SELECT_MOTION_TYPE(std::vector<uint8_t> rcsHandle, int64_t motionType);
-        int64_t SELECT_ORIENTATION_INTERPOLATION_MODE(std::vector<uint8_t> rcsHandle, int64_t interpolationMode, int64_t oriConst);
-        int64_t SELECT_POINT_ACCURACY(std::vector<uint8_t> rcsHandle, int64_t accuracyType);
-        int64_t SELECT_TARGET_TYPE(std::vector<uint8_t> rcsHandle, int64_t targetType, std::vector<uint8_t> cartPos, std::vector<uint8_t> jointPos, std::string configuration);
-        int64_t SELECT_TIME_COMPENSATION(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> compensation);
-        int64_t SELECT_TRACKING(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> conveyorFlags);
-        int64_t SELECT_TRAJECTORY_MODE(std::vector<uint8_t> rcsHandle, int64_t trajectoryOn);
-        int64_t SELECT_WEAVING_GROUP(std::vector<uint8_t> rcsHandle, int64_t groupNo, int64_t groupOn);
-        int64_t SELECT_WEAVING_MODE(std::vector<uint8_t> rcsHandle, int64_t weavingMode);
-        int64_t SELECT_WORK_FRAMES(std::vector<uint8_t> rcsHandle, std::string toolId, std::string objectId);
-        int64_t SET_ADVANCE_MOTION(std::vector<uint8_t> rcsHandle, int64_t numberOfMotion);
-        int64_t SET_CARTESIAN_ORIENTATION_ACCELERATION(std::vector<uint8_t> rcsHandle, int64_t rotationNo, double accelValue, int64_t accelType);
-        int64_t SET_CARTESIAN_ORIENTATION_SPEED(std::vector<uint8_t> rcsHandle, int64_t rotationNo, double speedValue);
-        int64_t SET_CARTESIAN_POSITION_ACCELERATION(std::vector<uint8_t> rcsHandle, double accelValue, int64_t accelType);
-        int64_t SET_CARTESIAN_POSITION_SPEED(std::vector<uint8_t> rcsHandle, double speedValue);
-        int64_t SET_CONFIGURATION_CONTROL(std::vector<uint8_t> rcsHandle, std::string paramId, std::string paramContents);
-        int64_t SET_CONVEYOR_POSITION(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> inputFormat, std::vector<uint8_t> conveyorFlags, std::vector<double> conveyorPos);
-        int64_t SET_FLYBY_CRITERIA_PARAMETER(std::vector<uint8_t> rcsHandle, int64_t paramNumber, int64_t jointNr, double paramValue);
-        std::tuple<int64_t, std::vector<uint8_t>> SET_INITIAL_POSITION(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> cartPos, std::vector<uint8_t> jointPos, std::string configuration);
-        int64_t SET_INTERPOLATION_TIME(std::vector<uint8_t> rcsHandle, double interpolationTime);
-        int64_t SET_JOINT_ACCELERATIONS(std::vector<uint8_t> rcsHandle, int64_t allJointFlags, std::vector<uint8_t> jointFlags, std::vector<double> accelPercent, int64_t accelType);
-        int64_t SET_JOINT_JERKS(std::vector<uint8_t> rcsHandle, int64_t allJointFlags, std::vector<uint8_t> jointFlags, std::vector<double> jerkPercent, int64_t jerkType);
-        int64_t SET_JOINT_SPEEDS(std::vector<uint8_t> rcsHandle, int64_t allJointFlags, std::vector<uint8_t> jointFlags, std::vector<double> speedPercent);
-        int64_t SET_MOTION_FILTER(std::vector<uint8_t> rcsHandle, int64_t filterFactor);
-        int64_t SET_MOTION_TIME(std::vector<uint8_t> rcsHandle, double timeValue);
-        int64_t SET_NEXT_TARGET(std::vector<uint8_t> rcsHandle, int64_t targetId, int64_t targetParam, std::vector<uint8_t> cartPos, std::vector<uint8_t> jointPos, std::string configuration, double targetParamValue);
-        int64_t SET_OVERRIDE_ACCELERATION(std::vector<uint8_t> rcsHandle, double correctionValue, int64_t accelType, int64_t correctionType);
-        int64_t SET_OVERRIDE_POSITION(std::vector<uint8_t> rcsHandle, std::vector<uint8_t> posOffset);
-        int64_t SET_OVERRIDE_SPEED(std::vector<uint8_t> rcsHandle, double correctionValue, int64_t correctionType);
-        int64_t SET_PAYLOAD_PARAMETER(std::vector<uint8_t> rcsHandle, int64_t storage, std::string frameId, int64_t paramNumber, double paramValue);
-        int64_t SET_POINT_ACCURACY_PARAMETER(std::vector<uint8_t> rcsHandle, int64_t accuracyType, double accuracyValue);
-        int64_t SET_REST_PARAMETER(std::vector<uint8_t> rcsHandle, int64_t paramNumber, double paramValue);
-        int64_t SET_WEAVING_GROUP_PARAMETER(std::vector<uint8_t> rcsHandle, int64_t groupNo, int64_t paramNo, double paramValue);
-        int64_t STOP_MOTION(std::vector<uint8_t> rcsHandle);
-        int64_t TERMINATE(std::vector<uint8_t> rcsHandle);
-        bool selectRcsServer(int64_t rcsServerHandle);
-        int64_t startRcsServer(std::string rcsLibraryFilename, std::string rcsLibraryFunctionName, int64_t portNumber);
-        bool stopRcsServer(int64_t rcsServerHandle);
-
-    };
-
-    class simSDF
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simSDF(RemoteAPIClient *client);
-
-        void dump(std::string fileName);
-        void import(std::string fileName, std::optional<json> options = {});
-
-    };
-
-    class simSkeleton
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simSkeleton(RemoteAPIClient *client);
-
-        std::tuple<std::string, json> getData(std::string inputString, json inputMap);
-
-    };
-
-    class simSurfRec
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simSurfRec(RemoteAPIClient *client);
-
-        int64_t reconstruct_scale_space(int64_t pointCloudHandle, std::optional<int64_t> iterations = {}, std::optional<int64_t> neighbors = {}, std::optional<int64_t> samples = {}, std::optional<double> squared_radius = {});
-
-    };
-
-    class simVision
-    {
-    protected:
-        RemoteAPIClient *_client;
-    public:
-        simVision(RemoteAPIClient *client);
-
-        void addBuffer1ToWorkImg(int64_t visionSensorHandle);
-        void addWorkImgToBuffer1(int64_t visionSensorHandle);
-        std::tuple<bool, std::vector<uint8_t>> binaryWorkImg(int64_t visionSensorHandle, double threshold, double oneProportion, double oneTol, double xCenter, double xCenterTol, double yCenter, double yCenterTol, double orient, double orientTol, double roundness, bool enableTrigger, std::optional<std::vector<double>> overlayColor = {});
-        std::tuple<bool, std::vector<uint8_t>> blobDetectionOnWorkImg(int64_t visionSensorHandle, double threshold, double minBlobSize, bool modifyWorkImage, std::optional<std::vector<double>> overlayColor = {});
-        void buffer1ToWorkImg(int64_t visionSensorHandle);
-        void buffer2ToWorkImg(int64_t visionSensorHandle);
-        std::tuple<bool, std::vector<uint8_t>> changedPixelsOnWorkImg(int64_t visionSensorHandle, double threshold);
-        void circularCutWorkImg(int64_t visionSensorHandle, double radius, bool copyToBuffer1);
-        void colorSegmentationOnWorkImg(int64_t visionSensorHandle, double maxColorColorDistance);
-        std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> coordinatesFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, bool evenlySpacedInAngularSpace, std::optional<bool> returnColorData = {});
-        int64_t createVelodyneHDL64E(std::vector<int64_t> visionSensorHandles, double frequency, std::optional<int64_t> options = {}, std::optional<int64_t> pointSize = {}, std::optional<std::vector<double>> coloring_closeFarDist = {}, std::optional<double> displayScalingFactor = {});
-        int64_t createVelodyneVPL16(std::vector<int64_t> visionSensorHandles, double frequency, std::optional<int64_t> options = {}, std::optional<int64_t> pointSize = {}, std::optional<std::vector<double>> coloring_closeFarDist = {}, std::optional<double> displayScalingFactor = {});
-        int64_t destroyVelodyneHDL64E(int64_t velodyneHandle);
-        int64_t destroyVelodyneVPL16(int64_t velodyneHandle);
-        void distort(int64_t visionSensorHandle, std::optional<std::vector<int64_t>> pixelMap = {}, std::optional<std::vector<double>> depthScalings = {});
-        void edgeDetectionOnWorkImg(int64_t visionSensorHandle, double threshold);
-        int64_t handleAnaglyphStereo(int64_t passiveVisionSensorHandle, std::vector<int64_t> activeVisionSensorHandles, std::optional<std::vector<double>> leftAndRightColors = {});
-        int64_t handleSpherical(int64_t passiveVisionSensorHandleForRGB, std::vector<int64_t> activeVisionSensorHandles, double horizontalAngle, double verticalAngle, std::optional<int64_t> passiveVisionSensorHandleForDepth = {});
-        std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> handleVelodyneHDL64E(int64_t velodyneHandle, double dt);
-        std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> handleVelodyneVPL16(int64_t velodyneHandle, double dt);
-        void horizontalFlipWorkImg(int64_t visionSensorHandle);
-        void intensityScaleOnWorkImg(int64_t visionSensorHandle, double start, double end, bool greyScale);
-        void matrix3x3OnWorkImg(int64_t visionSensorHandle, int64_t passes, double multiplier, std::optional<std::vector<double>> matrix = {});
-        void matrix5x5OnWorkImg(int64_t visionSensorHandle, int64_t passes, double multiplier, std::optional<std::vector<double>> matrix = {});
-        void multiplyWorkImgWithBuffer1(int64_t visionSensorHandle);
-        void normalizeWorkImg(int64_t visionSensorHandle);
-        void rectangularCutWorkImg(int64_t visionSensorHandle, std::vector<double> sizes, bool copyToBuffer1);
-        void resizeWorkImg(int64_t visionSensorHandle, std::vector<double> scaling);
-        void rotateWorkImg(int64_t visionSensorHandle, double rotationAngle);
-        void scaleAndOffsetWorkImg(int64_t visionSensorHandle, std::vector<double> preOffset, std::vector<double> scaling, std::vector<double> postOffset, bool rgb);
-        void selectiveColorOnWorkImg(int64_t visionSensorHandle, std::vector<double> color, std::vector<double> colorTolerance, bool rgb, bool keep, bool removedPartToBuffer1);
-        void sensorDepthMapToWorkImg(int64_t visionSensorHandle);
-        void sensorImgToWorkImg(int64_t visionSensorHandle);
-        void sharpenWorkImg(int64_t visionSensorHandle);
-        void shiftWorkImg(int64_t visionSensorHandle, std::vector<double> shift, bool wrapAround);
-        void subtractBuffer1FromWorkImg(int64_t visionSensorHandle);
-        void subtractWorkImgFromBuffer1(int64_t visionSensorHandle);
-        void swapBuffers(int64_t visionSensorHandle);
-        void swapWorkImgWithBuffer1(int64_t visionSensorHandle);
-        void uniformImgToWorkImg(int64_t visionSensorHandle, std::vector<double> color);
-        std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> velodyneDataFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, double vAngle, std::optional<bool> returnColorData = {});
-        void verticalFlipWorkImg(int64_t visionSensorHandle);
-        void workImgToBuffer1(int64_t visionSensorHandle);
-        void workImgToBuffer2(int64_t visionSensorHandle);
-        void workImgToSensorDepthMap(int64_t visionSensorHandle, std::optional<bool> removeBuffer = {});
-        void workImgToSensorImg(int64_t visionSensorHandle, std::optional<bool> removeBuffer = {});
-
+#ifndef calc_cannotinvert
+        const int calc_cannotinvert = 2;
+#endif
+#ifndef calc_limithit
+        const int calc_limithit = 64;
+#endif
+#ifndef calc_notperformed
+        const int calc_notperformed = 1;
+#endif
+#ifndef calc_notwithintolerance
+        const int calc_notwithintolerance = 16;
+#endif
+#ifndef calc_stepstoobig
+        const int calc_stepstoobig = 32;
+#endif
+#ifndef constraint_alpha_beta
+        const int constraint_alpha_beta = 8;
+#endif
+#ifndef constraint_gamma
+        const int constraint_gamma = 16;
+#endif
+#ifndef constraint_orientation
+        const int constraint_orientation = 24;
+#endif
+#ifndef constraint_pose
+        const int constraint_pose = 31;
+#endif
+#ifndef constraint_position
+        const int constraint_position = 7;
+#endif
+#ifndef constraint_x
+        const int constraint_x = 1;
+#endif
+#ifndef constraint_y
+        const int constraint_y = 2;
+#endif
+#ifndef constraint_z
+        const int constraint_z = 4;
+#endif
+#ifndef group_avoidlimits
+        const int group_avoidlimits = 64;
+#endif
+#ifndef group_enabled
+        const int group_enabled = 1;
+#endif
+#ifndef group_ignoremaxsteps
+        const int group_ignoremaxsteps = 2;
+#endif
+#ifndef group_restoreonbadangtol
+        const int group_restoreonbadangtol = 8;
+#endif
+#ifndef group_restoreonbadlintol
+        const int group_restoreonbadlintol = 4;
+#endif
+#ifndef group_stoponlimithit
+        const int group_stoponlimithit = 16;
+#endif
+#ifndef handle_all
+        const int handle_all = -2;
+#endif
+#ifndef handle_parent
+        const int handle_parent = -11;
+#endif
+#ifndef handle_world
+        const int handle_world = -1;
+#endif
+#ifndef handleflag_tipdummy
+        const int handleflag_tipdummy = 4194304;
+#endif
+#ifndef jointmode_ik
+        const int jointmode_ik = 2;
+#endif
+#ifndef jointmode_passive
+        const int jointmode_passive = 0;
+#endif
+#ifndef jointtype_prismatic
+        const int jointtype_prismatic = 11;
+#endif
+#ifndef jointtype_revolute
+        const int jointtype_revolute = 10;
+#endif
+#ifndef jointtype_spherical
+        const int jointtype_spherical = 12;
+#endif
+#ifndef method_damped_least_squares
+        const int method_damped_least_squares = 1;
+#endif
+#ifndef method_jacobian_transpose
+        const int method_jacobian_transpose = 2;
+#endif
+#ifndef method_pseudo_inverse
+        const int method_pseudo_inverse = 0;
+#endif
+#ifndef method_undamped_pseudo_inverse
+        const int method_undamped_pseudo_inverse = 3;
+#endif
+#ifndef objecttype_dummy
+        const int objecttype_dummy = 4;
+#endif
+#ifndef objecttype_joint
+        const int objecttype_joint = 1;
+#endif
+#ifndef result_fail
+        const int result_fail = 2;
+#endif
+#ifndef result_not_performed
+        const int result_not_performed = 0;
+#endif
+#ifndef result_success
+        const int result_success = 1;
+#endif
     };
 
 };
@@ -4682,27 +4220,7 @@ class RemoteAPIObjects
 public:
     RemoteAPIObjects(RemoteAPIClient *client);
     RemoteAPIObject::sim sim();
-    RemoteAPIObject::simAssimp simAssimp();
-    RemoteAPIObject::simBubble simBubble();
-    RemoteAPIObject::simCHAI3D simCHAI3D();
-    RemoteAPIObject::simCam simCam();
-    RemoteAPIObject::simGLTF simGLTF();
-    RemoteAPIObject::simGeom simGeom();
-    RemoteAPIObject::simICP simICP();
     RemoteAPIObject::simIK simIK();
-    RemoteAPIObject::simLDraw simLDraw();
-    RemoteAPIObject::simLuaCmd simLuaCmd();
-    RemoteAPIObject::simMTB simMTB();
-    RemoteAPIObject::simMujoco simMujoco();
-    RemoteAPIObject::simOpenMesh simOpenMesh();
-    RemoteAPIObject::simPython simPython();
-    RemoteAPIObject::simQHull simQHull();
-    RemoteAPIObject::simROS2 simROS2();
-    RemoteAPIObject::simRRS1 simRRS1();
-    RemoteAPIObject::simSDF simSDF();
-    RemoteAPIObject::simSkeleton simSkeleton();
-    RemoteAPIObject::simSurfRec simSurfRec();
-    RemoteAPIObject::simVision simVision();
 private:
     RemoteAPIClient *client;
 };

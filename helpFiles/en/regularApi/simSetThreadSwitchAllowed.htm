@@ -22,7 +22,7 @@
 <td class=apiTableLeftDescr>
 Description 
 </td> 
-<td class=apiTableRightDescr>Deprecated. See <a href="simAcquireLock.htm">sim.acquireLock</a> and <a href="simReleaseLock.htm">sim.releaseLock</a> instead</td>
+<td class=apiTableRightDescr>Lua only. Allows to temporarily forbid all thread interruptions, including explicit interruptions or switches. For complete control over thread switching, see also the other <a href="../apiFunctions.htm#threads">thread related functions</a>.</td>
 </tr> 
 <tr class=apiTableTr> 
 <td class=apiTableLeftCSyn>
@@ -57,8 +57,7 @@ Lua<br>synopsis
 <div><strong>forbidLevel</strong>: allows to set a switch forbid level: a level  &gt; 0 indicates that thread interruption is disabled.</div>
 <div></div>
 <div>Best is to always use following to temporarily forbid thread interruptions:</div>
-<code class="hljs language-lua simple">--lua
-
+<code class="hljs language-lua simple">
 local initialForbidLevel=sim.setThreadSwitchAllowed(false) -- forbid thread switches
 ...
 sim.setThreadSwitchAllowed(initialForbidLevel) -- restore to initial state</code>
@@ -85,17 +84,5 @@ Lua<br>return values
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

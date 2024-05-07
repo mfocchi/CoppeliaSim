@@ -1,16 +1,6 @@
-ptrSimRunSimulator simRunSimulator=nullptr;
-ptrSimRunSimulatorEx simRunSimulatorEx=nullptr;
 ptr_simGetJointOdeParameters _simGetJointOdeParameters=nullptr;
 ptr_simGetJointBulletParameters _simGetJointBulletParameters=nullptr;
 ptr_simGetOdeMaxContactFrictionCFMandERP _simGetOdeMaxContactFrictionCFMandERP=nullptr;
-ptrSimExtLaunchUIThread simExtLaunchUIThread=nullptr;
-ptrSimExtCanInitSimThread simExtCanInitSimThread=nullptr;
-ptrSimExtSimThreadInit simExtSimThreadInit=nullptr;
-ptrSimExtSimThreadDestroy simExtSimThreadDestroy=nullptr;
-ptrSimExtPostExitRequest simExtPostExitRequest=nullptr;
-ptrSimExtGetExitRequest simExtGetExitRequest=nullptr;
-ptrSimExtStep simExtStep=nullptr;
-ptrSimExtCallScriptFunction simExtCallScriptFunction=nullptr;
 ptr_simGetBulletCollisionMargin _simGetBulletCollisionMargin=nullptr;
 ptr_simGetBulletStickyContact _simGetBulletStickyContact=nullptr;
 ptr_simGetBulletRestitution _simGetBulletRestitution=nullptr;
@@ -27,19 +17,6 @@ ptrSimGetJointMatrix simGetJointMatrix=nullptr;
 ptrSimSetSphericalJointMatrix simSetSphericalJointMatrix=nullptr;
 ptr_simGetGeomProxyFromShape _simGetGeomProxyFromShape=nullptr;
 ptrSimReorientShapeBoundingBox simReorientShapeBoundingBox=nullptr;
-ptrSimIsDeprecated simIsDeprecated=nullptr;
-ptrSimLoadModule simLoadModule=nullptr;
-ptrSimUnloadModule simUnloadModule=nullptr;
-ptrSimGetModuleName simGetModuleName=nullptr;
-ptrSimSetModuleInfo simSetModuleInfo=nullptr;
-ptrSimGetModuleInfo simGetModuleInfo=nullptr;
-ptrSimIsStackValueNull simIsStackValueNull=nullptr;
-ptrSimIsRealTimeSimulationStepNeeded simIsRealTimeSimulationStepNeeded=nullptr;
-ptrSimAdjustRealTimeTimer simAdjustRealTimeTimer=nullptr;
-ptrSimSetSimulationPassesPerRenderingPass simSetSimulationPassesPerRenderingPass=nullptr;
-ptrSimGetSimulationPassesPerRenderingPass simGetSimulationPassesPerRenderingPass=nullptr;
-ptrSimAdvanceSimulationByOneStep simAdvanceSimulationByOneStep=nullptr;
-ptrSimHandleMainScript simHandleMainScript=nullptr;
 
 #ifdef SIM_INTERFACE_OLD
 #include "simLib-old2.cpp"
@@ -52,16 +29,6 @@ int getSimProcAddressesOld(LIBRARY lib)
         return(0);
 #endif
 
-    simRunSimulator=(ptrSimRunSimulator)(_getProcAddress(lib,"simRunSimulator",false));
-    simRunSimulatorEx=(ptrSimRunSimulatorEx)(_getProcAddress(lib,"simRunSimulatorEx",false));
-    simExtLaunchUIThread=(ptrSimExtLaunchUIThread)(_getProcAddress(lib,"simExtLaunchUIThread",false));
-    simExtCanInitSimThread=(ptrSimExtCanInitSimThread)(_getProcAddress(lib,"simExtCanInitSimThread",false));
-    simExtSimThreadInit=(ptrSimExtSimThreadInit)(_getProcAddress(lib,"simExtSimThreadInit",false));
-    simExtSimThreadDestroy=(ptrSimExtSimThreadDestroy)(_getProcAddress(lib,"simExtSimThreadDestroy",false));
-    simExtPostExitRequest=(ptrSimExtPostExitRequest)(_getProcAddress(lib,"simExtPostExitRequest",false));
-    simExtGetExitRequest=(ptrSimExtGetExitRequest)(_getProcAddress(lib,"simExtGetExitRequest",false));
-    simExtStep=(ptrSimExtStep)(_getProcAddress(lib,"simExtStep",false));
-    simExtCallScriptFunction=(ptrSimExtCallScriptFunction)(_getProcAddress(lib,"simExtCallScriptFunction",true));
     _simGetBulletStickyContact=(ptr_simGetBulletStickyContact)(_getProcAddress(lib,"_simGetBulletStickyContact",false));
     simCallScriptFunction=(ptrSimCallScriptFunction)(_getProcAddress(lib,"simCallScriptFunction",false));
     simAddModuleMenuEntry=(ptrSimAddModuleMenuEntry)(_getProcAddress(lib,"simAddModuleMenuEntry",false));
@@ -81,19 +48,6 @@ int getSimProcAddressesOld(LIBRARY lib)
     simSetSphericalJointMatrix=(ptrSimSetSphericalJointMatrix)(_getProcAddress(lib,"simSetSphericalJointMatrix",true));
     _simGetGeomProxyFromShape=(ptr_simGetGeomProxyFromShape)(_getProcAddress(lib,"_simGetGeomProxyFromShape",false));
     simReorientShapeBoundingBox=(ptrSimReorientShapeBoundingBox)(_getProcAddress(lib,"simReorientShapeBoundingBox",false));
-    simIsDeprecated=(ptrSimIsDeprecated)(_getProcAddress(lib,"simIsDeprecated",false));
-    simLoadModule=(ptrSimLoadModule)(_getProcAddress(lib,"simLoadModule",false));
-    simUnloadModule=(ptrSimUnloadModule)(_getProcAddress(lib,"simUnloadModule",false));
-    simGetModuleName=(ptrSimGetModuleName)(_getProcAddress(lib,"simGetModuleName",false));
-    simSetModuleInfo=(ptrSimSetModuleInfo)(_getProcAddress(lib,"simSetModuleInfo",false));
-    simGetModuleInfo=(ptrSimGetModuleInfo)(_getProcAddress(lib,"simGetModuleInfo",false));
-    simIsStackValueNull=(ptrSimIsStackValueNull)(_getProcAddress(lib,"simIsStackValueNull",false));
-    simIsRealTimeSimulationStepNeeded=(ptrSimIsRealTimeSimulationStepNeeded)(_getProcAddress(lib,"simIsRealTimeSimulationStepNeeded",false));
-    simAdjustRealTimeTimer=(ptrSimAdjustRealTimeTimer)(_getProcAddress(lib,"simAdjustRealTimeTimer",true));
-    simSetSimulationPassesPerRenderingPass=(ptrSimSetSimulationPassesPerRenderingPass)(_getProcAddress(lib,"simSetSimulationPassesPerRenderingPass",false));
-    simGetSimulationPassesPerRenderingPass=(ptrSimGetSimulationPassesPerRenderingPass)(_getProcAddress(lib,"simGetSimulationPassesPerRenderingPass",false));
-    simAdvanceSimulationByOneStep=(ptrSimAdvanceSimulationByOneStep)(_getProcAddress(lib,"simAdvanceSimulationByOneStep",false));
-    simHandleMainScript=(ptrSimHandleMainScript)(_getProcAddress(lib,"simHandleMainScript",false));
 
     char *ps=std::getenv("COPPELIASIMPLUGIN_IGNORE_MISSING_SYMBOLS");
     if (ps!=nullptr)
@@ -101,56 +55,6 @@ int getSimProcAddressesOld(LIBRARY lib)
 
     char couldNotFind[]="Could not find function";
 
-    if (simRunSimulator==nullptr)
-    {
-        printf("%s simRunSimulator\n",couldNotFind);
-        return 0;
-    }
-    if (simRunSimulatorEx==nullptr)
-    {
-        printf("%s simRunSimulatorEx\n",couldNotFind);
-        return 0;
-    }
-    if (simExtCallScriptFunction==nullptr)
-    {
-        printf("%s simExtCallScriptFunction\n",couldNotFind);
-        return 0;
-    }
-    if (simExtLaunchUIThread==nullptr)
-    {
-        printf("%s simExtLaunchUIThread\n",couldNotFind);
-        return 0;
-    }
-    if (simExtCanInitSimThread==nullptr)
-    {
-        printf("%s simExtCanInitSimThread\n",couldNotFind);
-        return 0;
-    }
-    if (simExtSimThreadInit==nullptr)
-    {
-        printf("%s simExtSimThreadInit\n",couldNotFind);
-        return 0;
-    }
-    if (simExtSimThreadDestroy==nullptr)
-    {
-        printf("%s simExtSimThreadDestroy\n",couldNotFind);
-        return 0;
-    }
-    if (simExtPostExitRequest==nullptr)
-    {
-        printf("%s simExtPostExitRequest\n",couldNotFind);
-        return 0;
-    }
-    if (simExtGetExitRequest==nullptr)
-    {
-        printf("%s simExtGetExitRequest\n",couldNotFind);
-        return 0;
-    }
-    if (simExtStep==nullptr)
-    {
-        printf("%s simExtStep\n",couldNotFind);
-        return 0;
-    }
     if (_simGetJointOdeParameters==nullptr)
     {
         printf("%s _simGetJointOdeParameters\n",couldNotFind);
@@ -244,71 +148,6 @@ int getSimProcAddressesOld(LIBRARY lib)
     if (simReorientShapeBoundingBox==nullptr)
     {
         printf("%s simReorientShapeBoundingBox\n",couldNotFind);
-        return 0;
-    }
-    if (simIsDeprecated==nullptr)
-    {
-        printf("%s simIsDeprecated\n",couldNotFind);
-        return 0;
-    }
-    if (simLoadModule==nullptr)
-    {
-        printf("%s simLoadModule\n",couldNotFind);
-        return 0;
-    }
-    if (simUnloadModule==nullptr)
-    {
-        printf("%s simUnloadModule\n",couldNotFind);
-        return 0;
-    }
-    if (simGetModuleName==nullptr)
-    {
-        printf("%s simGetModuleName\n",couldNotFind);
-        return 0;
-    }
-    if (simSetModuleInfo==nullptr)
-    {
-        printf("%s simSetModuleInfo\n",couldNotFind);
-        return 0;
-    }
-    if (simGetModuleInfo==nullptr)
-    {
-        printf("%s simGetModuleInfo\n",couldNotFind);
-        return 0;
-    }
-    if (simIsStackValueNull==nullptr)
-    {
-        printf("%s simIsStackValueNull\n",couldNotFind);
-        return 0;
-    }
-    if (simIsRealTimeSimulationStepNeeded==nullptr)
-    {
-        printf("%s simIsRealTimeSimulationStepNeeded\n",couldNotFind);
-        return 0;
-    }
-    if (simAdjustRealTimeTimer==nullptr)
-    {
-        printf("%s simAdjustRealTimeTimer\n",couldNotFind);
-        return 0;
-    }
-    if (simGetSimulationPassesPerRenderingPass==nullptr)
-    {
-        printf("%s simGetSimulationPassesPerRenderingPass\n",couldNotFind);
-        return 0;
-    }
-    if (simSetSimulationPassesPerRenderingPass==nullptr)
-    {
-        printf("%s simSetSimulationPassesPerRenderingPass\n",couldNotFind);
-        return 0;
-    }
-    if (simAdvanceSimulationByOneStep==nullptr)
-    {
-        printf("%s simAdvanceSimulationByOneStep\n",couldNotFind);
-        return 0;
-    }
-    if (simHandleMainScript==nullptr)
-    {
-        printf("%s simHandleMainScript\n",couldNotFind);
         return 0;
     }
     return 1;

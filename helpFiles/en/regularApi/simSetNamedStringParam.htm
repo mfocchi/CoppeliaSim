@@ -15,61 +15,71 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.setNamedStringParam</h2>
-    <p>Sets a named string or buffer parameter</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simSetNamedStringParam" id="simSetNamedStringParam"></a>simSetNamedStringParam / sim.setNamedStringParam</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Sets a named string or buffer parameter. See also the other <a href="../apiFunctions.htm#namedParams">simulator named parameter related functions</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simSetNamedStringParam(const char* paramName,const char* stringParam,int paramLength)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>paramName</strong>: the key or name of the parameter</div>
+<div><strong>stringParam</strong>: the string or buffer value</div>
+<div><strong>paramLength</strong>: the size of the string or buffer value</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful. 0 if an existing parameter was replaced, 1 if the parameter was set<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>isim.setNamedStringParam(string paramName,buffer stringParam)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.setNamedStringParam(string paramName, bytes stringParam)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.setNamedStringParam(string paramName, buffer stringParam)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>paramName</strong>: key or name of the parameter</li>
-                <li><strong>stringParam</strong>: string or buffer value</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>isim.setNamedStringParam(string paramName,bytes stringParam)</td>
+</tr>
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="../apiFunctions.htm#namedParams">simulator named parameter related functions</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+simBWF=
 function sysCall_init()
     model.codeVersion=1
     model.online=simBWF.isSystemOnline()

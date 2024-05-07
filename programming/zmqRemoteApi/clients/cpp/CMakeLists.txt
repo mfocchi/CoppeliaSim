@@ -18,10 +18,7 @@ list(APPEND CMAKE_MODULE_PATH
 find_package(CoppeliaSim 4.1.0.0 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-set(GENERATE OFF CACHE BOOL "Generate wrappers for objects and methods (requires CoppeliaSim to be running).")
-set(GENERATE_INCLUDE_OBJECTS "" CACHE STRING "Include only given objects (e.g.: \"sim,simIK\") or leave blank to include all objects in wrapper code generation.")
-set(GENERATE_EXCLUDE_OBJECTS "simEigen,simB0,simRemoteApi,simQML,simOMPL,simUI,simIM,simIGL,simURDF,simSkel,simBWF,simCmd,simSubprocess,simURLDrop,simWS,simZMQ" CACHE STRING "Exclude given objects (e.g.: \"simUI,simIM\") from being generated. Note: option GENERATE_INCLUDE_OBJECTS, if different from \"\", has precedence over this.")
-set(GENERATE_EXCLUDE_METHODS "sim.test,sim.auxFunc,sim.getStringSignal,sim.getInt32Signal,sim.getFloatSignal" CACHE STRING "Exclude given methods (e.g.: \"sim.test,simUI.foo\") from being generated.")
+option(GENERATE "Generate wrappers for objects and methods (requires CoppeliaSim to be running)")
 
 include(FetchContent)
 
@@ -52,7 +49,7 @@ add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
     COMMAND
         ${CMAKE_COMMAND} -E env
-        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python/src"
+        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python"
         ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_raw_calltips.py"
         "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
@@ -63,7 +60,7 @@ add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
     COMMAND
         ${CMAKE_COMMAND} -E env
-        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python/src"
+        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python"
         ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_constants.py"
         "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
@@ -81,12 +78,8 @@ foreach(templateFile ${templateFiles})
             "${COPPELIASIM_INCLUDE_DIR}/simStubsGen/external/pycpp/pycpp.py"
             -p "calltips_json=${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
             -p "constants_json=${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
-            -p "include_objects=${GENERATE_INCLUDE_OBJECTS}"
-            -p "exclude_objects=${GENERATE_EXCLUDE_OBJECTS}"
-            -p "exclude_methods=${GENERATE_EXCLUDE_METHODS}"
             -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}"
             -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}"
-            -P "${COPPELIASIM_PYTHON_DIR}"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools"
             -P "${CMAKE_CURRENT_SOURCE_DIR}"
         DEPENDS
@@ -95,8 +88,8 @@ foreach(templateFile ${templateFiles})
             "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
             "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
             "${CMAKE_CURRENT_SOURCE_DIR}/cpp_utils.py"
-            "${COPPELIASIM_PYTHON_DIR}/calltip.py"
-            "${COPPELIASIM_PYTHON_DIR}/calltip.lark"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/calltip.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/calltip.lark"
     )
     list(APPEND generatedFiles "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}")
 endforeach()
@@ -114,14 +107,7 @@ else()
 endif()
 target_compile_definitions(RemoteAPIClient PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS)
 target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
-if(GENERATE)
-    target_include_directories(RemoteAPIClient BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
-    set_source_files_properties(RemoteAPIClient.h OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated/RemoteAPIObjects.h)
-    set_source_files_properties(RemoteAPIClient.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated/RemoteAPIObjects.cpp)
-else()
-    set_source_files_properties(RemoteAPIClient.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAPIObjects.h)
-    set_source_files_properties(RemoteAPIClient.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAPIObjects.cpp)
-endif()
+target_include_directories(RemoteAPIClient BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 
 add_executable(example example.cpp)

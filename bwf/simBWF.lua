@@ -1,7 +1,3 @@
-sim=require'sim'
-simUI=require'simUI'
-simIK=require'simIK'
-
 if simBWF then
     saved=simBWF.query
 end

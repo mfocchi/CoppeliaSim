@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.addScript</title>
+<title>simAddScript</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,64 +15,69 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.addScript</h2>
-    <p>Inserts a new script. Use with care when simulation is running</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simAddScript" id="simAddScript"></a>simAddScript / sim.addScript </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Inserts a new script. Use with care when simulation is running. See also <a href="simAssociateScriptWithObject.htm">sim.associateScriptWithObject</a>.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simAddScript(int scriptType)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>scriptType</strong>: <a href="../apiConstants.htm#scriptTypes">type of the script</a>.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>handle of the new script, or -1 in case of an error</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int scriptHandle=sim.addScript(int scriptType)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+<div></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int scriptHandle = sim.addScript(int scriptType)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int scriptHandle = sim.addScript(int scriptType)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>scriptType</strong>: <a href="../apiConstants.htm#scriptTypes">type of the script</a></li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int scriptHandle=sim.addScript(int scriptType)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>scriptHandle</strong>: handle of the new script</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simAssociateScriptWithObject.htm">sim.associateScriptWithObject</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

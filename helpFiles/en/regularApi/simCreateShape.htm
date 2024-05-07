@@ -15,88 +15,85 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.createShape</h2>
-    <p>Creates a mesh shape</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simCreateShape" id="simCreateShape"></a>simCreateShape / sim.createShape </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Creates a mesh shape. See also <a href="simCreatePrimitiveShape.htm">sim.createPrimitiveShape</a>, <a href="simCreateHeightfieldShape.htm">sim.createHeightfieldShape</a> and <a href="simGetShapeMesh.htm">sim.getShapeMesh</a>, and see <a href="simImportMesh.htm">sim.importMesh</a> for a usage example.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simCreateShape(int options,double shadingAngle,const double* vertices,int verticesSize,const int* indices,int indicesSize,const double* normals,const double* textureCoordinates,const unsigned char* texture,const int* textureResolution)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>options</strong>: Bit-coded: </div>
+<div class=tab>if bit0 is set (1), backfaces are culled</div>
+<div class=tab>If bit1 is set (2), edges are visible</div>
+<div class=tab>If bit2 is set (4), adjacent texture pixels are not interpolated</div>
+<div class=tab>If bit3 is set (8), texture is applied as a decal</div>
+<div class=tab>If bit4 is set (16), texture is RGBA, otherwise it is RGB</div>
+<div class=tab>If bit5 is set (32), texture is horizontally flipped</div>
+<div class=tab>If bit6 is set (64), texture is vertically flipped</div>
+<div><strong>shadingAngle</strong>: the shading angle</div>
+<div><strong>vertices</strong>: an array of vertices</div>
+<div><strong>verticesSize</strong>: the size of the vertice array</div>
+<div><strong>indices</strong>: an array of indices</div>
+<div><strong>indicesSize</strong>: the size of the indice array</div>
+<div><strong>normals</strong>: an optional array of normal vectors. Has to be 3*indicesSize in length</div>
+<div><strong>textureCoordinates</strong>: an optional array of texture coordinates. Has to be 2*indicesSize in length</div>
+<div><strong>texture</strong>: an optional texture, specified as RGB or RGBA</div>
+<div><strong>textureResolution</strong>: the resolution of the specified texture</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful, otherwise the handle of the newly created shape<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int objectHandle=sim.createShape(int options,float shadingAngle,float[] vertices,int[] indices,float[] normals=nil,float[] textureCoordinates=nil,string/buffer texture=nil,int[2] textureResolution=nil)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int objectHandle = sim.createShape(int options, float shadingAngle, list vertices, list indices, 
-                                   list normals = None, list textureCoordinates = None, 
-                                   string/bytes texture = None, list textureResolution = None)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int objectHandle = sim.createShape(int options, float shadingAngle, float[] vertices, int[] indices, 
-                                   float[] normals = nil, float[] textureCoordinates = nil, 
-                                   string/buffer texture = nil, int[2] textureResolution = nil)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>options</strong>: Bit-coded:
-                    <ul>
-                        <li>if bit0 is set (1), backfaces are culled</li>
-                        <li>If bit1 is set (2), edges are visible</li>
-                        <li>If bit2 is set (4), adjacent texture pixels are not interpolated</li>
-                        <li>If bit3 is set (8), texture is applied as a decal</li>
-                        <li>If bit4 is set (16), texture is RGBA, otherwise it is RGB</li>
-                        <li>If bit5 is set (32), texture is horizontally flipped</li>
-                        <li>If bit6 is set (64), texture is vertically flipped</li>
-                    </ul>
-                </li>
-                <li><strong>shadingAngle</strong>: shading angle</li>
-                <li><strong>vertices</strong>: array of vertices</li>
-                <li><strong>indices</strong>: array of indices</li>
-                <li><strong>normals</strong>: optional array of normal vectors. Has to be 3 * len(indices) in length</li>
-                <li><strong>textureCoordinates</strong>: optional array of texture coordinates. Has to be 2 * len(indices) in length</li>
-                <li><strong>texture</strong>: optional texture, specified as RGB or RGBA</li>
-                <li><strong>textureResolution</strong>: resolution of the specified texture</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int objectHandle=sim.createShape(int options,float shadingAngle,list vertices,list indices,list normals=None,list textureCoordinates=None,string/bytes texture=None,list textureResolution=None)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>objectHandle</strong>: handle of the newly created shape</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simCreatePrimitiveShape.htm">sim.createPrimitiveShape</a></li>
-<li><a href="simCreateHeightfieldShape.htm">sim.createHeightfieldShape</a></li>
-<li><a href="simGetShapeMesh.htm">sim.getShapeMesh</a></li>
-<li><a href="simImportMesh.htm">sim.importMesh</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

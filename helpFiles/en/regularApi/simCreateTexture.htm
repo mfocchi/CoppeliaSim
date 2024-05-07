@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.createTexture</title>
+<title>simCreateTexture</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,85 +15,80 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.createTexture</h2>
-    <p>Creates a planar shape, that will be textured with a new, or imported texture</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simCreateTexture" id="simCreateTexture"></a>simCreateTexture / sim.createTexture </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Creates a planar shape, that will be textured with a new, or imported texture. See also <a href="simGetTextureId.htm">sim.getTextureId</a>, <a href="simReadTexture.htm">sim.readTexture</a>,  <a href="simWriteTexture.htm">sim.writeTexture</a> and <a href="simSetShapeTexture.htm">sim.setShapeTexture</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simCreateTexture(const char* fileName,int options,const double* planeSizes,const double* scalingUV,const double* xy_g,int fixedResolution,int* textureId,int* resolution,const void* reserved)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>fileName</strong>: the filename of the texure to import, or an empty string if you wish to create a new texture.</div>
+<div><strong>options</strong>: bit-coded:</div>
+<div class=tab><strong>bit0</strong> set (1) =do not interpolate adjacent color patches.</div>
+<div class=tab><strong>bit1</strong> set (2) =apply the texture in decal-mode.</div>
+<div class=tab><strong>bit2</strong> set (4) =repeat the texture along the U direction.</div>
+<div class=tab><strong>bit3</strong> set (8) =repeat the texture along the V direction.</div>
+<div><strong>planeSizes</strong>: a pointer to 2 values: the dimensions of the planar shape that will be generated. Can be nullptr for default dimensions.</div>
+<div><strong>scalingUV</strong>: a pointer to 2 values: the desired scaling of the texture, along the U and V directions. Can be nullptr for default scalings.</div>
+<div><strong>xy_g</strong>: a pointer to 3 values: the texture x/y shift, and the texture gamma-rotation. Can be nullptr for default shift/rotation values.</div>
+<div><strong>fixedResolution</strong>: 0 to import the shape with its original resolution. Otherwise, specify a power of 2 value which will be the maximum texture resolution (the texture will also be applied a power of 2 resolution).</div>
+<div><strong>resolution</strong>: a pointer to 2 values representing the desired texture resolution when creating a new texture. The same pointer is used to return the effective resolution of the created/imported texture.</div>
+<div><strong>textureId</strong>: a pointer to an integer that will be used to return the new texture ID. If a same texture is already present, the old texture ID will be returned. Can be nullptr.</div>
+<div><strong>reserved</strong>: reserved. Set to nullptr.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 in case of an error, otherwise the object handle of the created planar shape.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int shapeHandle,int textureId,int[2] resolution=sim.createTexture(string fileName,int options,float[2] planeSizes=nil,float[2] scalingUV=nil,float[2] xy_g=nil,int fixedResolution=0,int[2] resolution=nil)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int shape, int id, list res = sim.createTexture(string fileName, int options, list planeSizes = None, 
-                                                list scalingUV = None, list xy_g = None, 
-                                                int fixedResolution = 0, list resolution = None)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int shape, int id, int[2] res = sim.createTexture(string fileName, int options, float[2] planeSizes = nil, 
-                                                  float[2] scalingUV = nil, float[2] xy_g = nil, 
-                                                  int fixedResolution = 0, int[2] resolution = nil)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>fileName</strong>: filename of the texure to import, or an empty string if you wish to create a new texture.</li>
-                <li><strong>options</strong>: bit-coded:
-                    <ul>
-                        <li><strong>bit0</strong> set (1): do not interpolate adjacent color patches.</li>
-                        <li><strong>bit1</strong> set (2): apply the texture in decal-mode.</li>
-                        <li><strong>bit2</strong> set (4): repeat the texture along the U direction.</li>
-                        <li><strong>bit3</strong> set (8): repeat the texture along the V direction.</li>
-                    </ul>
-                </li>
-                <li><strong>planeSizes</strong>: array of 2 values: the dimensions of the planar shape that will be generated. Can be None/nil for default dimensions.</li>
-                <li><strong>scalingUV</strong>: array of 2 values: the desired scaling of the texture, along the U and V directions. Can be None/nil for default scalings.</li>
-                <li><strong>xy_g</strong>: array of 3 values: the texture x/y shift, and the texture gamma-rotation. Can be None/nil for default shift/rotation values.</li>
-                <li><strong>fixedResolution</strong>: 0 to import the shape with its original resolution. Otherwise, specify a power of 2 value which will be the maximum texture resolution (the texture will also be applied a power of 2 resolution).</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int shapeHandle,int textureId,list resolution=sim.createTexture(string fileName,int options,list planeSizes=None,list scalingUV=None,list xy_g=None,int fixedResolution=0,list resolution=None)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>shape</strong>: handle of the created planar shape</li>
-                <li><strong>id</strong>: new texture ID. If a same texture is already present, the old texture ID will be returned</li>
-                <li><strong>res</strong>: the effective texture resolution</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGetTextureId.htm">sim.getTextureId</a></li>
-<li><a href="simReadTexture.htm">sim.readTexture</a></li>
-<li><a href="simWriteTexture.htm">sim.writeTexture</a></li>
-<li><a href="simSetShapeTexture.htm">sim.setShapeTexture</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

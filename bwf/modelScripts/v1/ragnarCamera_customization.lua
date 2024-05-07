@@ -1,4 +1,3 @@
-simBWF=require('simBWF')
 function sysCall_init()
     local modelName=sim.getObjectAlias(sim.getObject('.'),1)
     local msg="Model '"..modelName.."' is an old version, and\nis not supported anymore.\n\nMake sure to use an updated model instead."

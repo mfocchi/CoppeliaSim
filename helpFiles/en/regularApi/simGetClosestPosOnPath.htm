@@ -15,66 +15,71 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getClosestPosOnPath</h2>
-    <p>Returns the position or distance along a path that is closest to a specified point in space</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetClosestPosOnPath" id="simGetClosestPosOnPath"></a>simGetClosestPosOnPath / sim.getClosestPosOnPath</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Returns the position or distance along a path that is closest to a specified point in space. See also the other <a href="../apiFunctions.htm#paths">path related functions</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn><div>double simGetClosestPosOnPath(const double* path,int pathSize,const double* pathLengths,const double* absPt)</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>path</strong>: the path, specified in row-major order, with x/y/z values for each path point</div>
+<div><strong>pathSize</strong>: the size/length of the path pointer</div>
+<div><strong>pathLengths</strong>: the lengths of a path. Each path point should have a corresponding length value (as the distance from the path's first point, along the path). See also <a href="simGetPathLengths.htm">sim.getPathLengths</a>.</div>
+<div><strong>absPt</strong>: a point in 3D space</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>The position/distance along the path </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>float posAlongPath=sim.getClosestPosOnPath(float[] path,float[] pathLengths,float[3] absPt)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+Similar to the C-function counterpart
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+Similar to the C-function counterpart
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">float posAlongPath = sim.getClosestPosOnPath(list path, list pathLengths, list absPt)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">float posAlongPath = sim.getClosestPosOnPath(float[] path, float[] pathLengths, float[3] absPt)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>path</strong>: path, specified in row-major order, with x/y/z values for each path point</li>
-                <li><strong>pathLengths</strong>: lengths of a path. Each path point should have a corresponding length value (as the distance from the path's first point, along the path). See also <a href="simGetPathLengths.htm">sim.getPathLengths</a>.</li>
-                <li><strong>absPt</strong>: point in 3D space</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>float posAlongPath=sim.getClosestPosOnPath(list path,list pathLengths,list absPt)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>posAlongPath</strong>: position/distance along the path</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="../apiFunctions.htm#paths">path related functions</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

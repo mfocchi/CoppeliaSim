@@ -40,7 +40,7 @@ C/C++<br>synopsis
 <div><strong>replyData</strong>: pointer to 4 integers that can be used by a module to reply to a broadcasted message. Can be nullptr. If not nullptr, all 4 values are automatically initialized to -1.<br>
 </div>
 <br>
-<div>Broadcasted messages can be intercepted in a plugin's "simMsg"-function. In the function, broadcasted messages can be recognized when the function's first argument ("message") is sim.message_module_broadcast.
+<div>Broadcasted messages can be intercepted in a plugin's "simMessage"-function. In the function, broadcasted messages can be recognized when the function's first argument ("message") is sim.message_module_broadcast.
 </div>
 </td> 
 </tr> 
@@ -49,7 +49,7 @@ C/C++<br>synopsis
 C/C++<br>return value
 </td> 
 <td class=apiTableRightCRet>
-<div>Pointer to custom reply data that can be used by a module to reply to a broadcasted message. The module that replies is in charge of allocating the data with <a href="simCreateBuffer_cpp.htm">simCreateBuffer</a> and the original broadcaster is in charge of releasing that data with <a href="simReleaseBuffer_cpp.htm">simReleaseBuffer</a>. A reply to a broadcasted message is triggered by a module that writes a value different from -1 into auxiliaryData[0]-auxiliaryData[3], thus aborting further broadcast of the original message and returning to the broadcaster. If the return value is different from nullptr, the broadcast is also interrupted.<br>
+<div>Pointer to custom reply data that can be used by a module to reply to a broadcasted message. The module that replies is in charge of allocating the data with <a href="simCreateBuffer.htm">simCreateBuffer</a> and the original broadcaster is in charge of releasing that data with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>. A reply to a broadcasted message is triggered by a module that writes a value different from -1 into auxiliaryData[0]-auxiliaryData[3], thus aborting further broadcast of the original message and returning to the broadcaster. If the return value is different from nullptr, the broadcast is also interrupted.<br>
 </div>
 </td> 
 </tr> 

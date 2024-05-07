@@ -3,9 +3,7 @@
 #py plugin = parse(pycpp.params['xml_file'])
 #include "stubs.h"
 #include <simPlusPlus/Lib.h>
-#include <simStubsGen/cpp/common.h>
 
-#include <optional>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -83,6 +81,250 @@ void simThread()
 
 #endif // QT_COMPIL
 
+void readFromStack(int stack, bool *value, const ReadOptions &rdopt)
+{
+    bool v;
+    if(sim::getStackBoolValue(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected bool");
+    }
+}
+
+void readFromStack(int stack, int *value, const ReadOptions &rdopt)
+{
+    int v;
+    if(sim::getStackInt32Value(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected int");
+    }
+}
+
+void readFromStack(int stack, long *value, const ReadOptions &rdopt)
+{
+    int v;
+    if(sim::getStackInt32Value(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected int");
+    }
+}
+
+void readFromStack(int stack, float *value, const ReadOptions &rdopt)
+{
+    float v;
+    if(sim::getStackFloatValue(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected float");
+    }
+}
+
+void readFromStack(int stack, double *value, const ReadOptions &rdopt)
+{
+    double v;
+    if(sim::getStackDoubleValue(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected double");
+    }
+}
+
+void readFromStack(int stack, std::string *value, const ReadOptions &rdopt)
+{
+    std::string v;
+    if(sim::getStackStringValue(stack, &v) == 1)
+    {
+        *value = v;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        throw sim::exception("expected string");
+    }
+}
+
+template<typename T>
+void readFromStack(int stack, boost::optional<T> *value, const ReadOptions &rdopt = {})
+{
+    if(sim::isStackValueNull(stack) == 1)
+    {
+        *value = boost::none;
+        sim::popStackItem(stack, 1);
+    }
+    else
+    {
+        T v;
+        readFromStack(stack, &v, rdopt); // will call sim::popStackItem() by itself
+        *value = v;
+    }
+}
+
+template<typename T>
+void readFromStack(int stack, std::vector<T> *vec, const ReadOptions &rdopt = {})
+{
+    int sz = sim::getStackTableInfo(stack, 0);
+    if(sz < 0)
+        throw sim::exception("expected array (simGetStackTableInfo(stack, 0) returned %d)", sz);
+
+    rdopt.validateTableSize(sz);
+
+    int oldsz = sim::getStackSize(stack);
+    sim::unfoldStackTable(stack);
+    int sz1 = (sim::getStackSize(stack) - oldsz + 1) / 2;
+    if(sz != sz1)
+        throw std::runtime_error("simUnfoldStackTable unpacked more elements than simGetStackTableInfo reported");
+
+    vec->resize(sz);
+
+    for(int i = 0; i < sz; i++)
+    {
+        sim::moveStackItemToTop(stack, oldsz - 1);
+        int j;
+        readFromStack(stack, &j);
+        sim::moveStackItemToTop(stack, oldsz - 1);
+        if constexpr(std::is_same<T, bool>::value)
+        {
+            T v;
+            readFromStack(stack, &v);
+            (*vec)[i] = v;
+        }
+        else
+        {
+            readFromStack(stack, &vec->at(i));
+        }
+    }
+}
+
+template<typename T>
+void readFromStack(int stack, std::vector<T> *vec, int (*f)(int, std::vector<T>*), const ReadOptions &rdopt = {})
+{
+    int sz = sim::getStackTableInfo(stack, 0);
+    if(sz < 0)
+        throw sim::exception("expected array (simGetStackTableInfo(stack, 0) returned %d)", sz);
+
+    rdopt.validateTableSize(sz);
+
+    int chk = sim::getStackTableInfo(stack, 2);
+    if(chk != 1)
+        throw sim::exception("table contains non-numbers (simGetStackTableInfo(stack, 2) returned %d)", chk);
+
+    vec->resize(sz);
+
+    int ret = f(stack, vec);
+    if(ret != 1)
+        throw sim::exception("readFunc error %d", ret);
+
+    sim::popStackItem(stack, 1);
+}
+
+template<>
+void readFromStack(int stack, std::vector<float> *vec, const ReadOptions &rdopt)
+{
+    readFromStack(stack, vec, sim::getStackFloatTable, rdopt);
+}
+
+template<>
+void readFromStack(int stack, std::vector<double> *vec, const ReadOptions &rdopt)
+{
+    readFromStack(stack, vec, sim::getStackDoubleTable, rdopt);
+}
+
+template<>
+void readFromStack(int stack, std::vector<int> *vec, const ReadOptions &rdopt)
+{
+    readFromStack(stack, vec, sim::getStackInt32Table, rdopt);
+}
+
+template<typename T>
+void readFromStack(int stack, Grid<T> *grid, const ReadOptions &rdopt = {})
+{
+    try
+    {
+        int info = sim::getStackTableInfo(stack, 0);
+        if(info != sim_stack_table_map && info != sim_stack_table_empty)
+        {
+            throw sim::exception("expected a map");
+        }
+
+        int oldsz = sim::getStackSize(stack);
+        sim::unfoldStackTable(stack);
+        int numItems = (sim::getStackSize(stack) - oldsz + 1) / 2;
+
+        std::set<std::string> requiredFields{"dims", "data"};
+
+        while(numItems >= 1)
+        {
+            sim::moveStackItemToTop(stack, oldsz - 1); // move key to top
+            std::string key;
+            readFromStack(stack, &key);
+
+            sim::moveStackItemToTop(stack, oldsz - 1); // move value to top
+            try
+            {
+                if(0) {}
+                else if(key == "dims")
+                {
+                    readFromStack(stack, &grid->dims, ReadOptions().setBounds(0, 1, -1));
+                }
+                else if(key == "data")
+                {
+                    readFromStack(stack, &grid->data, ReadOptions());
+                }
+                else
+                {
+                    throw sim::exception("unexpected key");
+                }
+            }
+            catch(std::exception &ex)
+            {
+                throw sim::exception("field '%s': %s", key, ex.what());
+            }
+
+            requiredFields.erase(key);
+            numItems = (sim::getStackSize(stack) - oldsz + 1) / 2;
+        }
+
+        for(const auto &field : requiredFields)
+            throw sim::exception("missing required field '%s'", field);
+
+        if(grid->dims.size() < 1)
+            throw sim::exception("must have at least one dimension");
+
+        size_t elemCount = 1;
+        for(const int &i : grid->dims) elemCount *= i;
+        if(grid->data.size() != elemCount)
+            throw sim::exception("incorrect data length (expected %d elements)", elemCount);
+
+        rdopt.validateSize(grid->dims);
+    }
+    catch(std::exception &ex)
+    {
+        throw sim::exception("readFromStack(Grid): %s", ex.what());
+    }
+}
+
 #py for struct in plugin.structs:
 void readFromStack(int stack, `struct.name` *value, const ReadOptions &rdopt)
 {
@@ -149,6 +391,108 @@ void readFromStack(int stack, `struct.name` *value, const ReadOptions &rdopt)
     addStubsDebugLog("readFromStack(`struct.name`): finished reading");
 }
 
+#py endfor
+void writeToStack(const bool &value, int stack, const WriteOptions &wropt)
+{
+    sim::pushBoolOntoStack(stack, value);
+}
+
+void writeToStack(const int &value, int stack, const WriteOptions &wropt)
+{
+    sim::pushInt32OntoStack(stack, value);
+}
+
+void writeToStack(const long &value, int stack, const WriteOptions &wropt)
+{
+    if(value < std::numeric_limits<int>::max() || value > std::numeric_limits<int>::max())
+        throw std::runtime_error("stack doesn't support (yet) int64 values");
+    sim::pushInt32OntoStack(stack, static_cast<int>(value));
+}
+
+void writeToStack(const float &value, int stack, const WriteOptions &wropt)
+{
+    sim::pushFloatOntoStack(stack, value);
+}
+
+void writeToStack(const double &value, int stack, const WriteOptions &wropt)
+{
+    sim::pushDoubleOntoStack(stack, value);
+}
+
+void writeToStack(const std::string &value, int stack, const WriteOptions &wropt)
+{
+    sim::pushStringOntoStack(stack, value);
+}
+
+template<typename T>
+void writeToStack(const boost::optional<T> &value, int stack, const WriteOptions &wropt = {})
+{
+    if(!value)
+    {
+        sim::pushNullOntoStack(stack);
+        return;
+    }
+
+    writeToStack(*value, stack, wropt);
+}
+
+template<typename T>
+void writeToStack(const std::vector<T> &vec, int stack, const WriteOptions &wropt = {})
+{
+    sim::pushTableOntoStack(stack);
+    for(size_t i = 0; i < vec.size(); i++)
+    {
+        writeToStack(int(i + 1), stack);
+        writeToStack(vec.at(i), stack);
+        sim::insertDataIntoStackTable(stack);
+    }
+}
+
+template<>
+void writeToStack(const std::vector<float> &vec, int stack, const WriteOptions &wropt)
+{
+    sim::pushFloatTableOntoStack(stack, vec);
+}
+
+template<>
+void writeToStack(const std::vector<double> &vec, int stack, const WriteOptions &wropt)
+{
+    sim::pushDoubleTableOntoStack(stack, vec);
+}
+
+template<>
+void writeToStack(const std::vector<int> &vec, int stack, const WriteOptions &wropt)
+{
+    sim::pushInt32TableOntoStack(stack, vec);
+}
+
+template<typename T>
+void writeToStack(const Grid<T> &grid, int stack, const WriteOptions &wropt = {})
+{
+    try
+    {
+        sim::pushTableOntoStack(stack);
+
+#py for field_name in ['dims', 'data']:
+        try
+        {
+            writeToStack(std::string{"`field_name`"}, stack);
+            writeToStack(grid.`field_name`, stack);
+            sim::insertDataIntoStackTable(stack);
+        }
+        catch(std::exception &ex)
+        {
+            throw sim::exception("field '`field_name`': %s", ex.what());
+        }
+#py endfor
+    }
+    catch(std::exception &ex)
+    {
+        throw sim::exception("writeToStack(Grid): %s", ex.what());
+    }
+}
+
+#py for struct in plugin.structs:
 void writeToStack(const `struct.name` &value, int stack, const WriteOptions &wropt)
 {
     addStubsDebugLog("writeToStack(`struct.name`): begin writing...");
@@ -179,6 +523,8 @@ void writeToStack(const `struct.name` &value, int stack, const WriteOptions &wro
     addStubsDebugLog("writeToStack(`struct.name`): finished writing");
 }
 
+#py endfor
+#py for struct in plugin.structs:
 `struct.name`::`struct.name`()
 {
 #py for field in struct.fields:
@@ -194,7 +540,7 @@ void checkRuntimeVersion()
     int simVer = sim::programVersion();
 
     // version required by simStubsGen:
-    int minVer = 4050107; // 4.5.1rev7
+    int minVer = 4010000; // 4.1.0rev0
     if(simVer < minVer)
         throw sim::exception("requires at least %s (simStubsGen)", sim::versionString(minVer));
 
@@ -219,23 +565,42 @@ bool registerScriptStuff()
 
         try
         {
+#py plugin_var = f'sim{plugin.name}'
+#py lua_require = pycpp.params.get('lua_require')
+#py #
+#py if plugin.version > 0:
+#py plugin_var += f'_{plugin.version}'
+#py if lua_require:
+#py lua_require += f'-{plugin.version}'
+#py endif
+#py endif
+#py #
+#py if lua_require:
+            sim::registerScriptVariable("`plugin_var`", "require('`lua_require`')", 0);
+#py else:
+            sim::registerScriptVariable("`plugin_var`", "{}", 0);
+#py endif
+            sim::registerScriptVariable("_`plugin.name`_latest_version", "math.max(_`plugin.name`_latest_version or 0, `plugin.version`)", 0);
+
             // register varables from enums:
 #py for enum in plugin.enums:
-#if SIM_PROGRAM_FULL_VERSION_NB < 4060010
-            sim::registerScriptVariableRaw("`enum.name`", "{}", 0);
-#endif
+            sim::registerScriptVariable("`plugin_var`.`enum.name`", "{}", 0);
 #py for item in enum.items:
-            sim::registerScriptVariable("`enum.name`.`item.name`", `plugin.name.lower()`_`enum.item_prefix``item.name`, 0);
+            sim::registerScriptVariable("`plugin_var`.`enum.name`.`item.name`", boost::lexical_cast<std::string>(sim_`plugin.name.lower()`_`enum.item_prefix``item.name`), 0);
 #py endfor
 #py endfor
             // register commands:
 #py for cmd in plugin.commands:
-            sim::registerScriptCallbackFunction("`cmd.name`", `cmd.c_name`_callback);
+            sim::registerScriptCallbackFunction("`plugin_var`.`cmd.name`@`plugin.name`", "`escape(cmd.calltip)``escape(cmd.documentation)`", `cmd.c_name`_callback);
 #py endfor
+
+#py if pycpp.params['have_lua_calltips'] == 'True':
+#include "lua_calltips.cpp"
+#py endif
         }
         catch(std::exception &ex)
         {
-            throw sim::exception("Initialization failed (registerScriptItems): %s", ex.what());
+            throw sim::exception("Initialization failed (registerScriptStuff): %s", ex.what());
         }
     }
     catch(sim::exception& ex)
@@ -252,7 +617,7 @@ const char* `enum.name.lower()`_string(`enum.name` x)
     switch(x)
     {
 #py for item in enum.items:
-        case `plugin.name.lower()`_`enum.item_prefix``item.name`: return "`plugin.name.lower()`_`enum.item_prefix``item.name`";
+        case sim_`plugin.name.lower()`_`enum.item_prefix``item.name`: return "sim_`plugin.name.lower()`_`enum.item_prefix``item.name`";
 #py endfor
         default: return "???";
     }
@@ -283,7 +648,7 @@ void `cmd.c_name`_callback(SScriptCallBack *p)
     addStubsDebugLog("`cmd.c_name`_callback: reading input arguments...");
     addStubsDebugStackDump(p->stackID);
 
-    const char *cmd = "`plugin.name`.`cmd.name`";
+    const char *cmd = "sim`plugin.name`.`cmd.name`";
 
     `cmd.c_in_name` in_args;
     if(p)
@@ -336,11 +701,11 @@ void `cmd.c_name`_callback(SScriptCallBack *p)
 #py endif
 
         addStubsDebugLog("`cmd.c_name`_callback: calling callback (`cmd.c_name`)");
-        `plugin.name`_`cmd.c_name`(&in_args, &out_args);
+        simExt`plugin.name`_`cmd.c_name`(&in_args, &out_args);
     }
     catch(std::exception &ex)
     {
-        sim::setLastError(ex.what());
+        sim::setLastError(cmd, ex.what());
     }
 
     try
@@ -374,7 +739,7 @@ void `cmd.c_name`_callback(SScriptCallBack *p)
     }
     catch(std::exception &ex)
     {
-        sim::setLastError(ex.what());
+        sim::setLastError(cmd, ex.what());
         // clear stack
         try { sim::popStackItem(p->stackID, 0); } catch(...) {}
     }
@@ -462,7 +827,7 @@ bool `fn.c_name`(int scriptId, const char *func, `fn.c_in_name` *in_args, `fn.c_
     {
         if(stackID != -1)
             try { sim::releaseStack(stackID); } catch(...) {}
-        sim::setLastError(ex.what());
+        sim::setLastError(func, ex.what());
         return false;
     }
 

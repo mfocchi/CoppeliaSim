@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.getSimulatorMessage</title>
+<title>simGetSimulatorMessage</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,61 +15,74 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getSimulatorMessage</h2>
-    <p>Retrieves and removes the next message in the C/C++ or Lua message queues. Use this in a while-loop until
-all messages have been extracted. While the C/C++ interface has one single message queue, each Lua script
-has its own message queue. The C/C++ version of this function should only be called from the CoppeliaSim
-client application. A given message queue cannot hold more than 64 messages, unread messages will be discarded.</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetSimulatorMessage" id="simGetSimulatorMessage"></a>simGetSimulatorMessage / sim.getSimulatorMessage </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Retrieves and removes the next message in the C/C++ or Lua message queues. Use this in a while-loop until all messages have been extracted. While the C/C++ interface has one single message queue, each Lua script has its own message queue. The C/C++ version of this function should only be called from the CoppeliaSim client application. A given message queue cannot hold more than 64 messages, unread messages will be discarded.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>char* simGetSimulatorMessage(int* messageID,int* auxiliaryData,int* returnedDataSize)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>messageID</strong>: a simulator message (see the <a href="../apiConstants.htm#simulatorMessages">simulator messages</a>) or -1 if no message is available or in case of an error<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int message, list auxiliaryData, list auxiliaryData2 = sim.getSimulatorMessage()</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int message, int[4] auxiliaryData, int[] auxiliaryData2 = sim.getSimulatorMessage()</code>
-    </div>
+<div><strong>auxiliaryData</strong>: table of 4 integers that can describe the returned message in more details</div>
+<div><strong>returnedDataSize</strong>: size of the returned buffer</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>nullptr if no buffer was returned, otherwise a buffer that should be released with <a href="simReleaseBuffer.htm">simReleaseBuffer</a></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int message,int[4] auxiliaryData,int[] auxiliaryData2=sim.getSimulatorMessage()</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div></div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>message</strong>: a simulator message (see the <a href="../apiConstants.htm#simulatorMessages">simulator messages</a>) or -1 if no message is available<br>
 </div>
+<div><strong>auxiliaryData</strong>: table of 4 numbers that can describe the returned message in more details</div>
+<div><strong>auxiliaryData2</strong>: optional table of n numbers that hold more data related to the message</div>
+</td> 
+</tr> 
 
-<div style="display: none;" class="regApiSection">
-    <h3>Arguments</h3>
-    
-</div>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>message</strong>: <a href="../apiConstants.htm#simulatorMessages">simulator message</a></li>
-                <li><strong>auxiliaryData</strong>: array of numbers that describe the returned message in more details</li>
-                <li><strong>auxiliaryData2</strong>: array of numbers that describe the returned message in more details</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int message,list auxiliaryData,list auxiliaryData2=sim.getSimulatorMessage()</td>
+</tr>
 
-<div class="regApiSection">
+</table> 
 
-</div>
-
-<p></p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

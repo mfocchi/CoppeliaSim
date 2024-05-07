@@ -15,64 +15,76 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.registerScriptFuncHook</h2>
-    <p>Registers a script function hook for <a href="../callbackFunctions.htm">callback functions</a>,
-that will be executed before or after the specified function. Calling this function a second
-time with the same arguments will unregister a previous hook</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simRegisterScriptFuncHook" id="simRegisterScriptFuncHook"></a>sim.registerScriptFuncHook</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr><div>Lua only. Registers a script function hook for <a href="../callbackFunctions.htm">callback functions</a>, that will be executed before or after the specified function. Calling this function a second time with the same arguments will unregister a previous hook.</div>
+</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn><div>int simRegisterScriptFuncHook(int scriptHandle,const char* funcToHook,const char* userFunc,bool execBefore,int options)</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>scriptHandle</strong>: the handle of the script</div>
+<div><strong>funcToHook</strong>: the function to hook</div>
+<div><strong>userFunc</strong>: the user function</div>
+<div><strong>execBefore</strong>: if true, the user function will be called before the function to hook. Otherwise it will be called after.</div>
+<div><strong>options</strong>: set to 0</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>1 if the hook registration was successful, 0 if a previous hook was removed, and -1 in case of an error</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn><div>int result=sim.registerScriptFuncHook(string funcToHook,string/function userFunc,bool execBefore)</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart. userFunc can be a string or a function.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int result = sim.registerScriptFuncHook(string funcToHook, string/function userFunc, bool execBefore)</code>
-    </div>
-</div>
+<tr class=apiTableTr> 
+<td class=apiTableLeftPSyn>
+Python<br>synopsis
+</td> 
+<td class=apiTableRightPSyn><div></div></td> 
+</tr> 
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>funcToHook</strong>: function to hook</li>
-                <li><strong>userFunc</strong>: user function. Can be a string or a function</li>
-                <li><strong>execBefore</strong>: if true, the user function is called before the function to hook. Otherwise it is called after</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>result</strong>result: 1 if the hook registration was successful, or 0 if a previous hook was removed</li>
-            </ul>
-        
-</div>
 
-<div class="regApiSection">
-
-</div>
-
-<p></p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

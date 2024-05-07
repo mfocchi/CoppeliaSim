@@ -2,8 +2,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Content-Language" content="en-us">
-<title>simWS Plugin API reference</title>
-<link rel="stylesheet" type="text/css" href="../style.css">
+<title>WS Plugin API reference</title>
+<link rel="stylesheet" type="text/css" href="../../helpFiles/style.css">
 <script type="text/javascript">
 //
 function getParameterByName(name, url = window.location.href)
@@ -22,7 +22,7 @@ td.section { margin: 0; padding: 0; }
 </head>
 <body>
 <div align="center"><table class="allEncompassingTable">
-<tr><td id="title" class="section"><h1>simWS Plugin API reference</h1></td></tr>
+<tr><td id="title" class="section"><h1>WS Plugin API reference</h1></td></tr>
 <tr><td id="info" class="section"><p class="infoBox">WebSocket plugin.</p></td></tr>
 <tr><td id="alphabetical" class="section"><pre class="lightGreyBox"><a href="?#send">simWS.send</a>
 <a href="?#setCloseHandler">simWS.setCloseHandler</a>
@@ -47,20 +47,20 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">simWS.send(string serverHandle, string connectionHandle, buffer data, int opcode=simws_opcode_text)<br>
+<td class="apiTableRightLSyn">simWS.send(string serverHandle, string connectionHandle, string data, int opcode=sim_ws_opcode_text)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 <div>
-<strong>data</strong> (buffer)</div>
+<strong>data</strong> (string): </div>
 <div>
-<strong>opcode</strong> (int, default: simws_opcode_text)</div>
+<strong>opcode</strong> (int, default: sim_ws_opcode_text): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -69,8 +69,14 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">simWS.send(string serverHandle, string connectionHandle, buffer data, int opcode=simws_opcode_text)<br>
+<td class="apiTableRightPSyn">simWS.send(string serverHandle, string connectionHandle, string data, int opcode=sim_ws_opcode_text)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -93,9 +99,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>callbackFn</strong> (string)</div>
+<strong>callbackFn</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -106,6 +112,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.setCloseHandler(string serverHandle, string callbackFn)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -128,9 +140,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>callbackFn</strong> (string)</div>
+<strong>callbackFn</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -141,6 +153,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.setFailHandler(string serverHandle, string callbackFn)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -163,9 +181,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>callbackFn</strong> (string)</div>
+<strong>callbackFn</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -176,6 +194,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.setHTTPHandler(string serverHandle, string callbackFn)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -198,9 +222,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>callbackFn</strong> (string)</div>
+<strong>callbackFn</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -211,6 +235,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.setMessageHandler(string serverHandle, string callbackFn)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -233,9 +263,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>callbackFn</strong> (string)</div>
+<strong>callbackFn</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -246,6 +276,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.setOpenHandler(string serverHandle, string callbackFn)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -267,17 +303,23 @@ td.section { margin: 0; padding: 0; }
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam"><div>
-<strong>listenPort</strong> (int)</div></td>
+<strong>listenPort</strong> (int): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet"><div>
-<strong>serverHandle</strong> (string)</div></td>
+<strong>serverHandle</strong> (string): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">string serverHandle=simWS.start(int listenPort)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -299,7 +341,7 @@ td.section { margin: 0; padding: 0; }
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam"><div>
-<strong>serverHandle</strong> (string)</div></td>
+<strong>serverHandle</strong> (string): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
@@ -309,6 +351,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simWS.stop(string serverHandle)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br>
@@ -346,9 +394,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -385,9 +433,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -424,9 +472,9 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -456,18 +504,18 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">simWS.messageCallback(string serverHandle, string connectionHandle, buffer data)<br>
+<td class="apiTableRightLSyn">simWS.messageCallback(string serverHandle, string connectionHandle, string data)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 <div>
-<strong>data</strong> (buffer)</div>
+<strong>data</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -476,7 +524,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">simWS.messageCallback(string serverHandle, string connectionHandle, buffer data)<br>
+<td class="apiTableRightPSyn">simWS.messageCallback(string serverHandle, string connectionHandle, string data)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -497,34 +545,34 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">int status, buffer data=simWS.httpCallback(string serverHandle, string connectionHandle, string resource, buffer data)<br>
+<td class="apiTableRightLSyn">int status, string data=simWS.httpCallback(string serverHandle, string connectionHandle, string resource, string data)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>serverHandle</strong> (string)</div>
+<strong>serverHandle</strong> (string): </div>
 <div>
-<strong>connectionHandle</strong> (string)</div>
+<strong>connectionHandle</strong> (string): </div>
 <div>
-<strong>resource</strong> (string)</div>
+<strong>resource</strong> (string): </div>
 <div>
-<strong>data</strong> (buffer)</div>
+<strong>data</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet">
 <div>
-<strong>status</strong> (int)</div>
+<strong>status</strong> (int): </div>
 <div>
-<strong>data</strong> (buffer)</div>
+<strong>data</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">int status, buffer data=simWS.httpCallback(string serverHandle, string connectionHandle, string resource, buffer data)<br>
+<td class="apiTableRightPSyn">int status, string data=simWS.httpCallback(string serverHandle, string connectionHandle, string resource, string data)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -546,7 +594,15 @@ document.getElementById('enums').style.display = view == null ? 'table-cell' : '
 document.getElementById('structs').style.display = view == null ? 'table-cell' : 'none'
 document.getElementById('scriptFunctions').style.display = view == null ? 'table-cell' : 'none'
 //
-                </script><link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css">
-<script src="../js/hljs/11.8.0/highlight.min.js"></script><script src="../js/hljs/11.8.0/languages/cmake.min.js"></script><script src="../js/hljs/11.8.0/languages/cpp.min.js"></script><script src="../js/hljs/11.8.0/languages/java.min.js"></script><script src="../js/hljs/11.8.0/languages/javascript.min.js"></script><script src="../js/hljs/11.8.0/languages/lua.min.js"></script><script src="../js/hljs/11.8.0/languages/matlab.min.js"></script><script src="../js/hljs/11.8.0/languages/python.min.js"></script><script src="../js/hljs/11.8.0/languages/rust.min.js"></script><script src="../js/hljs/11.8.0/languages/xml.min.js"></script><script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
+                </script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script><script type="text/javascript">
+//
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('code.hljs').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+});
+//
+                </script>
 </body>
 </html>

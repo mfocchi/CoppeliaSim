@@ -7,14 +7,20 @@
 import asyncio
 import sys
 
-from coppeliasim_zmqremoteapi_client.asyncio import RemoteAPIClient
+from zmqRemoteApi.asyncio import RemoteAPIClient
 
 
 async def mainFunc():
     print('Program started')
 
     async with RemoteAPIClient() as client:
-        sim = await client.require('sim')
+        sim = await client.getObject('sim')
+
+        # When simulation is not running, ZMQ message handling could be a bit
+        # slow, since the idle loop runs at 8 Hz by default. So let's make
+        # sure that the idle loop runs at full speed for this program:
+        defaultIdlsFps = await sim.getInt32Param(sim.intparam_idle_fps)
+        await sim.setInt32Param(sim.intparam_idle_fps, 0)
 
         # Create a few dummies (below executes "concurrently", i.e. without
         # waiting for the result of one call, before sending the request for
@@ -42,19 +48,22 @@ async def mainFunc():
             await asyncio.sleep(0.1)
 
         # Run a simulation in stepping mode:
-        await sim.setStepping(True)
+        await client.setStepping(True)
         await sim.startSimulation()
         while (t := await sim.getSimulationTime()) < 3:
             s = f'Simulation time: {t:.2f} [s] (simulation running '\
                 'synchronously to client, i.e. stepped)'
             print(s)
             await sim.addLog(sim.verbosity_scriptinfos, s)
-            await sim.step()  # triggers next simulation step
+            await client.step()  # triggers next simulation step
         await sim.stopSimulation()
 
         # Remove the dummies created earlier
         # (executes "concurrently", see above):
         await asyncio.gather(*[sim.removeObject(h) for h in handles])
+
+        # Restore the original idle loop frequency:
+        await sim.setInt32Param(sim.intparam_idle_fps, defaultIdlsFps)
 
     print('Program ended')
 

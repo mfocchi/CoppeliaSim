@@ -7,27 +7,6 @@
     <version>1.0-SNAPSHOT</version>
     <name>coppeliaSim-zmqRemoteApi-java</name>
 
-    <profiles>
-        <profile>
-            <id>unix</id>
-            <activation>
-                <os><family>!Windows</family></os>
-            </activation>
-            <properties>
-                <Python3_EXECUTABLE>python3</Python3_EXECUTABLE>
-            </properties>
-        </profile>
-        <profile>
-            <id>win</id>
-            <activation>
-                <os><family>Windows</family></os>
-            </activation>
-            <properties>
-                <Python3_EXECUTABLE>py</Python3_EXECUTABLE>
-            </properties>
-        </profile>
-    </profiles>
-
     <properties>
         <!-- https://maven.apache.org/general.html#encoding-warning -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,11 +51,6 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <groupId>org.codehaus.mojo</groupId>
-                <!-- 
-                <configuration>
-                    <mainClass>Example</mainClass>
-                </configuration>
-                -->
                 <executions>
                     <execution>
                         <id>Extract calltips.json</id>
@@ -87,13 +61,13 @@
                         <configuration>
                             <skip>${haveCalltips}</skip>
                             <environmentVariables>
-                                <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
-                            <executable>${Python3_EXECUTABLE}</executable>
-                            <arguments>
-                                <argument>${basedir}/../../tools/get_raw_calltips.py</argument>
-                                <argument>${basedir}/calltips.json</argument>
-                            </arguments>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${basedir}/../../tools/get_raw_calltips.py
+                                ${basedir}/calltips.json
+                            </commandlineArgs>
                         </configuration>
                     </execution>
                     <execution>
@@ -105,13 +79,13 @@
                         <configuration>
                             <skip>${haveConstants}</skip>
                             <environmentVariables>
-                                <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
-                            <executable>${Python3_EXECUTABLE}</executable>
-                            <arguments>
-                                <argument>${basedir}/../../tools/get_constants.py</argument>
-                                <argument>${basedir}/constants.json</argument>
-                            </arguments>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${basedir}/../../tools/get_constants.py
+                                ${basedir}/constants.json
+                            </commandlineArgs>
                         </configuration>
                     </execution>
                     <execution>
@@ -122,34 +96,19 @@
                         </goals>
                         <configuration>
                             <environmentVariables>
-                                <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
-                            <executable>${Python3_EXECUTABLE}</executable>
-                            <arguments>
-                                <argument>${env.COPPELIASIM_ROOT_DIR}/programming/include/simStubsGen/external/pycpp/pycpp.py</argument>
-                                <argument>-i</argument>
-                                <argument>${basedir}/templates/RemoteAPIObjects.java</argument>
-                                <argument>-o</argument>
-                                <argument>src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java</argument>
-                                <argument>-P</argument>
-                                <argument>${basedir}</argument>
-                                <argument>-p</argument>
-                                <argument>calltips_json=${basedir}/calltips.json</argument>
-                                <argument>-p</argument>
-                                <argument>constants_json=${basedir}/constants.json</argument>
-                                <argument>-p</argument>
-                                <argument>include_objects=${GENERATE_INCLUDE_OBJECTS}</argument>
-                                <argument>-p</argument>
-                                <argument>exclude_objects=${GENERATE_EXCLUDE_OBJECTS}</argument>
-                                <argument>-p</argument>
-                                <argument>exclude_methods=${GENERATE_EXCLUDE_METHODS}</argument>
-                                <argument>-P</argument>
-                                <argument>${env.COPPELIASIM_ROOT_DIR}/python</argument>
-                                <argument>-P</argument>
-                                <argument>${basedir}/../../tools</argument>
-                                <argument>-P</argument>
-                                <argument>${basedir}</argument>
-                            </arguments>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${env.COPPELIASIM_ROOT_DIR}/programming/libPlugin/simStubsGen/external/pycpp/pycpp.py
+                                -i ${basedir}/templates/RemoteAPIObjects.java
+                                -o src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java
+                                -P ${basedir}
+                                -p calltips_json=${basedir}/calltips.json
+                                -p constants_json=${basedir}/constants.json
+                                -P ${basedir}/../../tools
+                                -P ${basedir}
+                            </commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>

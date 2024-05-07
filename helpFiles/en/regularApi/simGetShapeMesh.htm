@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.getShapeMesh</title>
+<title>simGetShapeMesh</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,68 +15,81 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getShapeMesh</h2>
-    <p>Retrieves a shape's mesh information</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetShapeMesh" id="simGetShapeMesh"></a>simGetShapeMesh / sim.getShapeMesh </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Retrieves a shape's mesh information. See also <a href="simGetShapeViz.htm">sim.getShapeViz</a>, <a href="simCreateShape.htm">sim.createShape</a> and <a href="simExportMesh.htm">sim.exportMesh</a> for a usage example.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simGetShapeMesh(int shapeHandle,double** vertices,int* verticesSize,int** indices,int* indicesSize,double** normals)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>shapeHandle</strong>: handle of the shape</div>
+<div><strong>vertices</strong>: receives the vertices. The user is in charge of destroying the array with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>. See <a href="simExportMesh.htm">simExportMesh</a> for a usage example.<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">list vertices, list indices, list normals = sim.getShapeMesh(int shapeHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">float[] vertices, int[] indices, float[] normals = sim.getShapeMesh(int shapeHandle)</code>
-    </div>
+<div><strong>verticesSize</strong>: receives the size of the vertices array. See <a href="simExportMesh.htm">simExportMesh</a> for a usage example.<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>shapeHandle</strong>: handle of the shape. See <a href="simExportMesh.htm">sim.exportMesh</a> for a usage example.</li>
-            </ul>
-        
+<div><strong>indices</strong>: receives the indices. The user is in charge of destroying the array with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>. See <a href="simExportMesh.htm">simExportMesh</a> for a usage example.<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>vertices</strong>: array of vertices</li>
-                <li><strong>indices</strong>: array of indices</li>
-                <li><strong>normals</strong>: array of normals</li>
-            </ul>
-        
+<div><strong>indicesSize</strong>: receives the size of the indice array. See <a href="simExportMesh.htm">simExportMesh</a> for a usage example.<br>
 </div>
-
-<div class="regApiSection">
-
+<div><strong>normals</strong>: receives the normals (3 times the size of indicesSize). The user is in charge of destroying the array with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>. Can be nullptr.</div>
+<div></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>float[] vertices,int[] indices,float[] normals=sim.getShapeMesh(int shapeHandle)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div><strong>shapeHandle</strong>: handle of the shape. See <a href="simExportMesh.htm">sim.exportMesh</a> for a usage example.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>vertices</strong>: table of vertices</div>
+<div><strong>indices</strong>: table of indices</div>
+<div><strong>normals</strong>: table of normals</div>
+</td> 
+</tr> 
 
-<p><br>See also:
-<ul>
-<li><a href="simGetShapeViz.htm">sim.getShapeViz</a></li>
-<li><a href="simCreateShape.htm">sim.createShape</a></li>
-<li><a href="simExportMesh.htm">sim.exportMesh</a></li>
-</ul>
-</p>
 
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>list vertices,list indices,list normals=sim.getShapeMesh(int shapeHandle)</td>
+</tr>
+
+</table> 
+
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

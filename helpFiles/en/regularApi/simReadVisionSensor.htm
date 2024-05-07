@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.readVisionSensor</title>
+<title>simReadVisionSensor</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,71 +15,82 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.readVisionSensor</h2>
-    <p>Reads the state of a vision sensor. This function doesn't perform detection, it merely
-reads the result from a previous call to <a href="simHandleVisionSensor.htm">sim.handleVisionSensor</a>
-        </p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simReadVisionSensor" id="simReadVisionSensor"></a>simReadVisionSensor / sim.readVisionSensor</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Reads the state of a vision sensor. This function doesn't perform detection, it merely reads the result from a previous call to <a href="simHandleVisionSensor.htm">sim.handleVisionSensor</a> (sim.handleVisionSensor is called in the default main script). See also <a href="simCheckVisionSensor.htm">sim.checkVisionSensor</a>, <a href="simCheckVisionSensorEx.htm">sim.checkVisionSensorEx</a> and <a href="simResetVisionSensor.htm">sim.resetVisionSensor</a>.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simReadVisionSensor(int visionSensorHandle,double** auxValues,int** auxValuesCount)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>visionSensorHandle</strong>: handle of a vision sensor object</div>
+<div><strong>auxValues</strong>: by default CoppeliaSim returns one packet of 15 auxiliary values:the minimum of {intensity, red, green, blue, depth value}, the maximum of {intensity, red, green, blue, depth value}, and the average of {intensity, red, green, blue, depth value}. Additional packets can be appended in the <a href="../visionCallbackFunctions.htm">vision callback function</a>. AuxValues can be nullptr. The user is in charge of releasing the auxValues buffer with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>(*auxValues).<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int result, list packet1, list packet2, etc. = sim.readVisionSensor(int visionSensorHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int result, float[] packet1, float[] packet2, etc. = sim.readVisionSensor(int visionSensorHandle)</code>
-    </div>
+<div><strong>auxValuesCount</strong>: contains information about the number of auxiliary value packets and packet sizes returned in auxValues. The first value is the number of packets, the second is the size of packet1, the third is the size of packet2, etc. Can be nullptr if auxValues is also nullptr. The user is in charge of releasing the auxValuesCount buffer with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>(*auxValuesCount).<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>visionSensorHandle</strong>: handle of a vision sensor object</li>
-            </ul>
-        
+<br>
+<div>See <a href="simHandleVisionSensor.htm">simHandleVisionSensor</a> for a usage example</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>detection state (0 or 1), or -1 in case of an error, or if <a href="simHandleVisionSensor.htm">simHandleVisionSensor</a> was never called, or if <a href="simResetVisionSensor.htm">simResetVisionSensor</a> was previously called.<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>result</strong>: detection state (0 or 1), or -1 if <a href="simHandleVisionSensor.htm">sim.handleVisionSensor</a> was never called, or if <a href="simResetVisionSensor.htm">sim.resetVisionSensor</a> was previously called.</li>
-                <li><strong>packet1</strong>: default auxiliary packet of 15 auxiliary values: the minimum of [intensity red green blue depth], the maximum of [intensity red green blue depth], and the average of [intensity red green blue depth]</li>
-                <li><strong>packet2</strong>: additional auxiliary value packet (e.g. from an image processing component)</li>
-                <li><strong>packet3</strong>: etc. (the function returns as many tables as there are auxiliary value packets)</li>
-            </ul>
-        
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int result,float[] auxiliaryValuePacket1,float[] auxiliaryValuePacket2, etc.=sim.readVisionSensor(int visionSensorHandle)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div><strong>visionSensorHandle</strong>: handle of a vision sensor object</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>result</strong>: detection state (0 or 1), or -1 if <a href="simHandleVisionSensor.htm">sim.handleVisionSensor</a> was never called, or if <a href="simResetVisionSensor.htm">sim.resetVisionSensor</a> was previously called.<br>
 </div>
+<div><strong>auxiliaryValuePacket1</strong>: default auxiliary value packet (same as for the C-function)</div>
+<div><strong>auxiliaryValuePacket2</strong>: additional auxiliary value packet (e.g. from an image processing component)</div>
+<div><strong>auxiliaryValuePacket3</strong>: etc. (the function returns as many tables as there are auxiliary value packets)</div>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
+ 
 
-</div>
 
-<p><br>See also:
-<ul>
-<li><a href="simCheckVisionSensor.htm">sim.checkVisionSensor</a></li>
-<li><a href="simCheckVisionSensorEx.htm">sim.checkVisionSensorEx</a></li>
-<li><a href="simResetVisionSensor.htm">sim.resetVisionSensor</a></li>
-</ul>
-</p>
 
-</td>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int result,list auxiliaryValuePacket1,list auxiliaryValuePacket2, etc.=sim.readVisionSensor(int visionSensorHandle)</td>
 </tr>
+
+</table> 
+
+<br>
+</td>
+
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

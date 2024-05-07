@@ -8,10 +8,10 @@ if __name__ == '__main__':
     try:
         import json
 
-        from coppeliasim_zmqremoteapi_client import RemoteAPIClient
+        from zmqRemoteApi import RemoteAPIClient
 
         client = RemoteAPIClient()
-        sim = client.require('sim')
+        sim = client.getObject('sim')
 
         def progress(i, lst, prev_pct):
             pct = int((i + 1) * 100 / len(lst))

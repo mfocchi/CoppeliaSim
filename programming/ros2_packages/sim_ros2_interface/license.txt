@@ -5,7 +5,9 @@ copying, etc.) contained in the same directory if it is present, or
 under the same terms of the files in the parent directory otherwise.
 
 -----------------------------------------------------------------------
-Copyright (C) 2019-2024 Coppelia Robotics AG
+simExtROS2Interface
+
+Copyright (C) 2019-2023 Coppelia Robotics AG
 
 All rights reserved.
 
@@ -33,3 +35,5 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------
+
+The ROS Interface plugin is courtesy of Federico Ferri.

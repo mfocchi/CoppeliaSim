@@ -8,27 +8,6 @@ namespace sim
 
 static bool debugStackEnabled = false;
 
-api_error::api_error(const std::string &func_)
-    : api_error(func_, "")
-{
-}
-
-static std::string getLastError_noexcept()
-{
-    char *ret = simGetLastError();
-    if(!ret) return "unknown error";
-    std::string s(ret);
-    releaseBuffer(ret);
-    return s;
-}
-
-api_error::api_error(const std::string &func_, const std::string &error_)
-    : func(func_),
-      error((error_.empty() ? "" : (error_ + std::string(": "))) + getLastError_noexcept()),
-      exception("%s: %s", func_, error_)
-{
-}
-
 void enableStackDebug()
 {
     debugStackEnabled = true;
@@ -211,7 +190,7 @@ void setNamedInt32Param(const std::string &parameter, int value)
     setNamedStringParam(parameter, std::to_string(value));
 }
 
-std::optional<std::string> getNamedStringParam(const std::string &parameter)
+boost::optional<std::string> getNamedStringParam(const std::string &parameter)
 {
     char *ret;
     int len;
@@ -222,7 +201,7 @@ std::optional<std::string> getNamedStringParam(const std::string &parameter)
     return s;
 }
 
-std::optional<bool> getNamedBoolParam(const std::string &parameter)
+boost::optional<bool> getNamedBoolParam(const std::string &parameter)
 {
     auto v = getNamedStringParam(parameter);
     if(!v) return {};
@@ -236,14 +215,14 @@ std::optional<bool> getNamedBoolParam(const std::string &parameter)
     throw api_error("simGetNamedBoolParam");
 }
 
-std::optional<double> getNamedFloatParam(const std::string &parameter)
+boost::optional<double> getNamedFloatParam(const std::string &parameter)
 {
     auto v = getNamedStringParam(parameter);
     if(!v) return {};
     return std::stod(*v);
 }
 
-std::optional<int> getNamedInt32Param(const std::string &parameter)
+boost::optional<int> getNamedInt32Param(const std::string &parameter)
 {
     auto v = getNamedStringParam(parameter);
     if(!v) return {};
@@ -298,7 +277,7 @@ int getObjectFromUid(long long int uid, bool noError)
     return getObjectFromUid(uid, options);
 }
 
-int getScriptHandleEx(int scriptType, int objHandle, std::optional<std::string> scriptName)
+int getScriptHandleEx(int scriptType, int objHandle, boost::optional<std::string> scriptName)
 {
     return simGetScriptHandleEx(scriptType, objHandle, scriptName ? scriptName->c_str() : nullptr);
 }
@@ -335,12 +314,18 @@ void setObjectAlias(int objectHandle, const std::string &alias, int options)
 
 int getObjectParent(int objectHandle)
 {
-    return simGetObjectParent(objectHandle);
+    int ret;
+    if((ret = simGetObjectParent(objectHandle)) == -1)
+        throw api_error("simGetObjectParent");
+    return ret;
 }
 
 int getObjectChild(int objectHandle, int index)
 {
-    return simGetObjectChild(objectHandle, index);
+    int ret;
+    if((ret = simGetObjectChild(objectHandle, index)) == -1)
+        throw api_error("simGetObjectChild");
+    return ret;
 }
 
 std::vector<int> getObjectChildren(int objectHandle)
@@ -530,9 +515,9 @@ bool checkCollision(int entity1Handle, int entity2Handle)
 
 // int simAdjustView(int viewHandleOrIndex, int associatedViewableObjectHandle, int options, const char *viewLabel);
 
-void setLastError(const std::string &msg)
+void setLastError(const std::string &func, const std::string &msg)
 {
-    if(simSetLastError(nullptr, msg.c_str()) == -1)
+    if(simSetLastError(func.c_str(), msg.c_str()) == -1)
         throw api_error("simSetLastError");
 }
 
@@ -562,19 +547,7 @@ int registerScriptCallbackFunction(const std::string &funcNameAtPluginName, cons
     return ret;
 }
 
-int registerScriptCallbackFunction(const std::string &funcNameAtPluginName, void (*callBack)(struct SScriptCallBack *cb))
-{
-    int ret = simRegisterScriptCallbackFunction(funcNameAtPluginName.c_str(), nullptr, callBack);
-    if(ret == 0)
-    {
-        addLog(sim_verbosity_warnings, "replaced function '%s'", funcNameAtPluginName);
-    }
-    if(ret == -1)
-        throw api_error("simRegisterScriptCallbackFunction");
-    return ret;
-}
-
-int registerScriptVariableRaw(const std::string &varName, const char *varValue, int stackID)
+int registerScriptVariable(const std::string &varName, const char *varValue, int stackID)
 {
     int ret = simRegisterScriptVariable(varName.c_str(), varValue, stackID);
     if(ret == 0)
@@ -586,27 +559,9 @@ int registerScriptVariableRaw(const std::string &varName, const char *varValue, 
     return ret;
 }
 
-int registerScriptVariableRaw(const std::string &varName, const std::string &varValue, int stackID)
-{
-    return registerScriptVariableRaw(varName, varValue.c_str(), stackID);
-}
-
-int registerScriptVariable(const std::string &varName, const char *varValue, int stackID)
-{
-    return registerScriptVariable(varName, std::string(varValue), stackID);
-}
-
 int registerScriptVariable(const std::string &varName, const std::string &varValue, int stackID)
 {
-    std::string s = varValue;
-    std::string::size_type pos = 0;
-    while((pos = s.find('\"', pos)) != std::string::npos)
-    {
-        s.replace(pos, 1, "\\\"");
-        pos += 2;
-    }
-    s = "\"" + s + "\"";
-    return registerScriptVariableRaw(varName, s, stackID);
+    return registerScriptVariable(varName, varValue.c_str(), stackID);
 }
 
 // int simRegisterScriptFuncHook(int scriptHandle, const char *funcToHook, const char *userFunction, bool executeBefore, int options);
@@ -854,7 +809,7 @@ char * readCustomDataBlock(int objectHandle, const char *tagName, int *dataSize)
     return simReadCustomDataBlock(objectHandle, tagName, dataSize);
 }
 
-std::optional<std::string> readCustomDataBlock(int objectHandle, const std::string &tagName)
+boost::optional<std::string> readCustomDataBlock(int objectHandle, const std::string &tagName)
 {
     int size = 0;
     char *buf = readCustomDataBlock(objectHandle, tagName.c_str(), &size);
@@ -958,7 +913,7 @@ std::string getScriptStringParam(int scriptHandle, int parameterID)
     return s;
 }
 
-std::optional<std::string> getScriptStringParamOpt(int scriptHandle, int parameterID)
+boost::optional<std::string> getScriptStringParamOpt(int scriptHandle, int parameterID)
 {
     int parameterLength = 0;
     char *buf = simGetScriptStringParam(scriptHandle, parameterID, &parameterLength);
@@ -1006,9 +961,9 @@ unsigned char * getScaledImage(const unsigned char *imageIn, std::array<int, 2> 
     return getScaledImage(imageIn, resolutionIn.data(), resolutionOut, options);
 }
 
-void callScriptFunctionEx(int scriptHandle, const std::string &functionName, int stackId)
+void callScriptFunctionEx(int scriptHandleOrType, const std::string &functionNameAtScriptName, int stackId)
 {
-    if(simCallScriptFunctionEx(scriptHandle, functionName.c_str(), stackId) == -1)
+    if(simCallScriptFunctionEx(scriptHandleOrType, functionNameAtScriptName.c_str(), stackId) == -1)
         throw api_error("simCallScriptFunctionEx");
 }
 
@@ -1075,15 +1030,7 @@ void pushInt32OntoStack(int stackHandle, int value)
     addStackDebugDump(stackHandle);
 }
 
-void pushInt64OntoStack(int stackHandle, long long int value)
-{
-    addStackDebugLog("simPushInt64OntoStack %ld", value);
-
-    if(simPushInt64OntoStack(stackHandle, value) == -1)
-        throw api_error("simPushInt64OntoStack");
-
-    addStackDebugDump(stackHandle);
-}
+// int simPushInt64OntoStack(int stackHandle, long long int value);
 
 void pushStringOntoStack(int stackHandle, const char *value, int stringSize)
 {
@@ -1135,20 +1082,7 @@ void pushInt32TableOntoStack(int stackHandle, const std::vector<int> &values)
     pushInt32TableOntoStack(stackHandle, values.data(), values.size());
 }
 
-void pushInt64TableOntoStack(int stackHandle, const long long int *values, int valueCnt)
-{
-    addStackDebugLog("simPushInt64TableOntoStack <%d values>", valueCnt);
-
-    if(simPushInt64TableOntoStack(stackHandle, values, valueCnt) == -1)
-        throw api_error("simPushInt64TableOntoStack");
-
-    addStackDebugDump(stackHandle);
-}
-
-void pushInt64TableOntoStack(int stackHandle, const std::vector<long long int> &values)
-{
-    pushInt64TableOntoStack(stackHandle, values.data(), values.size());
-}
+// int simPushInt64TableOntoStack(int stackHandle, const long long int *values, int valueCnt);
 
 void pushTableOntoStack(int stackHandle)
 {
@@ -1205,15 +1139,16 @@ void moveStackItemToTop(int stackHandle, int cIndex)
     addStackDebugDump(stackHandle);
 }
 
-int getStackItemType(int stackHandle, int cIndex)
+int isStackValueNull(int stackHandle)
 {
-    int ret = simGetStackItemType(stackHandle, cIndex);
+    int ret = simIsStackValueNull(stackHandle);
     if(ret == -1)
-        throw api_error("simGetStackItemType");
+        throw api_error("simIsStackValueNull");
 
-    addStackDebugLog("simGetStackItemType -> %d", ret);
+    addStackDebugLog("simIsStackValueNull -> %d", ret);
 
-    return ret;}
+    return ret;
+}
 
 int getStackBoolValue(int stackHandle, bool *boolValue)
 {
@@ -1253,24 +1188,7 @@ int getStackInt32Value(int stackHandle, int *numberValue)
     return ret;
 }
 
-int getStackInt64Value(int stackHandle, long long int *numberValue)
-{
-    int ret = simGetStackInt64Value(stackHandle, numberValue);
-    if(ret == -1)
-        throw api_error("simGetStackInt64Value");
-
-#ifndef NDEBUG
-    if(debugStackEnabled)
-    {
-        if(ret)
-            addStackDebugLog("simGetStackInt64Value -> %d", *numberValue);
-        else
-            addStackDebugLog("simGetStackInt64Value -> not an int");
-    }
-#endif
-
-    return ret;
-}
+// int simGetStackInt64Value(int stackHandle, long long int *numberValue);
 
 char * getStackStringValue(int stackHandle, int *stringSize)
 {
@@ -1388,23 +1306,7 @@ int getStackInt32Table(int stackHandle, std::vector<int> *v)
     return getStackInt32Table(stackHandle, v->data(), count);
 }
 
-int getStackInt64Table(int stackHandle, long long int *array, int count)
-{
-    int ret = simGetStackInt64Table(stackHandle, array, count);
-
-    addStackDebugLog("simGetStackInt64Table count = %d -> %d", count, ret);
-
-    if(ret == -1)
-        throw api_error("simGetStackInt64Table");
-    return ret;
-}
-
-int getStackInt64Table(int stackHandle, std::vector<long long int> *v)
-{
-    int count = getStackTableInfo(stackHandle, 0);
-    v->resize(count);
-    return getStackInt64Table(stackHandle, v->data(), count);
-}
+// int simGetStackInt64Table(int stackHandle, long long int *array, int count);
 
 void unfoldStackTable(int stackHandle)
 {
@@ -1471,9 +1373,9 @@ void setEngineBoolParam(int paramId, int objectHandle, const void *object, bool 
 
 // int simGetReferencedHandles(int objectHandle, int **referencedHandles, int **reserved1, int **reserved2);
 
-void executeScriptString(int scriptHandle, const std::string &code, int stackID)
+void executeScriptString(int scriptHandleOrType, const std::string &stringAtScriptName, int stackID)
 {
-    if(simExecuteScriptString(scriptHandle, code.c_str(), stackID) == -1)
+    if(simExecuteScriptString(scriptHandleOrType, stringAtScriptName.c_str(), stackID) == -1)
         throw api_error("simExecuteScriptString");
 }
 
@@ -1501,34 +1403,34 @@ std::string getApiInfo(int scriptHandleOrType, const std::string &apiWord)
     return "";
 }
 
-void setPluginInfo(const std::string &moduleName, int infoType, const std::string &stringInfo)
+void setModuleInfo(const std::string &moduleName, int infoType, const std::string &stringInfo)
 {
-    if(simSetPluginInfo(moduleName.c_str(), infoType, stringInfo.c_str(), 0) == -1)
-        throw api_error("simSetPluginInfo");
+    if(simSetModuleInfo(moduleName.c_str(), infoType, stringInfo.c_str(), 0) == -1)
+        throw api_error("simSetModuleInfo");
 }
 
-void setPluginInfo(const std::string &moduleName, int infoType, int intInfo)
+void setModuleInfo(const std::string &moduleName, int infoType, int intInfo)
 {
-    if(simSetPluginInfo(moduleName.c_str(), infoType, nullptr, intInfo) == -1)
-        throw api_error("simSetPluginInfo");
+    if(simSetModuleInfo(moduleName.c_str(), infoType, nullptr, intInfo) == -1)
+        throw api_error("simSetModuleInfo");
 }
 
-void setPluginInfo(int infoType, const std::string &stringInfo)
+void setModuleInfo(int infoType, const std::string &stringInfo)
 {
-    setPluginInfo(pluginInfo->name, infoType, stringInfo);
+    setModuleInfo(pluginName, infoType, stringInfo);
 }
 
-void setPluginInfo(int infoType, int intInfo)
+void setModuleInfo(int infoType, int intInfo)
 {
-    setPluginInfo(pluginInfo->name, infoType, intInfo);
+    setModuleInfo(pluginName, infoType, intInfo);
 }
 
-void getPluginInfo(const std::string &moduleName, int infoType, std::string &stringInfo)
+void getModuleInfo(const std::string &moduleName, int infoType, std::string &stringInfo)
 {
     int intInfo = 0;
     char *s = nullptr;
-    if(simGetPluginInfo(moduleName.c_str(), infoType, &s, &intInfo) == -1)
-        throw api_error("simGetPluginInfo");
+    if(simGetModuleInfo(moduleName.c_str(), infoType, &s, &intInfo) == -1)
+        throw api_error("simGetModuleInfo");
     if(s)
     {
         stringInfo = std::string(s);
@@ -1536,51 +1438,57 @@ void getPluginInfo(const std::string &moduleName, int infoType, std::string &str
     }
 }
 
-void getPluginInfo(const std::string &moduleName, int infoType, int &intInfo)
+void getModuleInfo(const std::string &moduleName, int infoType, int &intInfo)
 {
     char *s = nullptr;
-    if(simGetPluginInfo(moduleName.c_str(), infoType, &s, &intInfo) == -1)
-        throw api_error("simGetPluginInfo");
+    if(simGetModuleInfo(moduleName.c_str(), infoType, &s, &intInfo) == -1)
+        throw api_error("simGetModuleInfo");
     if(s)
         releaseBuffer(s);
 }
 
-std::string getPluginInfoStr(const std::string &moduleName, int infoType)
+std::string getModuleInfoStr(const std::string &moduleName, int infoType)
 {
     std::string s;
-    getPluginInfo(moduleName, infoType, s);
+    getModuleInfo(moduleName, infoType, s);
     return s;
 }
 
-int getPluginInfoInt(const std::string &moduleName, int infoType)
+int getModuleInfoInt(const std::string &moduleName, int infoType)
 {
     int i;
-    getPluginInfo(moduleName, infoType, i);
+    getModuleInfo(moduleName, infoType, i);
     return i;
 }
 
-void getPluginInfo(int infoType, std::string &stringInfo)
+void getModuleInfo(int infoType, std::string &stringInfo)
 {
-    getPluginInfo(pluginInfo->name, infoType, stringInfo);
+    getModuleInfo(pluginName, infoType, stringInfo);
 }
 
-void getPluginInfo(int infoType, int &intInfo)
+void getModuleInfo(int infoType, int &intInfo)
 {
-    getPluginInfo(pluginInfo->name, infoType, intInfo);
+    getModuleInfo(pluginName, infoType, intInfo);
 }
 
-std::string getPluginInfoStr(int infoType)
+std::string getModuleInfoStr(int infoType)
 {
     std::string s;
-    getPluginInfo(infoType, s);
+    getModuleInfo(infoType, s);
     return s;
 }
 
-int getPluginInfoInt(int infoType)
+int getModuleInfoInt(int infoType)
 {
     int i;
-    getPluginInfo(infoType, i);
+    getModuleInfo(infoType, i);
     return i;
+}
+
+bool isDeprecated(const std::string &funcOrConst)
+{
+    int ret = simIsDeprecated(funcOrConst.c_str());
+    return ret > 0;
 }
 
 std::vector<std::string> getPersistentDataTags()
@@ -1601,7 +1509,7 @@ int eventNotification(const std::string &event)
     return simEventNotification(event.c_str());
 }
 
-void addLog(std::optional<std::string> pluginName, int verbosityLevel, std::optional<std::string> logMsg)
+void addLog(boost::optional<std::string> pluginName, int verbosityLevel, boost::optional<std::string> logMsg)
 {
     if(simAddLog(pluginName ? pluginName->c_str() : nullptr, verbosityLevel, logMsg ? logMsg->c_str() : nullptr) == -1)
         throw api_error("simAddLog");
@@ -2374,7 +2282,7 @@ void setObjectColor(int objectHandle, int index, int colorComponent, const std::
     setObjectColor(objectHandle, index, colorComponent, rgbData.data());
 }
 
-std::optional<std::array<float, 3>> getObjectColor(int objectHandle, int index, int colorComponent)
+boost::optional<std::array<float, 3>> getObjectColor(int objectHandle, int index, int colorComponent)
 {
     std::array<float, 3> rgbData;
     int ret = simGetObjectColor(objectHandle, index, colorComponent, rgbData.data());
@@ -2392,12 +2300,12 @@ void setShapeColor(int shapeHandle, const char *colorName, int colorComponent, c
         throw api_error("simSetShapeColor");
 }
 
-void setShapeColor(int shapeHandle, std::optional<std::string> colorName, int colorComponent, const std::array<float, 3> &rgbData)
+void setShapeColor(int shapeHandle, boost::optional<std::string> colorName, int colorComponent, const std::array<float, 3> &rgbData)
 {
     setShapeColor(shapeHandle, colorName ? colorName->c_str() : nullptr, colorComponent, rgbData.data());
 }
 
-std::optional<std::array<float, 3>> getShapeColor(int shapeHandle, std::optional<std::string> colorName, int colorComponent)
+boost::optional<std::array<float, 3>> getShapeColor(int shapeHandle, boost::optional<std::string> colorName, int colorComponent)
 {
     std::array<float, 3> rgbData;
     int ret = simGetShapeColor(shapeHandle, colorName ? colorName->c_str() : 0, colorComponent, rgbData.data());
@@ -2408,7 +2316,7 @@ std::optional<std::array<float, 3>> getShapeColor(int shapeHandle, std::optional
     return rgbData;
 }
 
-std::optional<std::array<float, 3>> getShapeColor(int shapeHandle, int colorComponent)
+boost::optional<std::array<float, 3>> getShapeColor(int shapeHandle, int colorComponent)
 {
     return getShapeColor(shapeHandle, {}, colorComponent);
 }
@@ -2479,7 +2387,7 @@ void getShapeMesh(int shapeHandle, double **vertices, int *verticesSize, int **i
         throw api_error("simGetShapeMesh");
 }
 
-void getShapeMesh(int shapeHandle, std::vector<double> vertices, std::vector<int> indices, std::optional<std::vector<double>> normals)
+void getShapeMesh(int shapeHandle, std::vector<double> vertices, std::vector<int> indices, boost::optional<std::vector<double>> normals)
 {
     double *verticesBuf;
     int verticesSize = 0;
@@ -2504,7 +2412,7 @@ int createJoint(int jointType, int jointMode, int options, const double *sizes)
     return handle;
 }
 
-int createJoint(int jointType, int jointMode, int options, std::optional<std::array<double, 2>> sizes)
+int createJoint(int jointType, int jointMode, int options, boost::optional<std::array<double, 2>> sizes)
 {
     return createJoint(jointType, jointMode, options, sizes ? sizes->data() : nullptr);
 }
@@ -2722,7 +2630,7 @@ int createPointCloud(double maxVoxelSize, int maxPtCntPerVoxel, int options, dou
 
 // int simIntersectPointsWithPointCloud(int pointCloudHandle, int options, const double *pts, int ptCnt, double tolerance, void *reserved);
 
-int insertObjectIntoPointCloud(int pointCloudHandle, int objectHandle, int options, double gridSize, std::optional<std::array<unsigned char, 3>> color, std::optional<float> duplicateTolerance)
+int insertObjectIntoPointCloud(int pointCloudHandle, int objectHandle, int options, double gridSize, boost::optional<std::array<unsigned char, 3>> color, boost::optional<float> duplicateTolerance)
 {
     std::array<unsigned char, 3> color_;
     unsigned char *colorPtr = nullptr;

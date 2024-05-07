@@ -15,79 +15,88 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getShapeGeomInfo</h2>
-    <p>Retrieves geometric information related to a shape</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetShapeGeomInfo" id="simGetShapeGeomInfo"></a>simGetShapeGeomInfo / sim.getShapeGeomInfo </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Retrieves geometric information related to a shape. See also <a href="simGetShapeMesh.htm">sim.getShapeMesh</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simGetShapeGeomInfo(int shapeHandle,int* intData,double* floatData,void* reserved)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>shapeHandle</strong>: handle of the shape. See also <a href="simGetObject.htm">sim.getObject</a>.</div>
+<div><strong>intData (output)</strong>: pointer to 5 integer values:</div>
+<div class=tab>intData[0]: the <a href="../apiConstants.htm#primitiveTypes">primitive type</a> of the shape. Undefined if the shape is a compound shape.</div>
+<div><strong>floatData (output)</strong>: pointer to 5 double values:</div>
+<div class=tab>floatData[0]: X-size or diameter of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>floatData[1]: Y-size of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>floatData[2]: Z-size or height of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>floatData[3]: Reserved.</div>
+<div><strong>reserved</strong>: reserved for future extensions. Set to nullptr.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 in case of an error, otherwise bit-coded:</div>
+<div class=tab>bit0 set (1): shape is a compound shape</div>
+<div class=tab>bit1 set (2): shape is primitive</div>
+<div class=tab>bit2 set (4): shape is convex</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int result,int pureType,float[4] dimensions=sim.getShapeGeomInfo(int shapeHandle)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div><strong>shapeHandle</strong>: handle of the shape. See also <a href="simGetObject.htm">sim.getObject</a>.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>result</strong>: bit-coded:</div>
+<div class=tab>bit0 set (1): shape is a compound shape</div>
+<div class=tab>bit1 set (2): shape is a primitive</div>
+<div class=tab>bit2 set (4): shape is convex</div>
+<div><strong>pureType</strong>: the <a href="../apiConstants.htm#pureTypes">primitive type</a> of the shape. Undefined if the shape is a compound shape.</div>
+<div><strong>dimensions</strong>: table to 4 values giving information about the shape's dimensions:</div>
+<div class=tab>dimensions[1]: X-size or diameter of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>dimensions[2]: Y-size of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>dimensions[3]: Z-size or height of the primitive shape. Undefined if the shape is a compound shape or not primitive.</div>
+<div class=tab>dimensions[4]: Inside scaling. Undefined if the shape is a compound shape or not primitive.</div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int result, int pureType, list dimensions = sim.getShapeGeomInfo(int shapeHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int result, int pureType, float[4] dimensions = sim.getShapeGeomInfo(int shapeHandle)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>shapeHandle</strong>: handle of the shape</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int result,int pureType,list dimensions=sim.getShapeGeomInfo(int shapeHandle)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>result</strong>: bit-coded:
-                    <ul>
-                        <li>bit0 set (1): shape is a compound shape</li>
-                        <li>bit1 set (2): shape is a primitive</li>
-                        <li>bit2 set (4): shape is convex</li>
-                    </ul>
-                </li>
-                <li><strong>pureType</strong>: the <a href="../apiConstants.htm#pureTypes">primitive type</a> of the shape. Undefined if the shape is a compound shape.</li>
-                <li><strong>dimensions</strong>: array of 4 values giving information about the shape's dimensions (indexing (i) starts from 0 for Python and 1 for Lua):
-                    <ul>
-                        <li>dimensions[i+0]: X-size or diameter of the primitive shape. Undefined if the shape is a compound shape or not primitive</li>
-                        <li>dimensions[i+1]: Y-size of the primitive shape. Undefined if the shape is a compound shape or not primitive</li>
-                        <li>dimensions[i+2]: Z-size or height of the primitive shape. Undefined if the shape is a compound shape or not primitive</li>
-                        <li>dimensions[i+3]: Inside scaling. Undefined if the shape is a compound shape or not primitive</li>
-                    </ul>
-                </li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGetShapeMesh.htm">sim.getShapeMesh</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

@@ -21,7 +21,7 @@
 
 <p>This tutorial will try to explain how to integrate or embed a robot language interpreter into CoppeliaSim. The procedure is very similar in case you want to integrate an emulator (e.g. a specific microcontroller emulator) into CoppeliaSim. Extending CoppeliaSim's functionality requires most of the time the development of a <a href="plugins.htm">plugin</a>. Make sure you have read the <a href="pluginTutorial.htm">tutorial on plugins</a> , and the <a href="externalControllerTutorial.htm">tutorial on external controllers</a> before proceeding with this tutorial.<br>
 </p>
-<p>The CoppeliaSim <a href="scenes.htm">scene</a> file related to this tutorial is located in CoppeliaSim's installation folder  <em>scenes\robotLanguageControl.ttt</em>. You can find the  plugin project files <a href="https://github.com/CoppeliaRobotics/simMTB" target="_blank">here</a>, and the server application project files <a href="https://github.com/CoppeliaRobotics/mtbServer" target="_blank">here</a>.</p>
+<p>The CoppeliaSim <a href="scenes.htm">scene</a> file related to this tutorial is located in CoppeliaSim's installation folder  <em>scenes\robotLanguageControl.ttt</em>. You can find the  plugin project files <a href="https://github.com/CoppeliaRobotics/simExtMTB" target="_blank">here</a>, and the server application project files <a href="https://github.com/CoppeliaRobotics/mtbServer" target="_blank">here</a>.</p>
 
 <p>First, let's start by loading the related scene file <em>scenes\robotLanguageControl.ttt</em>:<br>
 </p>
@@ -94,12 +94,12 @@
 <p>The MTB robots are handled in following way:</p>
 
 <li>
-the actual robot language program is compiled and executed by the &quot;mtbServer&quot; application. That application also holds the MTB robot's state variables. For each MTB robot in the simulation scene, there will be an instance of the <em>mtbServer</em> application launched by the <em>simMTB</em> plugin.
+the actual robot language program is compiled and executed by the &quot;mtbServer&quot; application. That application also holds the MTB robot's state variables. For each MTB robot in the simulation scene, there will be an instance of the <em>mtbServer</em> application launched by the <em>simExtMTB</em> plugin.
 </li>
 <li>
-the <em>simMTB</em> plugin is in charge of providing custom script functions, and  also  launches the <em>mtbServer</em> application when needed, and communicates with it via socket communication.</li>
+the <em>simExtMTB</em> plugin is in charge of providing custom script functions, and  also  launches the <em>mtbServer</em> application when needed, and communicates with it via socket communication.</li>
 <li>
-the child scripts attached to <em>MTB_Robot</em> and <em>MTB_Robot#0</em> check whether the <em>simMTB</em> plugin is loaded and handle the communication with the plugin. </li>
+the child scripts attached to <em>MTB_Robot</em> and <em>MTB_Robot#0</em> check whether the <em>simExtMTB</em> plugin is loaded and handle the communication with the plugin. </li>
 
 
 
@@ -148,39 +148,16 @@ Checking whether the plugin was loaded. If not, an error message is output.</li>
 <p>Following 3 custom script functions are of main interest (others are exported by the plugin): <br>
 </p>
 
-<div class="multi-language-switcher">
+<code class="hljs language-lua coppelia-coppeliasim-script">
+int mtbServerHandle,string message=simMTB.startServer(string mtbServerExecutable,
+    int portNumber,charBuffer program,table[4] jointPositions, table[2] velocities)</code>
 
-<code class="hljs language-python coppelia-coppeliasim-script">#python
+<code class="hljs language-lua coppelia-coppeliasim-script">
+int result,string message=simMTB.step(int mtbServerHandle,float timeStep)</code>
 
-int mtbServerHandle, string message = simMTB.startServer(string mtbServerExecutable,
-    int portNumber, bytes program, list jointPositions, list velocities)</code>
-    
-<code class="hljs language-lua coppelia-coppeliasim-script">--lua
+<code class="hljs language-lua coppelia-coppeliasim-script">
+table[4] jointValues=simMTB.getJoints(int mtbServerHandle)</code>
 
-int mtbServerHandle, string message = simMTB.startServer(string mtbServerExecutable,
-    int portNumber, buffer program, table[4] jointPositions, table[2] velocities)</code>
-</div>
-
-<div class="multi-language-switcher">
-
-<code class="hljs language-python coppelia-coppeliasim-script">#python
-
-int result, string message = simMTB.step(int mtbServerHandle, float timeStep)</code>
-
-<code class="hljs language-lua coppelia-coppeliasim-script">--lua
-
-int result, string message = simMTB.step(int mtbServerHandle, float timeStep)</code>
-</div>
-
-<div class="multi-language-switcher">
-
-<code class="hljs language-python coppelia-coppeliasim-script">#python
-
-list jointValues = simMTB.getJoints(int mtbServerHandle)</code>
-<code class="hljs language-lua coppelia-coppeliasim-script">--lua
-
-table[4] jointValues = simMTB.getJoints(int mtbServerHandle)</code>
-</div>
 
 <li><strong>simMTB.startServer</strong>: launches the server application (e.g. <em>mtbServer</em>) on the specified port, connects to it, and sends it the robot language code, the initial linear/angular joint positions, and the initial velocities. In return, the function returns a server handle (if successful), and a message (usually a compilation error message).</li>
 
@@ -192,29 +169,17 @@ table[4] jointValues = simMTB.getJoints(int mtbServerHandle)</code>
 <p>You could also imagine slightly modifying the step function, and add one additional function, in order to be able to handle intermediate events triggered by the robot language program execution. In that case, each simulation step would have to execute following script code (in a child script):<br>
 </p>
 
-<div class="multi-language-switcher">
-
-<code class="hljs language-python coppelia-coppeliasim-script">#python
-
-dt = sim.getSimulationTimeStep()
-while dt &gt; 0:
-    result, dt, cmdMessage = simMTB.step(mtbServerHandle, dt) # where the returned dt is the remaining dt
-    event = simMTB.getEvent()
-    while event != -1:
-        # handle events here
-        event = simMTB.getEvent()</code>
-<code class="hljs language-lua coppelia-coppeliasim-script">--lua
-
-local dt = sim.getSimulationTimeStep()
-while dt &gt; 0 do
-    result, dt, cmdMessage = simMTB.step(mtbServerHandle, dt) -- where the returned dt is the remaining dt
-    local event = simMTB.getEvent()
-    while event ~= -1 do
+<code class="hljs language-lua coppelia-coppeliasim-script">
+local dt=sim.getSimulationTimeStep()
+while (dt&gt;0) do
+    result,dt,cmdMessage=simMTB.step(mtbServerHandle,dt) -- where the returned dt is the remaining dt
+    local event=simMTB.getEvent()
+    while event~=-1 do
         -- handle events here
-        event = simMTB.getEvent()
+        event=simMTB.getEvent()
     end
 end</code>
-</div>
+
 
 
 
@@ -227,19 +192,6 @@ end</code>
 </div>  
   
   
-<link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 
 </html>

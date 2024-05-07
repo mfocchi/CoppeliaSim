@@ -1,20 +1,13 @@
 #py from calltip import FuncDef
 #py from cpp_utils import *
-#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'], pycpp.params['include_objects'], pycpp.params['exclude_objects'], pycpp.params['exclude_methods'])
 namespace RemoteAPIObject
 {
-#py for obj, func_defs in all_func_defs.items():
+#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
     `obj`::`obj`(RemoteAPIClient *client)
         : _client(client)
     {
-        _client->require("`obj`");
     }
 
-#py if obj == 'sim':
-#include "sim-deprecated.cpp"
-#include "sim-special.cpp"
-
-#py endif
 #py for func, func_def in func_defs.items():
 #py if func_def.in_args.is_variadic() or func_def.out_args.is_variadic():
 #py continue
@@ -53,7 +46,7 @@ RemoteAPIObjects::RemoteAPIObjects(RemoteAPIClient *client)
     this->client = client;
 }
 
-#py for obj, func_defs in all_func_defs.items():
+#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
 RemoteAPIObject::`obj` RemoteAPIObjects::`obj`()
 {
     return RemoteAPIObject::`obj`(this->client);

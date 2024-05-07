@@ -1,4 +1,3 @@
-local simGLTF = loadPlugin 'simGLTF';
-(require 'simGLTF-typecheck')(simGLTF)
+local simGLTF={}
 
 return simGLTF

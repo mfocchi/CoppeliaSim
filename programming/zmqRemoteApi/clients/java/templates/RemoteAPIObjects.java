@@ -1,7 +1,7 @@
 #py from calltip import FuncDef
 #py from java_utils import *
 #py import json
-#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'], pycpp.params['include_objects'], pycpp.params['exclude_objects'], pycpp.params['exclude_methods'])
+#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'])
 #py f = open(pycpp.params['constants_json'], 'rt')
 #py all_constants = json.load(f)
 #py f.close()
@@ -15,7 +15,7 @@ import co.nstant.in.cbor.*;
 
 public class RemoteAPIObjects
 {
-    private final RemoteAPIClient client;
+    private RemoteAPIClient client;
 
     public RemoteAPIObjects(RemoteAPIClient client)
     {
@@ -23,13 +23,8 @@ public class RemoteAPIObjects
     }
 
 #py for obj, func_defs in all_func_defs.items():
-    public class _`obj` extends `f"com.coppeliarobotics.remoteapi.zmq.objects.special._{obj}" if obj in ('sim', ) else "RemoteAPIObject"`
+    public class _`obj`
     {
-        public _`obj`(RemoteAPIClient client)
-        {
-            super(client);
-        }
-
 #py for func, func_def in func_defs.items():
 #py if func_def.in_args.is_variadic() or func_def.out_args.is_variadic():
 #py continue
@@ -37,9 +32,9 @@ public class RemoteAPIObjects
         public `java_rets(func_def.out_args)` `func`(Object... args) throws CborException
         {
 #py if len(func_def.out_args) == 0:
-            this.client.call("`obj`.`func`", args);
+            RemoteAPIObjects.this.client.call("`obj`.`func`", args);
 #py else:
-            Object[] rets = this.client.call("`obj`.`func`", args);
+            Object[] rets = RemoteAPIObjects.this.client.call("`obj`.`func`", args);
 #py if len(func_def.out_args) > 1:
             return rets;
 #py else:
@@ -65,7 +60,7 @@ public class RemoteAPIObjects
     }
 
     public _`obj` `obj`() {
-        return new _`obj`(this.client);
+        return new _`obj`();
     }
 
 #py endfor

@@ -19,7 +19,7 @@
 
 <h1>Proximity sensor properties</h1>
 
-<p>The proximity sensor properties are part of the <a href="sceneObjectPropertiesDialog.htm">scene object properties </a>dialog, which is located at [Tools &gt; Scene object properties]. You can also open the dialog with a double-click on an object icon in the <a href="userInterface.htm#SceneHierarchy">scene hierarchy</a>, or with a click on its <a href="userInterface.htm#toolbars">toolbar</a> button:<br>
+<p>The proximity sensor properties are part of the <a href="sceneObjectPropertiesDialog.htm">scene object properties </a>dialog, which is located at [Menu bar --&gt; Tools --&gt; Scene object properties]. You can also open the dialog with a double-click on an object icon in the <a href="userInterface.htm#SceneHierarchy">scene hierarchy</a>, or with a click on its <a href="userInterface.htm#toolbars">toolbar</a> button:<br>
 </p>
 
 <p align=center><img src="images/objectPropertyToolbarButton.jpg"></p>
@@ -35,7 +35,7 @@
 <br>
 
 
-<li><strong>Explicit handling</strong>: indicates whether the sensor should be explicitly handled. If checked, the sensor will not be handled when sim.handleProximitySensor(sim.handle_all_except_explicit) is called, but only if sim.handleProximitySensor(sim.handle_all) or sim.handleProximitySensor(proximitySensorHandle) is called. This is useful if the user wishes to handle the sensor in a <a href="childScripts.htm">child script</a> rather than in the <a href="mainScript.htm">main script</a> (if not checked the sensor will be handled twice, once when sim.handleProximitySensor(sim.handle_all_except_explicit) is called in the main script, and once when sim.handleProximitySensor(proximitySensorHandle) is called in the child script). Refer also to the section on <a href="explicitHandling.htm">explicit and non-explicit calls</a>.<br>
+<li><strong>Explicit handling</strong>: indicates whether the sensor should be explicitely handled. If checked, the sensor will not be handled when sim.handleProximitySensor(sim.handle_all_except_explicit) is called, but only if sim.handleProximitySensor(sim.handle_all) or sim.handleProximitySensor(proximitySensorHandle) is called. This is useful if the user wishes to handle the sensor in a <a href="childScripts.htm">child script</a> rather than in the <a href="mainScript.htm">main script</a> (if not checked the sensor will be handled twice, once when sim.handleProximitySensor(sim.handle_all_except_explicit) is called in the main script, and once when sim.handleProximitySensor(proximitySensorHandle) is called in the child script). Refer also to the section on <a href="explicitHandling.htm">explicit and non-explicit calls</a>.<br>
 </li>
 
 <li><strong>Volume parameters</strong>: Toggles the <a href="proximitySensorVolumeDialog.htm">proximity sensor volume dialog</a>. That dialog allows to customize a proximity sensor's detection volume.</li>

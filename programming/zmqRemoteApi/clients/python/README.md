@@ -1,6 +1,6 @@
 # CoppeliaSim zmqRemoteApi Python client
 
-Python client for the zmqRemoteApi, [protocol verison 2](https://github.com/CoppeliaRobotics/zmqRemoteApi/blob/master/PROTOCOL.md#versions) (note: starting from pip package version 2.x, the major version number (e.g. 2) matches with the protocol version used by CoppeliaSim).
+Python client for the zmqRemoteApi.
 
 ## Installing:
 
@@ -19,7 +19,7 @@ from coppeliasim_zmqremoteapi_client import *
 client = RemoteAPIClient()
 
 # get a remote object:
-sim = client.require('sim')
+sim = client.getObject('sim')
 
 # call API function:
 h = sim.getObject('/Floor')
@@ -35,7 +35,7 @@ client = RemoteAPIClient()
 
 async def main():
     async with RemoteAPIClient() as client:
-        sim = await client.require('sim')
+        sim = await client.getObject('sim')
         h = await sim.getObject('/Floor')
         print(h)
 

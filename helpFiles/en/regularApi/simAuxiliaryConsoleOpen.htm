@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.auxiliaryConsoleOpen</title>
+<title>simAuxiliaryConsoleOpen</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,86 +15,83 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.auxiliaryConsoleOpen</h2>
-    <p>Opens an auxiliary console window for text display. This console window is different from
-the application main console window. Console window handles are shared across all simulator scenes</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simAuxiliaryConsoleOpen" id="simAuxiliaryConsoleOpen"></a>simAuxiliaryConsoleOpen / sim.auxiliaryConsoleOpen</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Opens an auxiliary console window for text display. This console window is different from the application main console window. Console window handles are shared across all simulator scenes. See also <a href="simAuxiliaryConsolePrint.htm">sim.auxiliaryConsolePrint</a>, <a href="simAuxiliaryConsoleClose.htm">sim.auxiliaryConsoleClose</a> and <a href="simAddLog.htm">sim.addLog</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simAuxiliaryConsoleOpen(const char* title,int maxLines,int mode,const int* position,const int* size,const float* textColor,const float* backgroundColor)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>title</strong>: the title of the console window</div>
+<div><strong>maxLines</strong>: the number of text lines that can be displayed and buffered</div>
+<div><strong>mode</strong>: bit-coded value. Bit0 (1) set indicates that the console window will automatically close at simulation end (when called from a <a href="../simulationScripts.htm">simulation script</a>, the console window will always automatically close at simulation end), bit1 (2) set indicates that lines will be wrapped, bit2 (4) set indicates that the user can close the console window, bit3 (8) is not used, bit4 (16) set indicates that the console will not automatically hide when the user switches to another scene (this only applies when called from an add-on or the sandbox script).<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">int consoleHandle = sim.auxiliaryConsoleOpen(string title, int maxLines, int mode, 
-                                             list position = None, list size = None, 
-                                             list textColor = None, list backgroundColor = None)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int consoleHandle = sim.auxiliaryConsoleOpen(string title, int maxLines, int mode, 
-                                             int[2] position = nil, int[2] size = nil, 
-                                             float[3] textColor = nil, 
-                                             float[3] backgroundColor = nil)</code>
-    </div>
+<div><strong>position</strong>: the initial position of the console window (x and y value). Can be nullptr<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>title</strong>: title of the console window</li>
-                <li><strong>maxLines</strong>: number of text lines that can be displayed and buffered</li>
-                <li><strong>mode</strong>: bit-coded value:
-                    <ul>
-                        <li>bit0 (1) set indicates that the console window automatically closes at simulation end</li>
-                        <li>bit1 (2) set indicates that lines will be wrapped</li>
-                        <li>bit2 (4) set indicates that the user can close the console window</li>
-                        <li>bit3 (8) is not used</li>
-                        <li>bit4 (16) set indicates that the console will not automatically hide when the user switches to another scene</li>
-                    </ul>
-                </li>
-                <li><strong>position</strong>: initial position of the console window (x and y value). Can be None/nil</li>
-                <li><strong>size</strong>: initial size of the console window (x and y value). Can be None/nil</li>
-                <li><strong>textColor</strong>: color of the text (rgb values, 0.0 - 1.0). Can be None/nil</li>
-                <li><strong>backgroundColor</strong>: background color of the console window (rgb values, 0.0 - 1.0 ). Can be None/nil</li>
-            </ul>
-        
+<div><strong>size</strong>: the initial size of the console window (x and y value). Can be nullptr<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>consoleHandle</strong>: console window handle</li>
-            </ul>
-        
+<div><strong>textColor</strong>: the color of the text (rgb values, 0-1). Can be nullptr<br>
 </div>
-
-<div class="regApiSection">
-
+<div><strong>backgroundColor</strong>: the background color of the console window (rgb values, 0-1). Can be nullptr<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful. Otherwise a console window handle</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int consoleHandle=sim.auxiliaryConsoleOpen(string title,int maxLines,int mode,int[2] position=nil,int[2] size=nil,float[3] textColor=nil,float[3] backgroundColor=nil)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart. Last 4 parameters can be omitted too.</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+<div></div>
+</td> 
+</tr> 
 
-<p><br>See also:
-<ul>
-<li><a href="simAuxiliaryConsolePrint.htm">sim.auxiliaryConsolePrint</a></li>
-<li><a href="simAuxiliaryConsoleClose.htm">sim.auxiliaryConsoleClose</a></li>
-<li><a href="simAddLog.htm">sim.addLog</a></li>
-</ul>
-</p>
+ 
 
-</td>
+
+
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>int consoleHandle=sim.auxiliaryConsoleOpen(string title,int maxLines,int mode,list position=None,list size=None,list textColor=None,list backgroundColor=None)</td>
 </tr>
+
+</table> 
+
+<br>
+</td>
+
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

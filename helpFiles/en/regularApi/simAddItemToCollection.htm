@@ -15,76 +15,74 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.addItemToCollection</h2>
-    <p>Adds an item to a <a href="../collections.htm">collection</a>
-        </p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simAddItemToCollection" id="simAddItemToCollection"></a>simAddItemToCollection / sim.addItemToCollection </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>
+Adds an item to a <a href="../collections.htm">collection</a>. See also the <a href="../apiFunctions.htm#collections">other functions related to collections</a>. </td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simAddItemToCollection(int collectionHandle,int what,int objectHandle,int options)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>collectionHandle</strong>: the handle of a collection.</div>
+<div><strong>what</strong>: the type of object (or group of objects) to add. Following are allowed values: <em>sim.handle_single</em> (for a single object), <em>sim.handle_all</em> (for all objects in the scene), <em>sim.handle_tree</em> (for a tree of objects), or <em>sim.handle_chain</em> (for a chain of objects (i.e. an inverted tree)).</div>
+<div><strong>objectHandle</strong>: the handle of an object.</div>
+<div><strong>options</strong>: bit-coded options:</div>
+<div class=tab>bit 0 set (1): the specified object (or group of objects) is removed from the collection. Otherwise it is added.</div>
+<div class=tab>bit 1 set (2): the specified object is not included in the group of objects, if sim.handle_tree or sim.handle_chain is specified (i.e. the tree base or tip is excluded).</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>sim.addItemToCollection(int collectionHandle,int what,int objectHandle,int options)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.addItemToCollection(int collectionHandle, int what, int objectHandle, int options)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.addItemToCollection(int collectionHandle, int what, int objectHandle, int options)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>collectionHandle</strong>: handle of a collection.</li>
-                <li><strong>what</strong>: type of object (or group of objects) to add. Following are allowed values:
-                    <ul>
-                        <li><em>sim.handle_single</em> (for a single object)</li>
-                        <li><em>sim.handle_all</em> (for all objects in the scene)</li>
-                        <li><em>sim.handle_tree</em> (for a tree of objects)</li>
-                        <li><em>sim.handle_chain</em> (for a chain of objects (i.e. an inverted tree)).</li>
-                    </ul>
-                </li>
-                <li><strong>objectHandle</strong>: handle of an object</li>
-                <li><strong>options</strong>: bit-coded options:
-                    <ul>
-                        <li>bit 0 set (1): the specified object (or group of objects) is removed from the collection. Otherwise it is added.</li>
-                        <li>bit 1 set (2): the specified object is not included in the group of objects, if sim.handle_tree or sim.handle_chain is specified (i.e. the tree base or tip is excluded).</li>
-                    </ul>
-                </li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>sim.addItemToCollection(int collectionHandle,int what,int objectHandle,int options)</td>
+</tr>
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="../apiFunctions.htm#collections">functions related to collections</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

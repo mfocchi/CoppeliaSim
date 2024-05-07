@@ -5,13 +5,7 @@ It reads an XML file containing a description of the callbacks, script
 functions, and enums, and it produces documentation, C++ source and header files,
 and other stuff:
 
-```mermaid
-  graph LR;
-  IN["Callbacks specification (XML)"]-->F[simStubsGen];
-  F-->OUT1[HTML API documentation];
-  F-->OUT2[C++ stubs for Lua callbacks];
-  F-->OUT3[More...];
-```
+![overview diagram](doc/overview.png)
 
 Additionally, it can parse special comments in the lua files to generate
 similar documentation for pure Lua functions. See [below](#lua-comments).
@@ -164,7 +158,7 @@ The `<param>` element can have the following attributes:
 
 - `name`: (mandatory) the name of the field. Cannot start with an underscore, and must be a valid C and a valid Lua identifier.
 - `type`: (mandatory) the type of the field (`int`, `float`, `double`, `bool`, `string`, `table`, or the name of a *struct*).
-- `nullable`: if `true`, the fields accepts also a nil value; the C++ type will be wrapped into a `std::optional` (only valid for `int`, `float`, `double`, `bool`, `string`).
+- `nullable`: if `true`, the fields accepts also a nil value; the C++ type will be wrapped into a `boost::optional` (only valid for `int`, `float`, `double`, `bool`, `string`).
 - `default`: the default value of the field (no more fields without default value should follow); in case of tables specify a list of values as `{1, 2, 3}`; in case of strings, the string value must be enclosed by `"`s, but the `"` must be escaped as `&quot;`, i.e.: `default="&quot;some value&quot;"`, or single quotes must be used in the XML attribute, i.e. `default='"some value"'`.
 - `skip`: if `true`, the value will be left on the stack; no other fields not marked as `skip` should follow.
 
@@ -266,7 +260,7 @@ Comments should start at the very beginning of a line, and are in the form:
 --@ret <type-specification> <parameter-name> [description]
 ```
 
-where `<type-specification>` can be a string with the type (`int`, `float`, `bool`, `string`, `table`, `table.int`, `table.string`, etc...) or an extended type specification in the form `{key1=value1,key2=value2}` where the key names are the same as the XML attributes of `<param>` (described [above](#parameter-specification)) whose `-` character is replaced by `_`.
+where `<type-specification>` can be a string with the type (`int`, `float`, `bool`, `string`, `table`, `table.int`, `table.string`, etc...) or an extended type specification in the form `{key1=value1,key2=value2}` where the key names are the same as the XML attributes of `<param>` (described [above](#parameter-specification)) where the `-` character is replaced by `_`.
 
 **Categories:**
 

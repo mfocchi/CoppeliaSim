@@ -15,66 +15,73 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.writeCustomDataBlock</h2>
-    <p>Adds or removes custom data to be stored and saved together with an object, or the scene.
-If the tag name ends with the string "@tmp", then the data is not saved during a scene or model save operation.
-The data can also be saved globally for the application (for the current CoppeliaSim session). If the data is attached to an object, then the sysCall_data <a href="../callbackFunctions.htm">callback function</a> is called asynchronously for the child- or customization script attached to that object</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simWriteCustomDataBlock" id="simWriteCustomDataBlock"></a>simWriteCustomDataBlock / sim.writeCustomDataBlock </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Adds or removes custom data to be stored and saved together with an object, or the scene. If the tag name ends with the string &quot;@tmp&quot;, then the data will not be saved during a scene or model save operation. The data can also be saved globally for the application (for the current CoppeliaSim session). See also the other <a href="../apiFunctions.htm#customDataBlocks">custom data block related functions</a> and the <a href="../apiFunctions.htm#packing">data packing/unpacking functions</a>. If you wish to store a reference to another object, have a look at <a href="simSetReferencedHandles.htm">sim.setReferencedHandles</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simWriteCustomDataBlock(int objectHandle,const char* tagName,const char* data,int dataSize)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>objectHandle</strong>: handle of the object where you want to store your data, or sim.handle_scene if you wish to store the data with the scene, or sim.handle_app if you wish to store the data with the application's current session.</div>
+<div><strong>tagName</strong>: a string that identifies the data. An empty string will remove all custom data blocks.<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.writeCustomDataBlock(int objectHandle, string tagName, string/bytes data)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.writeCustomDataBlock(int objectHandle, string tagName, buffer data)</code>
-    </div>
+<div><strong>data</strong>: your custom data. If nullptr or empty, the current data under the specified dataName will be removed. <br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>objectHandle</strong>: handle of the object where you want to store your data, or sim.handle_scene if you wish to store the data with the scene, or sim.handle_app if you wish to store the data with the application's current session</li>
-                <li><strong>tagName</strong>: string that identifies the data. An empty string removes all custom data blocks</li>
-                <li><strong>data</strong>: your custom data. If empty, the current data under the specified dataName is removed</li>
-            </ul>
-        
+<div><strong>dataSize</strong>: the size of your custom data</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>sim.writeCustomDataBlock(int objectHandle,string tagName,buffer data)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart.</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div></td> 
+</tr> 
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
 
-<div class="regApiSection">
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>sim.writeCustomDataBlock(int objectHandle,string tagName,string/bytes data)</td>
+</tr>
 
-</div>
+</table> 
 
-<p><br>See also:
-<ul>
-<li><a href="simSetReferencedHandles.htm">sim.setReferencedHandles</a></li>
-<li><a href="../apiFunctions.htm#customDataBlocks">custom data block related functions</a></li>
-<li><a href="../apiFunctions.htm#packing">data packing/unpacking functions</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

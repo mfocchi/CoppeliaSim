@@ -1,8 +1,4 @@
--- lua
-
 function sysCall_init()
-    sim = require('sim')
-
     -- do some initialization here
 end
 

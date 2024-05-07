@@ -1,4 +1,3 @@
-local simSurfRec = loadPlugin 'simSurfRec';
-(require 'simSurfRec-typecheck')(simSurfRec)
+local simSurfRec={}
 
 return simSurfRec

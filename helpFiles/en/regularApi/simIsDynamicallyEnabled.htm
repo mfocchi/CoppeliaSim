@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.isDynamicallyEnabled</title>
+<title>simIsDynamicallyEnabled</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,62 +15,69 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.isDynamicallyEnabled</h2>
-    <p>Checks whether a scene object is dynamically enabled, i.e. is being handled and simulated by the physics engine.
-Note that until the physics engine has parsed the scene in the first simulation step (i.e. the first time
-<a href="simHandleDynamics.htm">sim.handleDynamics</a> is called), no object will be dynamically enabled</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simIsDynamicallyEnabled" id="simIsDynamicallyEnabled"></a>simIsDynamicallyEnabled / sim.isDynamicallyEnabled</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Checks whether a scene object is dynamically enabled, i.e. is being handled and simulated by the physics engine. Note that until the physics engine has parsed the scene in the first simulation step (i.e. the first time <a href="simHandleDynamics.htm">sim.handleDynamics</a> is called), no object will be dynamically enabled.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simIsDynamicallyEnabled(int objectHandle)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>ojectHandle</strong>: handle of the scene object. See also <a href="simGetObject.htm">sim.getObject</a>.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful, 0 if the object is not dynamically enabled, 1 if the object is dynamically enabled.<br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>bool dynamicallyEnabled=sim.isDynamicallyEnabled(int objectHandle)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">bool dynamicallyEnabled = sim.isDynamicallyEnabled(int objectHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">bool dynamicallyEnabled = sim.isDynamicallyEnabled(int objectHandle)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>ojectHandle</strong>: handle of the scene object</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>bool dynamicallyEnabled=sim.isDynamicallyEnabled(int objectHandle)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>dynamicallyEnabled</strong>: whether the object is dynamically enabled</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p></p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

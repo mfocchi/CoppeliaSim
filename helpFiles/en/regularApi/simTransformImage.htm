@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.transformImage</title>
+<title>simTransformImage</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,71 +15,74 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.transformImage</h2>
-    <p>Transforms an image in various ways</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simTransformImage" id="simTransformImage"></a>simTransformImage / sim.transformImage </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Transforms an image in various ways. See also <a href="simLoadImage.htm">sim.loadImage</a>, <a href="simGetScaledImage.htm">sim.getScaledImage</a>, <a href="simTransformBuffer.htm">sim.transformBuffer</a> and <a href="simCombineRgbImages.htm">sim.combineRgbImages</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simTransformImage(unsigned char* image,const int* resolution,int options,const double* floatParams,const int* intParams,void* reserved)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>image</strong>: a pointer to rgb or rgba values of the image</div>
+<div><strong>resolution</strong>: the resolution of the image</div>
+<div><strong>options</strong>: bit-coded:</div>
+<div class=tab>bit0 set (1): the provided image is rgba (or a depth buffer, i.e. one double per image pixel), otherwise it is rgb</div>
+<div class=tab>bit1 set (2): the image will be flipped on its x-axis</div>
+<div class=tab>bit2 set (4): the image will be flipped on its y-axis</div>
+<div><strong>floatParams</strong>: Reserved for future extension. Set to nullptr.</div>
+<div><strong>intParams</strong>: Reserved for future extension. Set to nullptr.</div>
+<div><strong>reserved</strong>: Reserved for future extension. Set to nullptr.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>sim.transformImage(buffer image,int[2] resolution,int options)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.transformImage(bytes image, list resolution, int options)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.transformImage(buffer image, int[2] resolution, int options)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>image</strong>: buffer to rgb or rgba values of the image</li>
-                <li><strong>resolution</strong>: resolution of the image</li>
-                <li><strong>options</strong>: bit-coded:
-                    <ul>
-                        <li>bit0 set (1): the provided image is rgba (or a depth buffer, i.e. one double per image pixel), otherwise it is rgb</li>
-                        <li>bit1 set (2): the image will be flipped on its x-axis</li>
-                        <li>bit2 set (4): the image will be flipped on its y-axis</li>
-                    </ul>
-                </li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>sim.transformImage(bytes image,list resolution,int options)</td>
+</tr>
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simLoadImage.htm">sim.loadImage</a></li>
-<li><a href="simGetScaledImage.htm">sim.getScaledImage</a></li>
-<li><a href="simTransformBuffer.htm">sim.transformBuffer</a></li>
-<li><a href="simCombineRgbImages.htm">sim.combineRgbImages</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

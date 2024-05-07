@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.setLinkDummy</title>
+<title>simSetLinkDummy</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,62 +15,68 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.setLinkDummy</h2>
-    <p>Defines (or breaks) a dummy-dummy link pair. Useful to create dynamic loop closure
-constraints on the fly (among others)</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simSetLinkDummy" id="simSetLinkDummy"></a>simSetLinkDummy / sim.setLinkDummy </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Defines (or breaks) a dummy-dummy link pair. Useful to create dynamic loop closure constraints on the fly (among others). See also <a href="simGetLinkDummy.htm">sim.getLinkDummy</a>.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simSetLinkDummy(int dummyHandle,int linkedDummyHandle)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>dummyHandle</strong>: handle of the first dummy in the dummy-dummy link pair.</div>
+<div><strong>linkedDummyHandle</strong>: handle of the second dummy in the dummy-dummy link pair. Set to -1 to unlink the first dummy.</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>sim.setLinkDummy(int dummyHandle,int linkedDummyHandle)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div></div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">sim.setLinkDummy(int dummyHandle, int linkedDummyHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">sim.setLinkDummy(int dummyHandle, int linkedDummyHandle)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>dummyHandle</strong>: handle of the first dummy in the dummy-dummy link pair</li>
-                <li><strong>linkedDummyHandle</strong>: handle of the second dummy in the dummy-dummy link pair. Set to -1 to unlink the first dummy</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>sim.setLinkDummy(int dummyHandle,int linkedDummyHandle)</td>
+</tr>
 
-<div style="display: none;" class="regApiSection">
-    <h3>Return values</h3>
-    
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGetLinkDummy.htm">sim.getLinkDummy</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

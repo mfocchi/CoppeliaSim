@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.getReferencedHandles</title>
+<title>simGetReferencedHandles</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,64 +15,74 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getReferencedHandles</h2>
-    <p>Retrieves a list of custom handles, linking a given scene object to other scene objects</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetReferencedHandles" id="simGetReferencedHandles"></a>simGetReferencedHandles / sim.getReferencedHandles </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>
+Retrieves a list of custom handles, linking a given scene object to other scene objects. See also <a href="simSetReferencedHandles.htm">sim.setReferencedHandles</a>. </td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simGetReferencedHandles(int objectHandle,int** referencedHandles,int** reserved1,int** reserved2)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>objectHandle</strong>: handle of the scene object that stores the list of handles. Can be optionally combined with <em>sim.handleflag_keeporiginal</em>, in which case the handles that link to originals are retrieved.</div>
+<div><strong>referencedHandles</strong>: a pointer to a pointer that will be allocated and receive the list of scene object handles. The user is in charge of releasing that buffer with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>.</div>
+<div><strong>reserved1</strong>: reserved for future extensions</div>
+<div><strong>reserved2</strong>: reserved for future extensions</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 in case of an error. Otherwise, the number of handles returned.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int[] referencedHandles=sim.getReferencedHandles(int objectHandle)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the  C-function<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">list referencedHandles = sim.getReferencedHandles(int objectHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int[] referencedHandles = sim.getReferencedHandles(int objectHandle)</code>
-    </div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the  C-function<br>
 </div>
+<div></div></td> 
+</tr> 
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>objectHandle</strong>: handle of the scene object that stores the list of handles. Can be optionally combined with <em>sim.handleflag_keeporiginal</em>, in which case the handles that link to originals are retrieved.</li>
-            </ul>
-        
-</div>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>referencedHandles</strong>: an array with scene object handles</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>list referencedHandles=sim.getReferencedHandles(int objectHandle)</td>
+</tr>
 
-<div class="regApiSection">
+</table> 
 
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simSetReferencedHandles.htm">sim.setReferencedHandles</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

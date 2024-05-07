@@ -2,8 +2,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Content-Language" content="en-us">
-<title>simSubprocess Plugin API reference</title>
-<link rel="stylesheet" type="text/css" href="../style.css">
+<title>Subprocess Plugin API reference</title>
+<link rel="stylesheet" type="text/css" href="../../helpFiles/style.css">
 <script type="text/javascript">
 //
 function getParameterByName(name, url = window.location.href)
@@ -22,11 +22,10 @@ td.section { margin: 0; padding: 0; }
 </head>
 <body>
 <div align="center"><table class="allEncompassingTable">
-<tr><td id="title" class="section"><h1>simSubprocess Plugin API reference</h1></td></tr>
+<tr><td id="title" class="section"><h1>Subprocess Plugin API reference</h1></td></tr>
 <tr><td id="info" class="section"><p class="infoBox">API functions for subprocess</p></td></tr>
 <tr><td id="alphabetical" class="section"><pre class="lightGreyBox"><a href="?#exec">simSubprocess.exec</a>
 <a href="?#execAsync">simSubprocess.execAsync</a>
-<a href="?#getpid">simSubprocess.getpid</a>
 <a href="?#isRunning">simSubprocess.isRunning</a>
 <a href="?#kill">simSubprocess.kill</a>
 <a href="?#wait">simSubprocess.wait</a>
@@ -43,7 +42,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">int exitCode, buffer output=simSubprocess.exec(string programPath, string[] args, buffer input="", exec_opts opts={})<br>
+<td class="apiTableRightLSyn">int exitCode, string output=simSubprocess.exec(string programPath, string[] args, string input="", exec_opts opts={})<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -54,7 +53,7 @@ td.section { margin: 0; padding: 0; }
 <div>
 <strong>args</strong> (table of string): Program arguments.</div>
 <div>
-<strong>input</strong> (buffer, default: ""): Data passed to stdin.</div>
+<strong>input</strong> (string, default: ""): Data passed to stdin.</div>
 <div>
 <strong>opts</strong> (exec_opts, default: {}): Options. see <a href="#struct:exec_opts">exec_opts</a>
 </div>
@@ -64,15 +63,21 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet">
 <div>
-<strong>exitCode</strong> (int)</div>
+<strong>exitCode</strong> (int): </div>
 <div>
-<strong>output</strong> (buffer)</div>
+<strong>output</strong> (string): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">int exitCode, buffer output=simSubprocess.exec(string programPath, list args, buffer input="", exec_opts opts={})<br>
+<td class="apiTableRightPSyn">int exitCode, string output=simSubprocess.exec(string programPath, list args, string input="", exec_opts opts={})<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -104,42 +109,18 @@ td.section { margin: 0; padding: 0; }
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet"><div>
-<strong>handle</strong> (string)</div></td>
+<strong>handle</strong> (string): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">string handle=simSubprocess.execAsync(string programPath, list args, exec_opts opts={})<br>
 </td>
 </tr>
-</table>
-<br><h3 class="subsectionBar">
-<a name="getpid" id="getpid"></a>simSubprocess.getpid</h3>
-<table class="apiTable">
 <tr class="apiTableTr">
 <td class="apiTableLeftDescr">
-                                                    Description
-                                                </td>
-<td class="apiTableRightDescr">Get the process identifier (OS-dependent).</td>
-</tr>
-<tr class="apiTableTr">
-<td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">long pid=simSubprocess.getpid(string handle)<br>
-</td>
-</tr>
-<tr class="apiTableTr">
-<td class="apiTableLeftLParam">Lua parameters</td>
-<td class="apiTableRightLParam"><div>
-<strong>handle</strong> (string)</div></td>
-</tr>
-<tr class="apiTableTr">
-<td class="apiTableLeftLRet">Lua return values</td>
-<td class="apiTableRightLRet"><div>
-<strong>pid</strong> (long)</div></td>
-</tr>
-<tr class="apiTableTr">
-<td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">long pid=simSubprocess.getpid(string handle)<br>
-</td>
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -159,17 +140,23 @@ td.section { margin: 0; padding: 0; }
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam"><div>
-<strong>handle</strong> (string)</div></td>
+<strong>handle</strong> (string): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet"><div>
-<strong>running</strong> (bool)</div></td>
+<strong>running</strong> (bool): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">bool running=simSubprocess.isRunning(string handle)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -189,17 +176,23 @@ td.section { margin: 0; padding: 0; }
 <tr class="apiTableTr">
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam"><div>
-<strong>handle</strong> (string)</div></td>
+<strong>handle</strong> (string): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet"><div>
-<strong>exitCode</strong> (int)</div></td>
+<strong>exitCode</strong> (int): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">int exitCode=simSubprocess.kill(string handle)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -220,20 +213,26 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftLParam">Lua parameters</td>
 <td class="apiTableRightLParam">
 <div>
-<strong>handle</strong> (string)</div>
+<strong>handle</strong> (string): </div>
 <div>
-<strong>timeout</strong> (float, default: 5)</div>
+<strong>timeout</strong> (float, default: 5): </div>
 </td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLRet">Lua return values</td>
 <td class="apiTableRightLRet"><div>
-<strong>exitCode</strong> (int)</div></td>
+<strong>exitCode</strong> (int): </div></td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">int exitCode=simSubprocess.wait(string handle, float timeout=5)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br>
@@ -258,8 +257,6 @@ td.section { margin: 0; padding: 0; }
 <strong>useSearchPath</strong> (bool, default: true): Resolve program name searching in PATH entries.</div>
 <div>
 <strong>openNewConsole</strong> (bool, default: false): Win32-specific flag.</div>
-<div>
-<strong>workingDir</strong> (string): Start process in a specific working directory.</div>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -282,7 +279,15 @@ document.getElementById('enums').style.display = view == null ? 'table-cell' : '
 document.getElementById('structs').style.display = view == null ? 'table-cell' : 'none'
 document.getElementById('scriptFunctions').style.display = view == null ? 'table-cell' : 'none'
 //
-                </script><link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css">
-<script src="../js/hljs/11.8.0/highlight.min.js"></script><script src="../js/hljs/11.8.0/languages/cmake.min.js"></script><script src="../js/hljs/11.8.0/languages/cpp.min.js"></script><script src="../js/hljs/11.8.0/languages/java.min.js"></script><script src="../js/hljs/11.8.0/languages/javascript.min.js"></script><script src="../js/hljs/11.8.0/languages/lua.min.js"></script><script src="../js/hljs/11.8.0/languages/matlab.min.js"></script><script src="../js/hljs/11.8.0/languages/python.min.js"></script><script src="../js/hljs/11.8.0/languages/rust.min.js"></script><script src="../js/hljs/11.8.0/languages/xml.min.js"></script><script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
+                </script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script><script type="text/javascript">
+//
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('code.hljs').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+});
+//
+                </script>
 </body>
 </html>

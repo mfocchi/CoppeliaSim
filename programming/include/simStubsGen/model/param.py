@@ -38,14 +38,14 @@ class Param(object):
         return self.default is not None
 
     def ctype(self):
-        if self.nullable: return 'std::optional< %s >' % self.ctype_base
+        if self.nullable: return 'boost::optional< %s >' % self.ctype_base
         else: return self.ctype_base
 
     def htype(self):
         return self.dtype
 
     def cdefault(self):
-        if self.nullable and self.default == 'nil': return 'std::nullopt'
+        if self.nullable and self.default == 'nil': return 'boost::none'
         return self.default
 
     def hdefault(self):
@@ -80,7 +80,6 @@ class ParamInt(Param):
 class ParamLong(Param):
     def __init__(self, node):
         super(ParamLong, self).__init__(node)
-        self.ctype_base = 'long long'
 
     def htype(self):
         return 'int'
@@ -102,16 +101,6 @@ class ParamDouble(Param):
 class ParamString(Param):
     def __init__(self, node):
         super(ParamString, self).__init__(node)
-        self.ctype_base = 'std::string'
-
-class ParamBuffer(Param):
-    def __init__(self, node):
-        super(ParamBuffer, self).__init__(node)
-        self.ctype_base = 'std::string'
-
-class ParamFunc(Param):
-    def __init__(self, node):
-        super(ParamFunc, self).__init__(node)
         self.ctype_base = 'std::string'
 
 class ParamBool(Param):
@@ -180,8 +169,6 @@ Param.register_type('long', ParamLong)
 Param.register_type('float', ParamFloat)
 Param.register_type('double', ParamDouble)
 Param.register_type('string', ParamString)
-Param.register_type('buffer', ParamBuffer)
-Param.register_type('func', ParamFunc)
 Param.register_type('bool', ParamBool)
 Param.register_type('table', ParamTable)
 Param.register_type('grid', ParamGrid)

@@ -1,29 +1,21 @@
 #ifndef SIMPLUSPLUS_LIB_H_INCLUDED
 #define SIMPLUSPLUS_LIB_H_INCLUDED
 
-#if __cplusplus < 201703L
-    #error simPlusPlus needs at least a C++17 compliant compiler
+#if __cplusplus <= 199711L
+    #error simPlusPlus needs at least a C++11 compliant compiler
 #endif
 
-#include <optional>
 #include <string>
 #include <vector>
 #include <array>
 #include <stdexcept>
+#include <boost/optional.hpp>
 #include <boost/format.hpp>
 
 #include <simLib/simLib.h>
 
 namespace sim
 {
-    struct PluginInfo
-    {
-        LIBRARY lib;
-        std::string name;
-        std::string nameAndVersion;
-        int version;
-    };
-
     namespace util
     {
         static std::string sprintf(boost::format &fmt)
@@ -78,15 +70,24 @@ namespace sim
         std::string func;
         std::string error;
 
-        api_error(const std::string &func_);
-        api_error(const std::string &func_, const std::string &error_);
+        api_error(const std::string &func_)
+            : api_error(func_, "error")
+        {
+        }
+
+        api_error(const std::string &func_, const std::string &error_)
+            : func(func_),
+              error(error_),
+              exception("%s: %s", func_, error_)
+        {
+        }
 
         ~api_error() throw()
         {
         }
     };
 
-    extern PluginInfo *pluginInfo;
+    extern std::string pluginNameAndVersion;
 
 
     void enableStackDebug();
@@ -133,10 +134,10 @@ namespace sim
     void setNamedFloatParam(const std::string &parameter, double value);
     void setNamedInt32Param(const std::string &parameter, int value);
 
-    std::optional<std::string> getNamedStringParam(const std::string &parameter);
-    std::optional<bool> getNamedBoolParam(const std::string &parameter);
-    std::optional<double> getNamedFloatParam(const std::string &parameter);
-    std::optional<int> getNamedInt32Param(const std::string &parameter);
+    boost::optional<std::string> getNamedStringParam(const std::string &parameter);
+    boost::optional<bool> getNamedBoolParam(const std::string &parameter);
+    boost::optional<double> getNamedFloatParam(const std::string &parameter);
+    boost::optional<int> getNamedInt32Param(const std::string &parameter);
 
     int getObject(const char *objectPath, int index, int proxy, int options);
     int getObject(const std::string &objectPath, int index, int proxy, int options);
@@ -148,7 +149,7 @@ namespace sim
     int getObjectFromUid(long long int uid, int options);
     int getObjectFromUid(long long int uid, bool noError);
 
-    int getScriptHandleEx(int scriptType, int objHandle, std::optional<std::string> scriptName = {});
+    int getScriptHandleEx(int scriptType, int objHandle, boost::optional<std::string> scriptName = {});
 
     void removeObjects(const std::vector<int> &objectHandles);
 
@@ -229,11 +230,11 @@ namespace sim
 
     // pauseSimulation
 
-    // getPluginName
+    // getModuleName
 
     // adjustView
 
-    void setLastError(const std::string &msg);
+    void setLastError(const std::string &func, const std::string &msg);
 
     // resetGraph
 
@@ -250,16 +251,13 @@ namespace sim
     // getPage
 
     int registerScriptCallbackFunction(const std::string &funcNameAtPluginName, const std::string &callTips, void (*callBack)(struct SScriptCallBack *cb));
-    int registerScriptCallbackFunction(const std::string &funcNameAtPluginName, void (*callBack)(struct SScriptCallBack *cb));
 
-    int registerScriptVariableRaw(const std::string &varName, const char *varValue, int stackID);
-    int registerScriptVariableRaw(const std::string &varName, const std::string &varValue, int stackID);
     int registerScriptVariable(const std::string &varName, const char *varValue, int stackID);
     int registerScriptVariable(const std::string &varName, const std::string &varValue, int stackID);
     template<typename T>
     int registerScriptVariable(const std::string &varName, const T &varValue, int stackID)
     {
-        return registerScriptVariableRaw(varName, std::to_string(varValue), stackID);
+        return registerScriptVariable(varName, std::to_string(varValue), stackID);
     }
 
     // registerScriptFuncHook
@@ -367,7 +365,7 @@ namespace sim
     void writeCustomDataBlock(int objectHandle, const std::string &tagName, const std::string &data);
 
     char * readCustomDataBlock(int objectHandle, const char *tagName, int *dataSize);
-    std::optional<std::string> readCustomDataBlock(int objectHandle, const std::string &tagName);
+    boost::optional<std::string> readCustomDataBlock(int objectHandle, const std::string &tagName);
 
     char * readCustomDataBlockTags(int objectHandle, int *tagCount);
     std::vector<std::string> readCustomDataBlockTags(int objectHandle);
@@ -392,7 +390,7 @@ namespace sim
     int setScriptInt32Param(int scriptHandle, int parameterID, int parameter);
 
     std::string getScriptStringParam(int scriptHandle, int parameterID);
-    std::optional<std::string> getScriptStringParamOpt(int scriptHandle, int parameterID);
+    boost::optional<std::string> getScriptStringParamOpt(int scriptHandle, int parameterID);
 
     int setScriptStringParam(int scriptHandle, int parameterID, const std::string &parameter);
 
@@ -406,7 +404,7 @@ namespace sim
     unsigned char * getScaledImage(const unsigned char *imageIn, const int *resolutionIn, int *resolutionOut, int options);
     unsigned char * getScaledImage(const unsigned char *imageIn, std::array<int, 2> resolutionIn, int *resolutionOut, int options);
 
-    void callScriptFunctionEx(int scriptHandle, const std::string &functionName, int stackID);
+    void callScriptFunctionEx(int scriptHandleOrType, const std::string &functionNameAtScriptName, int stackID);
 
     // getExtensionString
 
@@ -422,7 +420,7 @@ namespace sim
 
     void pushInt32OntoStack(int stackHandle, int value);
 
-    void pushInt64OntoStack(int stackHandle, long long int value);
+    // pushInt64OntoStack
 
     void pushStringOntoStack(int stackHandle, const char *value, int stringSize);
     void pushStringOntoStack(int stackHandle, const std::string &value);
@@ -433,8 +431,7 @@ namespace sim
     void pushInt32TableOntoStack(int stackHandle, const int *values, int valueCnt);
     void pushInt32TableOntoStack(int stackHandle, const std::vector<int> &values);
 
-    void pushInt64TableOntoStack(int stackHandle, const long long int *values, int valueCnt);
-    void pushInt64TableOntoStack(int stackHandle, const std::vector<long long int> &values);
+    // pushInt64TableOntoStack
 
     void pushTableOntoStack(int stackHandle);
 
@@ -446,13 +443,13 @@ namespace sim
 
     void moveStackItemToTop(int stackHandle, int cIndex);
 
-    int getStackItemType(int stackHandle, int cIndex);
+    int isStackValueNull(int stackHandle);
 
     int getStackBoolValue(int stackHandle, bool *boolValue);
 
     int getStackInt32Value(int stackHandle, int *numberValue);
 
-    int getStackInt64Value(int stackHandle, long long int *numberValue);
+    // getStackInt64Value
 
     char * getStackStringValue(int stackHandle, int *stringSize);
     int getStackStringValue(int stackHandle, std::string *stringValue);
@@ -465,7 +462,7 @@ namespace sim
     int getStackInt32Table(int stackHandle, int *array, int count);
     int getStackInt32Table(int stackHandle, std::vector<int> *v);
 
-    int getStackInt64Table(int stackHandle, long long int *array, int count);
+    // getStackInt64Table
 
     void unfoldStackTable(int stackHandle);
 
@@ -493,35 +490,37 @@ namespace sim
 
     // getReferencedHandles
 
-    void executeScriptString(int scriptHandle, const std::string &code, int stackID);
+    void executeScriptString(int scriptHandleOrType, const std::string &stringAtScriptName, int stackID);
 
     std::vector<std::string> getApiFunc(int scriptHandleOrType, const std::string &apiWord);
 
     std::string getApiInfo(int scriptHandleOrType, const std::string &apiWord);
 
-    void setPluginInfo(const std::string &moduleName, int infoType, const std::string &stringInfo);
-    void setPluginInfo(const std::string &moduleName, int infoType, int intInfo);
-    void setPluginInfo(int infoType, const std::string &stringInfo);
-    void setPluginInfo(int infoType, int intInfo);
+    void setModuleInfo(const std::string &moduleName, int infoType, const std::string &stringInfo);
+    void setModuleInfo(const std::string &moduleName, int infoType, int intInfo);
+    void setModuleInfo(int infoType, const std::string &stringInfo);
+    void setModuleInfo(int infoType, int intInfo);
 
-    void getPluginInfo(const std::string &moduleName, int infoType, std::string &stringInfo);
-    void getPluginInfo(const std::string &moduleName, int infoType, int &intInfo);
-    std::string getPluginInfoStr(const std::string &moduleName, int infoType);
-    int getPluginInfoInt(const std::string &moduleName, int infoType);
-    void getPluginInfo(int infoType, std::string &stringInfo);
-    void getPluginInfo(int infoType, int &intInfo);
-    std::string getPluginInfoStr(int infoType);
-    int getPluginInfoInt(int infoType);
+    void getModuleInfo(const std::string &moduleName, int infoType, std::string &stringInfo);
+    void getModuleInfo(const std::string &moduleName, int infoType, int &intInfo);
+    std::string getModuleInfoStr(const std::string &moduleName, int infoType);
+    int getModuleInfoInt(const std::string &moduleName, int infoType);
+    void getModuleInfo(int infoType, std::string &stringInfo);
+    void getModuleInfo(int infoType, int &intInfo);
+    std::string getModuleInfoStr(int infoType);
+    int getModuleInfoInt(int infoType);
+
+    bool isDeprecated(const std::string &funcOrConst);
 
     std::vector<std::string> getPersistentDataTags();
 
     int eventNotification(const std::string &event);
 
-    void addLog(std::optional<std::string> pluginName, int verbosityLevel, std::optional<std::string> logMsg);
+    void addLog(boost::optional<std::string> pluginName, int verbosityLevel, boost::optional<std::string> logMsg);
     template<typename... Arguments>
     void addLog(int verbosity, const std::string &fmt, Arguments&&... args)
     {
-        addLog(pluginInfo->nameAndVersion, verbosity, util::sprintf(fmt, std::forward<Arguments>(args)...));
+        addLog(pluginNameAndVersion, verbosity, util::sprintf(fmt, std::forward<Arguments>(args)...));
     }
 
     bool isDynamicallyEnabled(int objectHandle);
@@ -837,13 +836,13 @@ namespace sim
     void setObjectColor(int objectHandle, int index, int colorComponent, const float *rgbData);
     void setObjectColor(int objectHandle, int index, int colorComponent, const std::array<float, 3> &rgbData);
 
-    std::optional<std::array<float, 3>> getObjectColor(int objectHandle, int index, int colorComponent);
+    boost::optional<std::array<float, 3>> getObjectColor(int objectHandle, int index, int colorComponent);
 
     void setShapeColor(int shapeHandle, const char *colorName, int colorComponent, const float *rgbData);
-    void setShapeColor(int shapeHandle, std::optional<std::string> colorName, int colorComponent, const std::array<float, 3> &rgbData);
+    void setShapeColor(int shapeHandle, boost::optional<std::string> colorName, int colorComponent, const std::array<float, 3> &rgbData);
 
-    std::optional<std::array<float, 3>> getShapeColor(int shapeHandle, std::optional<std::string> colorName, int colorComponent);
-    std::optional<std::array<float, 3>> getShapeColor(int shapeHandle, int colorComponent);
+    boost::optional<std::array<float, 3>> getShapeColor(int shapeHandle, boost::optional<std::string> colorName, int colorComponent);
+    boost::optional<std::array<float, 3>> getShapeColor(int shapeHandle, int colorComponent);
 
     // getContactInfo
 
@@ -866,10 +865,10 @@ namespace sim
     int createHeightfieldShape(int options, double shadingAngle, int xPointCount, int yPointCount, double xSize, const std::vector<double> &heights);
 
     void getShapeMesh(int shapeHandle, double **vertices, int *verticesSize, int **indices, int *indicesSize, double **normals = nullptr);
-    void getShapeMesh(int shapeHandle, std::vector<double> vertices, std::vector<int> indices, std::optional<std::vector<double>> normals = {});
+    void getShapeMesh(int shapeHandle, std::vector<double> vertices, std::vector<int> indices, boost::optional<std::vector<double>> normals = {});
 
     int createJoint(int jointType, int jointMode, int options, const double *sizes);
-    int createJoint(int jointType, int jointMode, int options = 0, std::optional<std::array<double, 2>> sizes = {});
+    int createJoint(int jointType, int jointMode, int options = 0, boost::optional<std::array<double, 2>> sizes = {});
 
     int createDummy(double size = 0.01);
 
@@ -941,7 +940,7 @@ namespace sim
 
     // intersectPointsWithPointCloud
 
-    int insertObjectIntoPointCloud(int pointCloudHandle, int objectHandle, int options, double gridSize, std::optional<std::array<unsigned char, 3>> color = {}, std::optional<float> duplicateTolerance = {});
+    int insertObjectIntoPointCloud(int pointCloudHandle, int objectHandle, int options, double gridSize, boost::optional<std::array<unsigned char, 3>> color = {}, boost::optional<float> duplicateTolerance = {});
 
     // subtractObjectFromPointCloud
 

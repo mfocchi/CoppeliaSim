@@ -1,12 +1,8 @@
 #python
 
 def sysCall_init():
-    sim = require('sim')
-
     # do some initialization here
-    #
-    # Instead of using globals, you can do e.g.:
-    # self.myVariable = 21000000
+    pass
 
 def sysCall_actuation():
     # put your actuation code here

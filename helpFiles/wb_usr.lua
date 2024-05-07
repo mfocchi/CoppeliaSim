@@ -659,8 +659,8 @@ wb_usr.tree =
                     folder=
                     {
                         {
-                            name={en="simCmd API reference"},
-                            link="simCmd.htm?view=alphabetical"
+                            name={en="simLuaCmd API reference"},
+                            link="simLuaCmd.htm?view=alphabetical"
                         },
                     }
                 },
@@ -791,8 +791,8 @@ wb_usr.tree =
                     link="plugins.htm"
                 },
                 {
-                    name={en="CoppeliaSim's library"},
-                    link="coppeliaSimLibrary.htm"
+                    name={en="The main client application"},
+                    link="mainClientApplication.htm"
                 },
                 {
                     name={en="Accessing scene objects programmatically"},

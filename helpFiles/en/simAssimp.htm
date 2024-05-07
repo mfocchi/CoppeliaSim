@@ -2,8 +2,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Content-Language" content="en-us">
-<title>simAssimp Plugin API reference</title>
-<link rel="stylesheet" type="text/css" href="../style.css">
+<title>Assimp Plugin API reference</title>
+<link rel="stylesheet" type="text/css" href="../../helpFiles/style.css">
 <script type="text/javascript">
 //
 function getParameterByName(name, url = window.location.href)
@@ -22,7 +22,7 @@ td.section { margin: 0; padding: 0; }
 </head>
 <body>
 <div align="center"><table class="allEncompassingTable">
-<tr><td id="title" class="section"><h1>simAssimp Plugin API reference</h1></td></tr>
+<tr><td id="title" class="section"><h1>Assimp Plugin API reference</h1></td></tr>
 <tr><td id="info" class="section"><p class="infoBox">Plugin for importing CAD files</p></td></tr>
 <tr><td id="alphabetical" class="section"><pre class="lightGreyBox"><a href="?#exportMeshes">simAssimp.exportMeshes</a>
 <a href="?#exportShapes">simAssimp.exportShapes</a>
@@ -45,7 +45,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">simAssimp.exportMeshes(table allVertices, table allIndices, string filename, string formatId, float scaling=1.0, int upVector=simassimp_upvect_z, int options=0)<br>
+<td class="apiTableRightLSyn">simAssimp.exportMeshes(table allVertices, table allIndices, string filename, string formatId, float scaling=1.0, int upVector=sim_assimp_upvect_z, int options=0)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -62,7 +62,7 @@ td.section { margin: 0; padding: 0; }
 <div>
 <strong>scaling</strong> (float, default: 1.0): The desired mesh scaling.</div>
 <div>
-<strong>upVector</strong> (int, default: simassimp_upvect_z): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
+<strong>upVector</strong> (int, default: sim_assimp_upvect_z): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
 <div>
 <strong>options</strong> (int, default: 0): Export flags (256=silent)</div>
 </td>
@@ -73,8 +73,14 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">simAssimp.exportMeshes(list allVertices, list allIndices, string filename, string formatId, float scaling=1.0, int upVector=simassimp_upvect_z, int options=0)<br>
+<td class="apiTableRightPSyn">simAssimp.exportMeshes(list allVertices, list allIndices, string filename, string formatId, float scaling=1.0, int upVector=sim_assimp_upvect_z, int options=0)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -88,7 +94,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">simAssimp.exportShapes(int[] shapeHandles, string filename, string formatId, float scaling=1.0, int upVector=simassimp_upvect_z, int options=0)<br>
+<td class="apiTableRightLSyn">simAssimp.exportShapes(int[] shapeHandles, string filename, string formatId, float scaling=1.0, int upVector=sim_assimp_upvect_z, int options=0)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -103,7 +109,7 @@ td.section { margin: 0; padding: 0; }
 <div>
 <strong>scaling</strong> (float, default: 1.0): The desired mesh scaling.</div>
 <div>
-<strong>upVector</strong> (int, default: simassimp_upvect_z): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
+<strong>upVector</strong> (int, default: sim_assimp_upvect_z): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
 <div>
 <strong>options</strong> (int, default: 0): Export flags (1=drop textures, 2=ignore colors, 4=drop normals, 8=export only visible, 256=silent, 512=coordinates relative to first shape's frame)</div>
 </td>
@@ -114,8 +120,14 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">simAssimp.exportShapes(list shapeHandles, string filename, string formatId, float scaling=1.0, int upVector=simassimp_upvect_z, int options=0)<br>
+<td class="apiTableRightPSyn">simAssimp.exportShapes(list shapeHandles, string filename, string formatId, float scaling=1.0, int upVector=sim_assimp_upvect_z, int options=0)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -149,6 +161,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftPSyn">Python synopsis</td>
 <td class="apiTableRightPSyn">simAssimp.exportShapesDlg(string filename, list shapeHandles)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -186,6 +204,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableRightPSyn">string formatDescription, string formatExtension, string formatId=simAssimp.getExportFormat(int index)<br>
 </td>
 </tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
+</tr>
 </table>
 <br><h3 class="subsectionBar">
 <a name="getImportFormat" id="getImportFormat"></a>simAssimp.getImportFormat</h3>
@@ -220,6 +244,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableRightPSyn">string formatDescription, string formatExtension=simAssimp.getImportFormat(int index)<br>
 </td>
 </tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
+</tr>
 </table>
 <br><h3 class="subsectionBar">
 <a name="importMeshes" id="importMeshes"></a>simAssimp.importMeshes</h3>
@@ -232,7 +262,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">table allVertices, table allIndices=simAssimp.importMeshes(string filenames, float scaling=0.0, int upVector=simassimp_upvect_auto, int options=0)<br>
+<td class="apiTableRightLSyn">table allVertices, table allIndices=simAssimp.importMeshes(string filenames, float scaling=0.0, int upVector=sim_assimp_upvect_auto, int options=0)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -243,7 +273,7 @@ td.section { margin: 0; padding: 0; }
 <div>
 <strong>scaling</strong> (float, default: 0.0): The desired mesh scaling. 0.0 for automatic scaling</div>
 <div>
-<strong>upVector</strong> (int, default: simassimp_upvect_auto): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
+<strong>upVector</strong> (int, default: sim_assimp_upvect_auto): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
 <div>
 <strong>options</strong> (int, default: 0): Import flags (8=do not optimize meshes, 16=keep inditical vertices, 32=one mesh per file, 128=ignore up vector coded in fileformat (e.g. Collada), 256=silent)</div>
 </td>
@@ -259,8 +289,14 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">list allVertices, list allIndices=simAssimp.importMeshes(string filenames, float scaling=0.0, int upVector=simassimp_upvect_auto, int options=0)<br>
+<td class="apiTableRightPSyn">list allVertices, list allIndices=simAssimp.importMeshes(string filenames, float scaling=0.0, int upVector=sim_assimp_upvect_auto, int options=0)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -274,7 +310,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftLSyn">Lua synopsis</td>
-<td class="apiTableRightLSyn">int[] shapeHandles=simAssimp.importShapes(string filenames, int maxTextureSize=512, float scaling=0.0, int upVector=simassimp_upvect_auto, int options=0)<br>
+<td class="apiTableRightLSyn">int[] shapeHandles=simAssimp.importShapes(string filenames, int maxTextureSize=512, float scaling=0.0, int upVector=sim_assimp_upvect_auto, int options=0)<br>
 </td>
 </tr>
 <tr class="apiTableTr">
@@ -287,7 +323,7 @@ td.section { margin: 0; padding: 0; }
 <div>
 <strong>scaling</strong> (float, default: 0.0): The desired mesh scaling. 0.0 for automatic scaling</div>
 <div>
-<strong>upVector</strong> (int, default: simassimp_upvect_auto): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
+<strong>upVector</strong> (int, default: sim_assimp_upvect_auto): The desired up-vector (see <a href="#enum:upVector">simAssimp.upVector</a>)</div>
 <div>
 <strong>options</strong> (int, default: 0): Import flags (1=drop textures, 2=ignore colors, 4=ignore transparency, 8=do not optimize meshes, 16=keep identical vertices, 32=generate one shape per file, 64=shapes have aligned orientations, 128=ignore up vector coded in fileformat (e.g. Collada), 256=silent)</div>
 </td>
@@ -299,8 +335,14 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftPSyn">Python synopsis</td>
-<td class="apiTableRightPSyn">list shapeHandles=simAssimp.importShapes(string filenames, int maxTextureSize=512, float scaling=0.0, int upVector=simassimp_upvect_auto, int options=0)<br>
+<td class="apiTableRightPSyn">list shapeHandles=simAssimp.importShapes(string filenames, int maxTextureSize=512, float scaling=0.0, int upVector=sim_assimp_upvect_auto, int options=0)<br>
 </td>
+</tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
 </tr>
 </table>
 <br><h3 class="subsectionBar">
@@ -332,6 +374,12 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableRightPSyn">list handles=simAssimp.importShapesDlg(string filename)<br>
 </td>
 </tr>
+<tr class="apiTableTr">
+<td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+<td class="apiTableRightDescr"></td>
+</tr>
 </table>
 <br>
 </td></tr>
@@ -361,7 +409,15 @@ document.getElementById('enums').style.display = view == null ? 'table-cell' : '
 document.getElementById('structs').style.display = view == null ? 'table-cell' : 'none'
 document.getElementById('scriptFunctions').style.display = view == null ? 'table-cell' : 'none'
 //
-                </script><link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css">
-<script src="../js/hljs/11.8.0/highlight.min.js"></script><script src="../js/hljs/11.8.0/languages/cmake.min.js"></script><script src="../js/hljs/11.8.0/languages/cpp.min.js"></script><script src="../js/hljs/11.8.0/languages/java.min.js"></script><script src="../js/hljs/11.8.0/languages/javascript.min.js"></script><script src="../js/hljs/11.8.0/languages/lua.min.js"></script><script src="../js/hljs/11.8.0/languages/matlab.min.js"></script><script src="../js/hljs/11.8.0/languages/python.min.js"></script><script src="../js/hljs/11.8.0/languages/rust.min.js"></script><script src="../js/hljs/11.8.0/languages/xml.min.js"></script><script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
+                </script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script><script type="text/javascript">
+//
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('code.hljs').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+});
+//
+                </script>
 </body>
 </html>

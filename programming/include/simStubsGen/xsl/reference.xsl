@@ -94,6 +94,7 @@
     <!-- template routines: -->
 
     <xsl:template name="symbolPrefix">
+        <xsl:text>sim</xsl:text>
         <xsl:value-of select="/plugin/@name"/>
         <xsl:text>.</xsl:text>
     </xsl:template>
@@ -275,11 +276,8 @@
                             <xsl:text>, default: </xsl:text>
                             <xsl:value-of select="@default"/>
                         </xsl:if>
-                        <xsl:text>)</xsl:text>
-                        <xsl:if test="description">
-                            <xsl:text>: </xsl:text>
-                            <xsl:apply-templates select="description/node()"/>
-                        </xsl:if>
+                        <xsl:text>): </xsl:text>
+                        <xsl:apply-templates select="description/node()"/>
                     </div>
                 </xsl:for-each>
             </xsl:when>
@@ -324,7 +322,7 @@
             <head>
                 <meta http-equiv="Content-Language" content="en-us"/>
                 <title><xsl:value-of select="/plugin/@name"/> Plugin API reference</title>
-                <link rel="stylesheet" type="text/css" href="../style.css"/>
+                <link rel="stylesheet" type="text/css" href="../../helpFiles/style.css"/>
                 <script type="text/javascript">
 //<![CDATA[
 function getParameterByName(name, url = window.location.href)
@@ -428,16 +426,14 @@ td.section { margin: 0; padding: 0; }
                                                 <br/>
                                             </td>
                                         </tr>
-                                        <xsl:if test="see-also/*[name()='command-ref' or name()='enum-ref' or name()='struct-ref' or name()='script-function-ref'] or categories/category">
-                                            <tr class="apiTableTr">
-                                                <td class="apiTableLeftDescr">
-                                                    See also
-                                                </td>
-                                                <td class="apiTableRightDescr">
-                                                    <xsl:call-template name="renderRelated"/>
-                                                </td>
-                                            </tr>
-                                        </xsl:if>
+                                        <tr class="apiTableTr">
+                                            <td class="apiTableLeftDescr">
+                                                See also
+                                            </td>
+                                            <td class="apiTableRightDescr">
+                                                <xsl:call-template name="renderRelated"/>
+                                            </td>
+                                        </tr>
                                     </table>
                                     <br/>
                                 </xsl:for-each>
@@ -603,19 +599,17 @@ document.getElementById('structs').style.display = view == null ? 'table-cell' :
 document.getElementById('scriptFunctions').style.display = view == null ? 'table-cell' : 'none'
 //]]>
                 </script>
-
-                <link rel="stylesheet" href="../js/hljs/11.8.0/styles/default.min.css" />
-                <script src="../js/hljs/11.8.0/highlight.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/cmake.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/cpp.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/java.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/javascript.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/lua.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/matlab.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/python.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/rust.min.js"></script>
-                <script src="../js/hljs/11.8.0/languages/xml.min.js"></script>
-                <script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/default.min.css" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script>
+                <script type="text/javascript">
+//<![CDATA[
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('code.hljs').forEach((block) => {
+        hljs.highlightBlock(block);
+    });
+});
+//]]>
+                </script>
             </body>
         </html>
     </xsl:template>

@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.ungroupShape</title>
+<title>simUngroupShape</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,70 +15,68 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.ungroupShape</h2>
-    <p>Ungroups a compound shape into several <a href="../shapes.htm">shapes</a>
-        </p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simUngroupShape" id="simUngroupShape"></a>simUngroupShape / sim.ungroupShape </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Ungroups a compound shape into several<a href="../shapes.htm"> shapes</a>. See also <a href="simGroupShapes.htm">sim.groupShapes</a>, <a href="simConvexDecompose.htm">sim.convexDecompose</a>, <a href="simGetQHull.htm">sim.getQHull</a>, <a href="simGetDecimatedMesh.htm">sim.getDecimatedMesh</a>, <a href="simAlignShapeBB.htm">sim.alignShapeBB</a> and <a href="simRelocateShapeFrame.htm">sim.relocateShapeFrame</a></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int* simUngroupShape(int shapeHandle,int* shapeCount)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>shapeHandle</strong>: the handles of the shape you wish to ungroup. If you specify for this argument (-2-handleOfShape), then the shape will be divided instead of ungrouped.</div>
+<div><strong>shapeCount</strong> (output): the size of the returned buffer.</div>
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>a pointer to an array holding the handles of the resulting shapes, or nullptr in case of an error. The user is in charge of releasing the array buffer with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>. <br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>int[] shapeHandles=sim.ungroupShape(int shapeHandle)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">list shapeHandles = sim.ungroupShape(int shapeHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">int[] shapeHandles = sim.ungroupShape(int shapeHandle)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>shapeHandle</strong>: handles of the shape you wish to ungroup. If you specify for this argument (-2-handleOfShape), then the shape will be divided instead of ungrouped</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>list shapeHandles=sim.ungroupShape(int shapeHandle)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>shapeHandles</strong>: array holding the handles of the resulting shapes</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGroupShapes.htm">sim.groupShapes</a></li>
-<li><a href="simConvexDecompose.htm">sim.convexDecompose</a></li>
-<li><a href="simGetQHull.htm">sim.getQHull</a></li>
-<li><a href="simGetDecimatedMesh.htm">sim.getDecimatedMesh</a></li>
-<li><a href="simAlignShapeBB.htm">sim.alignShapeBB</a></li>
-<li><a href="simRelocateShapeFrame.htm">sim.relocateShapeFrame</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

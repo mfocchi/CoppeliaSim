@@ -1,4 +1,3 @@
-local simSDF = loadPlugin 'simSDF';
-(require 'simSDF-typecheck')(simSDF)
+local simSDF={}
 
 return simSDF

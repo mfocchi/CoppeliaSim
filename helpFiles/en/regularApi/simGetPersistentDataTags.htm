@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.getPersistentDataTags</title>
+<title>simGetPersistentDataTags</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,61 +15,70 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getPersistentDataTags</h2>
-    <p>Retrieves all persistent data block tags or names</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetPersistentDataTags" id="simGetPersistentDataTags"></a>simGetPersistentDataTags / sim.getPersistentDataTags</p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Retrieves all persistent data block tags or names. See also <a href="simGetMatchingPersistentDataTags.htm">sim.getMatchingPersistentDataTags</a> and <a href="simPersistentDataRead.htm">sim.persistentDataRead</a></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>char* simGetPersistentDataTags(int* tagCount)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>tagCount</strong>: the number of retrieved data block tags</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>nullptr if operation was not successful or no data block exists. Otherwise the data block tags, separated by the '\0' char. In that case the returned buffer should be released with <a href="simReleaseBuffer.htm">simReleaseBuffer</a><br>
 </div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn><div>string[] tags=sim.getPersistentDataTags()</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>tags</strong>: a table containing the retrieved data block tags.</div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">list tags = sim.getPersistentDataTags()</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">string[] tags = sim.getPersistentDataTags()</code>
-    </div>
-</div>
+<tr class=apiTableTr> 
+<td class=apiTableLeftPSyn>
+Python<br>synopsis
+</td> 
+<td class=apiTableRightPSyn><div>list tags=sim.getPersistentDataTags()</div></td> 
+</tr> 
 
-<div style="display: none;" class="regApiSection">
-    <h3>Arguments</h3>
-    
-</div>
+</table> 
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>tags</strong>: an array containing the retrieved data block tags</li>
-            </ul>
-        
-</div>
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simGetMatchingPersistentDataTags.htm">sim.getMatchingPersistentDataTags</a></li>
-<li><a href="simPersistentDataRead.htm">sim.persistentDataRead</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

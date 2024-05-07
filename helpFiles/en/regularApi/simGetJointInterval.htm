@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.getJointInterval</title>
+<title>simGetJointInterval</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,65 +15,76 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.getJointInterval</h2>
-    <p>Retrieves the interval parameters of a joint</p>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simGetJointInterval" id="simGetJointInterval"></a>simGetJointInterval / sim.getJointInterval </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Retrieves the interval parameters of a joint. See also <a href="simSetJointInterval.htm">sim.setJointInterval</a>.<br></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>int simGetJointInterval(int objectHandle,bool* cyclic,double* interval)<br></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>objectHandle</strong>: handle of the joint</div>
+<div><strong>cyclic</strong>: indicates whether the joint is cyclic (the joint varies between -pi and +pi in a cyclic manner)<br>
 </div>
-
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">bool cyclic, list interval = sim.getJointInterval(int objectHandle)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">bool cyclic, float[2] interval = sim.getJointInterval(int objectHandle)</code>
-    </div>
+<div><strong>interval</strong>: interval of the joint. interval[0] is the joint minimum allowed value, interval[1] is the joint range (the maximum allowed value is interval[0]+interval[1]). When the joint is &quot;cyclic&quot;, then the interval parameters don't have any meaning.<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>objectHandle</strong>: handle of the joint</li>
-            </ul>
-        
+<div></div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>-1 if operation was not successful<br>
 </div>
-
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>cyclic</strong>: indicates whether the joint is cyclic (the joint varies between -pi and +pi in a cyclic manner).</li>
-                <li><strong>interval</strong>: interval of the joint. interval[1] is the joint minimum allowed value, interval[2] is the joint range (the maximum allowed value is interval[1]+interval[2]). When the joint is "cyclic", then the interval parameters don't have any meaning.</li>
-            </ul>
-        
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>bool cyclic,float[2] interval=sim.getJointInterval(int objectHandle)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div><strong>objectHandle</strong>: handle of the joint</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>cyclic</strong>: indicates whether the joint is cyclic (the joint varies between -pi and +pi in a cyclic manner). <br>
 </div>
-
-<div class="regApiSection">
-
+<div><strong>interval</strong>: interval of the joint. interval[1] is the joint minimum allowed value, interval[2] is the joint range (the maximum allowed value is interval[1]+interval[2]). When the joint is &quot;cyclic&quot;, then the interval parameters don't have any meaning.<br>
 </div>
+</td> 
+</tr> 
 
-<p><br>See also:
-<ul>
-<li><a href="simSetJointInterval.htm">sim.setJointInterval</a></li>
-</ul>
-</p>
 
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>bool cyclic,list interval=sim.getJointInterval(int objectHandle)</td>
+</tr>
+
+</table> 
+
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

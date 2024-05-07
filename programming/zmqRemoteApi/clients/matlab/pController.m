@@ -12,14 +12,14 @@ dynStepSize = 0.005;
 velUpperLimit = deg2rad(360);
 
 client = RemoteAPIClient();
-sim = client.require('sim');
+sim = client.getObject('sim');
 
 jointHandle = sim.getObject('/Cuboid[0]/joint');
 jointAngle = sim.getJointPosition(jointHandle);
 sim.setJointTargetVelocity(jointHandle, deg2rad(360));
 
 % enable the stepping mode on the client:
-sim.setStepping(true);
+client.setStepping(true);
 
 sim.startSimulation();
 
@@ -44,7 +44,7 @@ for i=1:numel(angles)
         % .
         sim.setJointTargetVelocity(jointHandle, velocity);
         sim.setJointMaxForce(jointHandle, maxForce);
-        sim.step();
+        client.step();
         jointAngle = sim.getJointPosition(jointHandle);
     end
 end

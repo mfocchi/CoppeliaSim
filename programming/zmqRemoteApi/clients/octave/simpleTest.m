@@ -5,10 +5,13 @@
 fprintf('Program started\n')
 
 client = RemoteAPIClient();
-sim = client.require('sim');
+sim = client.getObject('sim');
 
-% register a callback function (make sure it is in an own file):
-client.addCallback(@myCallback, 'myCallback');
+% When simulation is not running, ZMQ message handling could be a bit
+% slow, since the idle loop runs at 8 Hz by default. So let's make
+% sure that the idle loop runs at full speed for this program:
+defaultIdleFps = sim.getInt32Param(sim.intparam_idle_fps);
+sim.setInt32Param(sim.intparam_idle_fps, 0);
 
 % Create a few dummies and set their positions:
 n = 50;
@@ -24,10 +27,9 @@ sim.startSimulation();
 while 1
     t = sim.getSimulationTime();
     if t >= 3; break; end
-    s = sprintf('Simulation time: %.2f [s] (simulation running asynchronously to client, i.e. non-stepping)', t);
+    s = sprintf('Simulation time: %.2f [s] (simulation running asynchronously to client, i.e. non-stepped)', t);
     fprintf('%s\n', s);
     sim.addLog(sim.verbosity_scriptinfos, s);
-    % sim.testCB(21,'myCallback@func',42);
 end
 sim.stopSimulation();
 % If you need to make sure we really stopped:
@@ -36,15 +38,15 @@ while sim.getSimulationState() ~= sim.simulation_stopped
 end
 
 % Run a simulation in stepping mode:
-sim.setStepping(true);
+client.setStepping(true);
 sim.startSimulation();
 while 1
     t = sim.getSimulationTime();
     if t >= 3; break; end
-    s = sprintf('Simulation time: %.2f [s] (simulation running synchronously to client, i.e. stepping)', t);
+    s = sprintf('Simulation time: %.2f [s] (simulation running synchronously to client, i.e. stepped)', t);
     fprintf('%s\n', s);
-    sim.addLog(sim.verbosity_scriptinfos, s);
-    sim.step();  % triggers next simulation step
+    sim.addLog(sim.verbosity_scriptinfos, s)
+    client.step();  % triggers next simulation step
 end
 sim.stopSimulation();
 
@@ -53,13 +55,7 @@ for i=1:n
     sim.removeObject(handles(i));
 end
 
-fprintf('Program ended\n');
+% Restore the original idle loop frequency:
+sim.setInt32Param(sim.intparam_idle_fps, defaultIdleFps);
 
-% test callback on CoppeliaSim side:
-% int ret = sim.testCB(int a, func cb, int b)
-% function sim.testCB(a, cb, b)
-%     for i = 1, 99, 1 do
-%         cb(a, b)
-%     end
-%     return cb(a, b)
-% end
+fprintf('Program ended\n');

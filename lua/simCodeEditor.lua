@@ -1,4 +1,3 @@
-local simCodeEditor = loadPlugin 'simCodeEditor';
-(require 'simCodeEditor-typecheck')(simCodeEditor)
+local simCodeEditor={}
 
 return simCodeEditor

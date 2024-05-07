@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.loadImage</title>
+<title>simLoadImage</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,73 +15,69 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.loadImage</h2>
-    <p>Loads an image from file or memory</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simLoadImage" id="simLoadImage"></a>simLoadImage / sim.loadImage </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Loads an image from file or memory. See also <a href="simSaveImage.htm">sim.saveImage</a>, <a href="simGetScaledImage.htm">sim.getScaledImage</a>, <a href="simTransformImage.htm">sim.transformImage</a> and <a href="simSetVisionSensorImg.htm">sim.setVisionSensorImg</a>.</td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>unsigned char* simLoadImage(int* resolution,int options,const char* filenameOrBuffer,void* reserved)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div><strong>resolution</strong>: a pointer that will accept the image resolution.</div>
+<div><strong>options</strong>: bit-coded. If bit0 is set (1), then the returned image is rgba, otherwise it is rgb.</div>
+<div><strong>filename</strong>: the name of the file to read. The file extension indicates the format. If you wish to load an image from a memory buffer, then have filename point to that memory buffer.</div>
+<div><strong>reserved</strong>: Set to nullptr if you load an image from file. If you load an image from a memory buffer, this should be to an integer pointer where the first pointed integer is the size of the memory buffer.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div>nullptr if operation was not successful, otherwise a buffer containing the image data. The user is in charge of releasing the buffer with <a href="simReleaseBuffer.htm">simReleaseBuffer</a>.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>buffer image,int[2] resolution=sim.loadImage(int options,string/buffer filenameOrBuffer)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div>Similar to the C-function counterpart. To load an image from a string buffer, simply prefix the buffer with &quot;@mem&quot;.</div></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div>Similar to the C-function counterpart</div></td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">bytes image, list resolution = sim.loadImage(int options, string/bytes filenameOrBuffer)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">buffer image, int[2] resolution = sim.loadImage(int options, string/buffer filenameOrBuffer)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>options</strong>: bit-coded:
-                    <ul>
-                        <li>bit0 is set (1): the returned image is rgba, otherwise it is rgb</li>
-                    </ul>
-                </li>
-                <li><strong>filenameOrBuffer</strong>: name of the file to read. The file extension indicates the format. To load an image from a buffer, simply prefix the buffer with "@mem"</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>bytes image,list resolution=sim.loadImage(int options,string/bytes filenameOrBuffer)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>image</strong>: buffer containing the image data</li>
-                <li><strong>resolution</strong>: the image resolution</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="simSaveImage.htm">sim.saveImage</a></li>
-<li><a href="simGetScaledImage.htm">sim.getScaledImage</a></li>
-<li><a href="simTransformImage.htm">sim.transformImage</a></li>
-<li><a href="simSetVisionSensorImg.htm">sim.setVisionSensorImg</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

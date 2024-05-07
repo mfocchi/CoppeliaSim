@@ -9,48 +9,46 @@ coppeliaRobotics
     |__ coppeliaSimLib (CoppeliaSim main library)
     |__ programming
                   |__ include
-                  |__ coppeliaSimClient
-                  |__ coppeliaSimClientPython
                   |__ coppeliaGeometricRoutines
                   |__ coppeliaKinematicsRoutines
-                  |__ simGeom
-                  |__ simIK
-                  |__ simDyn
+                  |__ simExtGeom
+                  |__ simExtIK
+                  |__ simExtDyn
                   |__ zmqRemoteApi
                   |__ wsRemoteApi
-                  |__ simCodeEditor
+                  |__ simExtCodeEditor
                   |__ simExtJoystick
                   |__ simExtCam
-                  |__ simURDF
-                  |__ simSDF
-                  |__ simRuckig
-                  |__ simRRS1
-                  |__ simMTB
-                  |__ simUI
-                  |__ simOMPL
-                  |__ simICP
-                  |__ simSurfRec
-                  |__ simCmd
-                  |__ simSkeleton
-                  |__ simSkel
-                  |__ simCHAI3D
-                  |__ simConvexDecompose
-                  |__ simPovRay
-                  |__ simQHull
-                  |__ simQML
-                  |__ simVision
-                  |__ simIM
-                  |__ simIGL
-                  |__ simBubble
-                  |__ simAssimp
-                  |__ simOpenMesh
-                  |__ simOpenGL3
-                  |__ simGLTF
-                  |__ simZMQ
-                  |__ simURLDrop
-                  |__ simSubprocess
-                  |__ simEigen
-                  |__ simLDraw
+                  |__ simExtURDF
+                  |__ simExtSDF
+                  |__ simExtRuckig
+                  |__ simExtRRS1
+                  |__ simExtMTB
+                  |__ simExtUI
+                  |__ simExtOMPL
+                  |__ simExtICP
+                  |__ simExtSurfRec
+                  |__ simExtLuaCmd
+                  |__ simExtPluginSkeleton
+                  |__ simExtSkel
+                  |__ simExtCHAI3D
+                  |__ simExtConvexDecompose
+                  |__ simExtPovRay
+                  |__ simExtQHull
+                  |__ simExtQML
+                  |__ simExtVision
+                  |__ simExtIM
+                  |__ simExtIGL
+                  |__ simExtBubbleRob
+                  |__ simExtAssimp
+                  |__ simExtOpenMesh
+                  |__ simExtOpenGL3Renderer
+                  |__ simExtGLTF
+                  |__ simExtZMQ
+                  |__ simExtURLDrop
+                  |__ simExtSubprocess
+                  |__ simExtEigen
+                  |__ simExtLDraw
                   |__ bubbleRobServer
                   |__ bubbleRobZmqServer
                   |__ configUi-2
@@ -58,11 +56,11 @@ coppeliaRobotics
                   |__ mtbServer
                   |
                   |__ ros_packages
-                  |            |__ simROS
+                  |            |__ simExtROS
                   |            |__ ros_bubble_rob
                   |
                   |__ ros2_packages
-                               |__ simROS2
+                               |__ simExtROS2
                                |__ ros2_bubble_rob
                                
 
@@ -73,11 +71,8 @@ Following are the main Items:
 -   'coppeliaSimLib' (requires 'include'):         
     https://github.com/CoppeliaRobotics/coppeliaSimLib
 
--   'coppeliaSimClient' (requires 'include'):
-    https://github.com/CoppeliaRobotics/coppeliaSimClient
-
--   'coppeliaSimClientPython' (requires 'include'):
-    https://github.com/CoppeliaRobotics/coppeliaSimClientPython
+-   'coppeliaSimClientApplication' (requires 'include'):
+    https://github.com/CoppeliaRobotics/coppeliaSimClientApplication
 
 
 Various common items:
@@ -101,17 +96,17 @@ Various common items:
 Major plugins:
 --------------
 
--   'simDyn' (requires 'include' + various physics engine dependencies):
-    https://github.com/CoppeliaRobotics/simDyn
+-   'simExtDyn' (requires 'include' + various physics engine dependencies):
+    https://github.com/CoppeliaRobotics/simExtDyn
 
--   'simGeom' (requires 'include' and 'coppeliaGeometricRoutines'):
-    https://github.com/CoppeliaRobotics/simGeom
+-   'simExtGeom' (requires 'include' and 'coppeliaGeometricRoutines'):
+    https://github.com/CoppeliaRobotics/simExtGeom
 
--   'simIK' (requires 'include' and 'coppeliaKinematicsRoutines'):
-    https://github.com/CoppeliaRobotics/simIK
+-   'simExtIK' (requires 'include' and 'coppeliaKinematicsRoutines'):
+    https://github.com/CoppeliaRobotics/simExtIK
 
--   'simCodeEditor' (requires 'include' and 'QScintilla'):
-    https://github.com/CoppeliaRobotics/simCodeEditor
+-   'simExtCodeEditor' (requires 'include' and 'QScintilla'):
+    https://github.com/CoppeliaRobotics/simExtCodeEditor
 
 
 Various plugins:
@@ -123,89 +118,89 @@ Various plugins:
 -   'simExtCam' (requires 'include'):
     https://github.com/CoppeliaRobotics/simExtCam (Windows only)
 
--   'simURDF' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simURDF
+-   'simExtURDF' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtURDF
 
--   'simSDF' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simSDF
+-   'simExtSDF' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtSDF
 
--   'simRuckig' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simRuckig
+-   'simExtRuckig' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtRuckig
 
--   'simRRS1' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simRRS1
+-   'simExtRRS1' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtRRS1
 
--   'simMTB' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simMTB
+-   'simExtMTB' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtMTB
 
--   'simUI' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simUI
+-   'simExtUI' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtUI
 
--   'simOMPL' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simOMPL
+-   'simExtOMPL' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtOMPL
 
--   'simICP' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simICP
+-   'simExtICP' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtICP
 
--   'simIGL' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simIGL
+-   'simExtIGL' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtIGL
 
--   'simSurfRec' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simSurfRec
+-   'simExtSurfRec' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtSurfRec
 
--   'simQML' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simQML
+-   'simExtQML' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtQML
 
--   'simROS' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simROS
+-   'simExtROS' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtROS
 
--   'simROS2' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simROS2
+-   'simExtROS2' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtROS2
 
--   'simCmd' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simCmd
+-   'simExtLuaCmd' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtLuaCmd
 
--   'simCHAI3D' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simCHAI3D
+-   'simExtCHAI3D' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtCHAI3D
 
--   'simConvexDecompose' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simConvexDecompose
+-   'simExtConvexDecompose' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtConvexDecompose
 
--   'simPovRay' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simPovRay
+-   'simExtPovRay' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtPovRay
 
--   'simQHull' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simQHull
+-   'simExtQHull' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtQHull
 
--   'simOpenMesh' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simOpenMesh
+-   'simExtOpenMesh' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtOpenMesh
 
--   'simVision' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simVision
+-   'simExtVision' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtVision
 
--   'simIM' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simIM
+-   'simExtIM' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtIM
 
--   'simBubble' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simBubble
+-   'simExtBubbleRob' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtBubbleRob
 
--   'simOpenGL3' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simOpenGL3
+-   'simExtOpenGL3Renderer' (requires 'include'):
+    https://github.com/stepjam/simExtOpenGL3Renderer or https://github.com/CoppeliaRobotics/simExtOpenGL3Renderer
 
--   'simGLTF' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simGLTF
+-   'simExtGLTF' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtGLTF
 
--   'simZMQ' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simZMQ
+-   'simExtZMQ' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtZMQ
 
--   'simURLDrop' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simURLDrop
+-   'simExtURLDrop' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simExtURLDrop
 
--   'simSubprocess' (requires 'include' and Qt):
-    https://github.com/CoppeliaRobotics/simSubprocess
+-   'simExtSubprocess' (requires 'include' and Qt):
+    https://github.com/CoppeliaRobotics/simExtSubprocess
 
--   'simEigen' (requires 'include' and Eigen):
-    https://github.com/CoppeliaRobotics/simEigen
+-   'simExtEigen' (requires 'include' and Eigen):
+    https://github.com/CoppeliaRobotics/simExtEigen
 
 Various other repositories:		
 ---------------------------

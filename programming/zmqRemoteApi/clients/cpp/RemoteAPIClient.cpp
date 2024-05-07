@@ -44,7 +44,7 @@ namespace uuid {
 
 json bin(const char *s, int size)
 {
-    if(size == -1) size = int(strlen(s));
+    if(size == -1) size = strlen(s);
     return bin(reinterpret_cast<const uint8_t *>(s), size);
 }
 
@@ -55,7 +55,7 @@ json bin(const uint8_t *b, int size)
 
 json bin(const std::string &s)
 {
-    return bin(s.data(), int(s.length()));
+    return bin(s.data(), s.length());
 }
 
 json bin(const std::vector<uint8_t> &v)
@@ -65,6 +65,7 @@ json bin(const std::vector<uint8_t> &v)
 
 RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPort, int verbose_)
     : rpcSocket(ctx, zmq::socket_type::req),
+      cntSocket(ctx, zmq::socket_type::sub),
       verbose(verbose_)
 {
     if(verbose == -1)
@@ -75,20 +76,18 @@ RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPor
             verbose = 0;
     }
 
+    if(cntPort == -1)
+        cntPort = rpcPort + 1;
+
     uuid = uuid::generate_uuid_v4();
-    VERSION = 2;
 
     auto rpcAddr = (boost::format("tcp://%s:%d") % host % rpcPort).str();
     rpcSocket.connect(rpcAddr);
-}
 
-RemoteAPIClient::~RemoteAPIClient()
-{
-    json req;
-    req["func"] = "_*end*_";
-    req["args"] = json::array();
-    send(req);
-    recv();
+    auto cntAddr = (boost::format("tcp://%s:%d") % host % cntPort).str();
+    cntSocket.set(zmq::sockopt::subscribe, "");
+    cntSocket.set(zmq::sockopt::conflate, 1);
+    cntSocket.connect(cntAddr);
 }
 
 json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)
@@ -96,62 +95,22 @@ json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> 
     return call(func, json::make_array(args));
 }
 
-json RemoteAPIClient::call(const std::string &_func, const json &_args)
-{ // call function with specified arguments. Is reentrant
-    std::string func(_func);
-    json args = _args;
+json RemoteAPIClient::call(const std::string &func, const json &args)
+{
     json req;
     req["func"] = func;
     req["args"] = args;
     send(req);
+
     json resp = recv();
-
-    while (resp.contains("func"))
-    { // We have a callback or a wait:
-        if (resp["func"].as<std::string>().compare("_*wait*_")==0)
-        {
-            func = "_*executed*_";
-            args = json::array();
-            json req2;
-            req2["func"] = func;
-            req2["args"] = args;
-            send(req2);
-        }
-        else if (resp["func"].as<std::string>().compare("_*repeat*_")==0)
-        {
-            json req2;
-            req2["func"] = func;
-            req2["args"] = args;
-            send(req2);
-        }
+    bool ok = resp["success"].as<bool>();
+    if(!ok)
+    {
+        if(resp.contains("error"))
+            throw std::runtime_error(resp["error"].as<std::string>());
         else
-        { // call a callback
-            auto funcToRun = _getFunctionPointerByName(resp["func"].as<std::string>());
-            json rep;
-            func = "_*executed*_";
-            if (funcToRun)
-            {
-                auto r = funcToRun(resp["args"]);
-                if (!r.is_array())
-                {
-                    auto arr = json::array();
-                    arr.push_back(r);
-                    args = arr;
-                }
-                else
-                    args = r;
-            }
-            else
-                args = json::array();
-            rep["func"] = func;
-            rep["args"] = args;
-            send(rep);
-        }
-        resp = recv();
+            throw std::runtime_error("unknown error");
     }
-
-    if (resp.contains("err"))
-        throw std::runtime_error(resp["err"].as<std::string>().c_str());
     const auto &ret = resp["ret"];
     return ret;
 }
@@ -161,40 +120,41 @@ json RemoteAPIClient::getObject(const std::string &name)
     return call("zmqRemoteApi.info", json(json_array_arg, {name}));
 }
 
-void RemoteAPIClient::require(const std::string &name)
-{
-    call("zmqRemoteApi.require", json(json_array_arg, {name}));
-}
-
 void RemoteAPIClient::setVerbose(int level)
 {
     verbose = level;
 }
 
 void RemoteAPIClient::setStepping(bool enable)
-{ // for backw. comp., now via sim.setStepping
-    call("sim.setStepping", {enable});
+{
+    call("setStepping", {enable, uuid});
 }
 
 void RemoteAPIClient::step(bool wait)
-{ // for backw. comp., now via sim.step
-    call("sim.step", {wait});
+{
+    if(wait) getStepCount(false);
+    call("step", {uuid});
+    if(wait) getStepCount(true);
 }
 
-void RemoteAPIClient::send(json &j)
+long RemoteAPIClient::getStepCount(bool wait)
+{
+    zmq::message_t msg;
+    if(!cntSocket.recv(msg, wait ? zmq::recv_flags::none : zmq::recv_flags::dontwait))
+        return -1;
+
+    auto c = reinterpret_cast<const int*>(msg.data())[0];
+
+    if(verbose > 0)
+        std::cout << "Step count: " << c << std::endl;
+
+    return c;
+}
+
+void RemoteAPIClient::send(const json &j)
 {
     if(verbose > 0)
         std::cout << "Sending: " << pretty_print(j) << std::endl;
-
-    j["uuid"] = uuid;
-    j["ver"] = VERSION;
-    j["lang"] = "c++";
-    if (j.contains("args"))
-    {
-        auto a = j["args"];
-        j["argsL"] = a.size();
-    }
-
 
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);
@@ -232,19 +192,6 @@ json RemoteAPIClient::recv()
         std::cout << "Received: " << pretty_print(j) << std::endl;
 
     return j;
-}
-
-void RemoteAPIClient::registerCallback(const std::string &funcName, CallbackType callback)
-{
-    callbacks[funcName] = callback;
-}
-
-RemoteAPIClient::CallbackType RemoteAPIClient::_getFunctionPointerByName(const std::string &funcName)
-{
-    auto it = callbacks.find(funcName);
-    if(it != callbacks.end())
-        return it->second;
-    return nullptr;
 }
 
 #ifdef SIM_REMOTEAPICLIENT_OBJECTS

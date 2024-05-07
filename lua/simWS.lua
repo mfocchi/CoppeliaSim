@@ -1,4 +1,3 @@
-local simWS = loadPlugin 'simWS';
-(require 'simWS-typecheck')(simWS)
+local simWS={}
 
 return simWS

@@ -1,4 +1,3 @@
-local simICP = loadPlugin 'simICP';
-(require 'simICP-typecheck')(simICP)
+local simICP={}
 
 return simICP

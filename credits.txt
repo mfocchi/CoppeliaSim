@@ -144,10 +144,7 @@ acknowledge the contributions in various forms of the following people, group of
     Jovan Sumarac, Mechatronics Ninja, Alexander Oliva, Luigi Ascione, Rui Li, Patrick Grüner, Andrés Faíña,
     Michal Mareš, Kat Styles Wood, David Paulius, Pranav A. Bhounsule, Davide Scorza,
     Amirhossein Afkhami Ardekani, Roman Horshkov, Volker Kühn, Artem Shishkin, Andrey Voronkov,
-    Vitalii Kudinov, Yong Jiang, github user mfrigerio17, Elia Cereda, Keith Siilats, Pardeep Singh Panesar,
-    Zichun Xu, Belal Elsayed, Clélie Demey, Fumio Ozaki, Christopher Blum, Javier Quintana, Sebastian Serna,
-    Jian Qi, Vishwas Jain, Barca David, Sasha Koryakin, Louis Munier, Fatih Kocyigit, Clément Moulin-Frier,
-    Markus Voelk.
+    Vitalii Kudinov, Yong Jiang, github user mfrigerio17, Elia Cereda.
     We know we forgot many many people, also significant ones... please let us know!
 
 I also wish to thank following people for the inspiration they provided in various fields through their

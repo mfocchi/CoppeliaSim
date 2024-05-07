@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Language" content="en-us">
-<title>sim.multiplyVector</title>
+<title>simMultiplyVector</title>
 <link rel="stylesheet" type="text/css" href="../../style.css">
 </head>
 
@@ -15,65 +15,69 @@
   <td >
 <p><a href="../../index.html" TARGET="_top"><img src="../images/homeImg.png"></a></p>
 
-<div class="regApiSection">
-    <h2>sim.multiplyVector</h2>
-    <p>Multiplies a vector with a pose or a matrix (e.g. v=m*v)</p>
-</div>
+<h1>Regular API function</h1>
+<p class=subsectionBar><a name="simMultiplyVector" id="simMultiplyVector"></a>simMultiplyVector / sim.multiplyVector </p>
+<table class=apiTable>
+<tr class=apiTableTr> 
+<td class=apiTableLeftDescr>
+Description 
+</td> 
+<td class=apiTableRightDescr>Multiplies a vector with a pose or a matrix (e.g. v=m*v). See also the section about <a href="../positionOrientationTransformation.htm">positions, orientations and transformations</a></td>
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCSyn>
+C/C++<br>synopsis
+</td> 
+<td class=apiTableRightCSyn>See <a href="simTransformVector.htm">simTransformVector</a></td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCParam>C/C++<br>parameters</td> 
+<td class=apiTableRightCParam>
+<div></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftCRet>
+C/C++<br>return value
+</td> 
+<td class=apiTableRightCRet>
+<div></div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLSyn>
+Lua<br>synopsis
+</td> 
+<td class=apiTableRightLSyn>float[3*n] resultVector=sim.multiplyVector(float[7]/float[12] pose/matrix,float[3*n] vector)</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLParam>Lua<br>parameters</td> 
+<td class=apiTableRightLParam>
+<div><strong>pose/matrix</strong>: a pose or a transformation matrix </div>
+<div><strong>vector</strong>: the original vector: a table containing 3*n values. Each triplet represents one vector to be multiplied.</div>
+</td> 
+</tr> 
+<tr class=apiTableTr> 
+<td class=apiTableLeftLRet>
+Lua<br>return values
+</td> 
+<td class=apiTableRightLRet>
+<div><strong>resultVector</strong>: the result vector: a table containing 3*n values. Each triplet represents one vector.</div>
+</td> 
+</tr> 
 
-<div class="regApiSection">
-    <h3>Synopsis</h3>
-    <div class="multi-language-switcher">
-    	<code class="hljs language-python coppelia-coppeliasim-script">list resultVector = sim.multiplyVector(list pose/matrix, list vector)</code>
-        
-        <code class="hljs language-lua coppelia-coppeliasim-script">float[3*n] resultVector = sim.multiplyVector(float[7]/float[12] pose/matrix, float[3*n] vector)</code>
-    </div>
-</div>
 
-<div  class="regApiSection">
-    <h3>Arguments</h3>
-    
-            <ul>
-                <li><strong>pose/matrix</strong>: a pose (array of 7 values [x y z qx qy qz qw]) or a transformation matrix (array of 12 values [Vx0 Vy0 Vz0 P0 Vx1 Vy1 Vz1 P1 Vx2 Vy2 Vz2 P2])</li>
-                <li><strong>vector</strong>: the original vector: an array of 3 * n values. Each triplet represents one vector to be multiplied</li>
-            </ul>
-        
-</div>
+<tr class=apiTableTr>
+<td class=apiTableLeftPSyn>Python<br>synopsis</td>
+<td class=apiTableRightPSyn>list resultVector=sim.multiplyVector(list pose/matrix,list vector)</td>
+</tr>
 
-<div  class="regApiSection">
-    <h3>Return values</h3>
-    
-            <ul>
-                <li><strong>resultVector</strong>: the result vector: an array of 3 * n values. Each triplet represents one vector</li>
-            </ul>
-        
-</div>
+</table> 
 
-<div class="regApiSection">
-
-</div>
-
-<p><br>See also:
-<ul>
-<li><a href="../positionOrientationTransformation.htm">positions, orientations and transformations</a></li>
-</ul>
-</p>
-
+<br>
 </td>
 </tr>
 </table>
 </div>
-<link rel="stylesheet" href="../../js/hljs/11.8.0/styles/default.min.css" />
-<script src="../../js/hljs/11.8.0/highlight.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cmake.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/cpp.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/java.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/javascript.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/lua.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/matlab.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/python.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/rust.min.js"></script>
-<script src="../../js/hljs/11.8.0/languages/xml.min.js"></script>
-<script src="../../js/multi-language-switcher.js"></script>
-<script>document.querySelectorAll('code.hljs').forEach(el => {hljs.highlightElement(el);})</script>
 </body>
 </html>

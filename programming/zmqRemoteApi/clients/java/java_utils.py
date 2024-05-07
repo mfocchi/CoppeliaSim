@@ -9,7 +9,7 @@ def java_type(arg):
         if t == 'int':
             return 'Long'
         if t == 'float':
-            return 'Double'
+            return 'Float'
         if t == 'string':
             return 'String'
         if t == 'func':
