@@ -2,11 +2,17 @@
 
 This version works with ROS1
 
-This need to be cloned inside Locosim folder to be able to use tractor_simulator.py
+This need to be cloned inside the ros workspace folder 
+
+to be able to use tractor_simulator.py you need to add environment variable 
+
+e.g. export COPPELIASIM_ROOT_DIR=~/ros_ws/src/CoppeliaSim
+
+and compile.
 
 
 
-to install for ROS2 (ros2 compile only with version 4.5.1 and with clang):
+To install for ROS2 (ros2 compiles only with version 4.5.1 and with clang):
 
 1) checkout branch ros2 (Coppelia 4.5.1)
 
