@@ -27,5 +27,5 @@ model.specHandles={}
 
 model.specHandles.auxSpheres={}
 for i=1,3,1 do
-    model.specHandles.auxSpheres[i]=sim.getObject('./genericSphere_auxSphere'..i)
+    model.specHandles.auxSpheres[i]=sim.getObject('../genericSphere_auxSphere'..i)
 end

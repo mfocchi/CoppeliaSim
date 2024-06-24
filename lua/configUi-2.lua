@@ -85,28 +85,34 @@ function ConfigUI:validateSchema()
     end
 end
 
+function ConfigUI:getObject()
+    if self.getObjectCallback then
+        return self:getObjectCallback()
+    end
+    return sim.getObject '.'
+end
+
 function ConfigUI:getObjectName()
     if self.getObjectNameCallback then
         return self:getObjectNameCallback()
     end
-    local objectHandle = sim.getObject '.'
-    return sim.getObjectAlias(objectHandle, 1)
+    return sim.getObjectAlias(self:getObject(), 1)
 end
 
 function ConfigUI:readInfo()
     self.info = {}
-    local info = sim.readCustomTableData(sim.getObject '.', self.dataBlockName.info)
+    local info = sim.readCustomTableData(self:getObject(), self.dataBlockName.info)
     for k, v in pairs(info) do
         self.info[k] = v
     end
 end
 
 function ConfigUI:writeInfo()
-    sim.writeCustomTableData(sim.getObject '.', self.dataBlockName.info, self.info)
+    sim.writeCustomTableData(self:getObject(), self.dataBlockName.info, self.info)
 end
 
 function ConfigUI:readSchema()
-    local schema = sim.readCustomTableData(sim.getObject '.', self.dataBlockName.schema)
+    local schema = sim.readCustomTableData(self:getObject(), self.dataBlockName.schema)
     if next(schema) ~= nil then
         self.schema = {}
         for k, v in pairs(schema) do
@@ -126,14 +132,22 @@ end
 function ConfigUI:readConfig()
     if self.schema == nil then error('readConfig() requires schema') end
     self.config = self:defaultConfig()
-    local config = sim.readCustomTableData(sim.getObject '.', self.dataBlockName.config)
+    local config = sim.readCustomTableData(self:getObject(), self.dataBlockName.config)
     for k, v in pairs(config) do
         if self.schema[k] then self.config[k] = v end
     end
 end
 
 function ConfigUI:writeConfig()
-    sim.writeCustomTableData(sim.getObject '.', self.dataBlockName.config, self.config)
+    sim.writeCustomTableData(self:getObject(), self.dataBlockName.config, self.config)
+end
+
+function ConfigUI:readUiState()
+    return sim.readCustomTableData(self:getObject(), self.dataBlockName.uiState .. '@tmp')
+end
+
+function ConfigUI:writeUiState(uiState)
+    sim.writeCustomTableData(self:getObject(), self.dataBlockName.uiState .. '@tmp', uiState)
 end
 
 function ConfigUI:showUi()
@@ -152,8 +166,9 @@ function ConfigUI:createUi()
     simQML.sendEvent(self.uiHandle, 'setConfigAndSchema', {
         config = self.config,
         schema = self.schema,
-        objectName = sim.getObjectAlias(sim.getObject '.', 1),
+        objectName = sim.getObjectAlias(self:getObject(), 1),
     })
+    simQML.sendEvent(self.uiHandle, 'setUiState', self:readUiState())
 end
 
 function ConfigUI_uiChanged(c)
@@ -162,9 +177,9 @@ function ConfigUI_uiChanged(c)
     end
 end
 
-function ConfigUI_uiClosing(info)
+function ConfigUI_uiState(info)
     if ConfigUI.instance then
-        ConfigUI.instance:uiClosing(info)
+        ConfigUI.instance:uiState(info)
     end
 end
 
@@ -182,8 +197,11 @@ function ConfigUI:uiChanged(c)
     self:writeConfig()
 end
 
-function ConfigUI:uiClosing(info)
-    if self.uiHandle then
+function ConfigUI:uiState(uiState)
+    self:writeUiState(uiState)
+
+    if self.uiHandle and not uiState.opened then
+        -- UI is closing
         simQML.destroyEngine(self.uiHandle)
         self.uiHandle = nil
     end
@@ -197,6 +215,11 @@ function ConfigUI:sysCall_init()
     self:writeInfo()
     self:readConfig() -- reads existing or creates default
     self:writeConfig()
+
+    local uiState = self:readUiState()
+    if uiState.opened then
+        self:showUi()
+    end
 end
 
 function ConfigUI:sysCall_cleanup()
@@ -276,6 +299,7 @@ setmetatable(ConfigUI, {__call = function(meta, modelType, schema, genCb)
             config = '__config__',
             info = '__info__',
             schema = '__schema__',
+            uiState = '__uiState__',
         },
         modelType = modelType,
         schema = schema,

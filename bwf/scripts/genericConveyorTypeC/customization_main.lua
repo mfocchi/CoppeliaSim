@@ -108,7 +108,7 @@ function model.updateConveyor()
     while true do
         local h=sim.getObjectChild(model.specHandles.path,0)
         if h>=0 then
-            sim.removeObject(h)
+            sim.removeObjects({h})
         else
             break
         end

@@ -29,6 +29,6 @@ end
 model.specHandles={}
 model.specHandles.auxCylinders={}
 for i=1,2,1 do
-    model.specHandles.auxCylinders[i]=sim.getObject('./genericCylinder_auxCylinder'..i)
+    model.specHandles.auxCylinders[i]=sim.getObject('../genericCylinder_auxCylinder'..i)
 end
 

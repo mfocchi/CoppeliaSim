@@ -19,11 +19,11 @@ function model.updateThermoformer()
     sim.setObjectPosition(model.handles.trigger,model.handle,{-baseS[1]/2,-baseS[2]/2,0})
     local objs=sim.getObjectsInTree(model.handles.otherStations,sim.handle_all,1)
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     local objs=sim.getObjectsInTree(model.handles.boxes,sim.handle_all,1)
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     local off=-(data.thermo_stationCnt-1)*0.5*(stationS[1]+data.thermo_stationSpacing)
     sim.setObjectPosition(model.handles.station,model.handle,{off,0,-stationS[3]*0.5})
@@ -63,7 +63,7 @@ function model.createOriginPallet(currentDispl)
             sim.setObjectOrientation(h,sim.handle_parent,{0,0,0})
             sim.setObjectPosition(h,model.handle,{xy[1],xy[2],-bs[3]*0.5})
             local t={stationIndex=0,initX=xy[1]-currentDispl}
-            sim.writeCustomDataBlock(h,'thermoformerOpenBox',sim.packTable(t))
+            sim.writeCustomStringData(h,'thermoformerOpenBox',sim.packTable(t))
         end
     end
 end
@@ -97,8 +97,8 @@ function model.getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.BINARYSENSOR)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.BINARYSENSOR)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -110,8 +110,8 @@ function model.getAvailableMasterConveyors()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model.handle then
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
             end
         end
@@ -125,8 +125,8 @@ function model.getAvailableOutputboxes()
     local isSelectedBoxAvailable = false
     for i=1,#l,1 do
         if l[i]~=model.handle then
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.OUTPUTBOX)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.OUTPUTBOX)
+            if data and #data > 0 then
                 local connectionHandle,p=simBWF.getInputOutputBoxConnectedItem(l[i])
                 if connectionHandle>=0 then
                     retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
@@ -243,7 +243,7 @@ function sysCall_afterSimulation()
     model.writeInfo(conf)
     local objs=sim.getObjectsInTree(model.handles.boxes,sim.handle_all,1)
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     model.createOriginPallet()
 end

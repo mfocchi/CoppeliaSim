@@ -55,7 +55,7 @@ function sysCall_sensing()
             retData={}
             retData.points={{0,0,0.3}}
             retData.pointIds={1}
-            retData.partIds={sim.getObject('./genericBox#')}
+            retData.partIds={sim.getObject('../genericBox#')}
         end
         if reply=='ok' then
             local pts=retData.points

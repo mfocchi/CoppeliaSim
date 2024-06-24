@@ -48,4 +48,50 @@ return function(obj)
         end
     end)
 
+    obj['pointNormalToMatrix'] = wrap(obj['pointNormalToMatrix'], function(origFunc)
+        return function(...)
+            local point, normal = checkargsEx(
+                {level=1},
+                {
+                    {type = 'table'},
+                    {type = 'table'},
+                },
+                ...
+            )
+            local _rets = {origFunc(point, normal)}
+            return table.unpack(_rets)
+        end
+    end)
+
+    obj['rayTest'] = wrap(obj['rayTest'], function(origFunc)
+        return function(...)
+            local origin, points, proximitySensorHandle = checkargsEx(
+                {level=1},
+                {
+                    {type = 'table'},
+                    {type = 'table'},
+                    {type = 'int', nullable = true, default = NIL},
+                },
+                ...
+            )
+            local _rets = {origFunc(origin, points, proximitySensorHandle)}
+            return table.unpack(_rets)
+        end
+    end)
+
+    obj['drawMesh'] = wrap(obj['drawMesh'], function(origFunc)
+        return function(...)
+            local mesh, opts = checkargsEx(
+                {level=1},
+                {
+                    {type = 'table'},
+                    {type = 'table'},
+                },
+                ...
+            )
+            local _rets = {origFunc(mesh, opts)}
+            return table.unpack(_rets)
+        end
+    end)
+
 end

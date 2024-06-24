@@ -2,8 +2,8 @@ function model.getAvailableCameras()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.RAGNARCAMERA)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.RAGNARCAMERA)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -43,8 +43,8 @@ function model.getAvailableVisionWindows()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.VISIONWINDOW)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.VISIONWINDOW)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -55,8 +55,8 @@ function model.getAvailableLocationFrames()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.LOCATIONFRAME)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.LOCATIONFRAME)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end

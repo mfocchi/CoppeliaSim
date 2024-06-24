@@ -46,7 +46,7 @@ function sysCall_sensing()
         local p=simBWF.getAllInstanciatedParts()
         local newColorDistribution
         if #p>0 then
-            local data=sim.readCustomDataBlock(model.handle,model.tagName)
+            local data=sim.readCustomStringData(model.handle,model.tagName)
             data=sim.unpackTable(data)
             newColorDistribution='{'..data['partColorDistribution']..'}'
             f=loadstring("return "..newColorDistribution)
@@ -57,7 +57,7 @@ function sysCall_sensing()
                 if not model.alreadyDetectedPartsList[p[i]] then
                     model.alreadyDetectedPartsList[p[i]]=t
                     local colorChanged=false
-                    local data=sim.readCustomDataBlock(p[i],simBWF.modelTags.PART)
+                    local data=sim.readCustomStringData(p[i],simBWF.modelTags.PART)
                     data=sim.unpackTable(data)
                     local lline="Object name '"..simBWF.getObjectAltName(p[i]).."':\n"
                     if model.changeColor then
@@ -76,7 +76,7 @@ function sysCall_sensing()
                     lline=lline.."\n"
                     if colorChanged then
                         line=line..lline
-                        sim.writeCustomDataBlock(p[i],simBWF.modelTags.PART,sim.packTable(data))
+                        sim.writeCustomStringData(p[i],simBWF.modelTags.PART,sim.packTable(data))
                     end
                     model.counter=model.counter+1
                 end

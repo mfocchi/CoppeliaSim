@@ -57,13 +57,13 @@ end
 
 function model.getSensorState()
     if model.sensorHandle>=0 then
-        local data=sim.readCustomDataBlock(model.sensorHandle,simBWF.modelTags.BINARYSENSOR)
-        if data then
+        local data=sim.readCustomStringData(model.sensorHandle,simBWF.modelTags.BINARYSENSOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['detectionState']
         end
-        local data=sim.readCustomDataBlock(model.sensorHandle,simBWF.modelTags.OLDSTATICPICKWINDOW)
-        if data then
+        local data=sim.readCustomStringData(model.sensorHandle,simBWF.modelTags.OLDSTATICPICKWINDOW)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['triggerState']
         end
@@ -73,8 +73,8 @@ end
 
 function model.getConveyorDistanceTrigger()
     if model.conveyorHandle>=0 then
-        local data=sim.readCustomDataBlock(model.conveyorHandle,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(model.conveyorHandle,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local d=data['encoderDistance']
             if d then
@@ -118,8 +118,8 @@ end
 
 function model.getStartStopTriggerType()
     if model.stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(model.stopTriggerSensor,simBWF.modelTags.BINARYSENSOR)
-        if data then
+        local data=sim.readCustomStringData(model.stopTriggerSensor,simBWF.modelTags.BINARYSENSOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -132,8 +132,8 @@ function model.getStartStopTriggerType()
         end
     end
     if model.startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(model.startTriggerSensor,simBWF.modelTags.BINARYSENSOR)
-        if data then
+        local data=sim.readCustomStringData(model.startTriggerSensor,simBWF.modelTags.BINARYSENSOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -187,7 +187,7 @@ function sysCall_init()
         if parts then
             for i=1,#parts,1 do
                 local h=parts[i][2]
-                local dat=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+                local dat=sim.readCustomStringData(h,simBWF.modelTags.PART)
                 dat=sim.unpackTable(dat)
                 dat['handle']=h
                 model.partsData[simBWF.getObjectAltName(h)]=dat

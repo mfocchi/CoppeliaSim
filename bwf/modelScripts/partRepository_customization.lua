@@ -41,8 +41,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDPARTREPO)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDPARTREPO)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -53,9 +53,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDPARTREPO,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDPARTREPO,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDPARTREPO,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDPARTREPO,'')
     end
 end
 
@@ -78,8 +78,8 @@ function getPartTable()
     local l=sim.getObjectsInTree(originalPartHolder,sim.handle_all,1+2)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             retL[#retL+1]={data['name']..'   ('..sim.getObjectAlias(l[i],1)..')',l[i]}
         end
@@ -240,7 +240,7 @@ function removePart_callback(ui,id,newVal)
     local h=parts[partIndex+1][2]
     local p=sim.getModelProperty(h)
     if (p&sim.modelproperty_not_model)>0 then
-        sim.removeObject(h)
+        sim.removeObjects({h})
     else
         sim.removeModel(h)
     end
@@ -254,7 +254,7 @@ function onVisualizeCloseClicked()
         local x,y=simUI.getPosition(visualizeData.ui)
         previousVisualizeDlgPos={x,y}
         simUI.destroy(visualizeData.ui)
-        sim.removeObject(visualizeData.sensor)
+        sim.removeObjects({visualizeData.sensor})
         sim.removeCollection(visualizeData.collection)
         visualizeData=nil
     end
@@ -1025,19 +1025,6 @@ function removeDlg1()
     end
 end
 
-function getPotentialNewParts()
-    local p=sim.getObjectsInTree(model,sim.handle_all,1+2)
-    local i=1
-    while i<=#p do
-        if p[i]==functionalPartHolder then
-            table.remove(p,i)
-        else
-            i=i+1
-        end
-    end
-    return p
-end
-
 function getAllPartNameMap()
     local allNames={}
     local parts=sim.getObjectsInTree(originalPartHolder,sim.handle_all,1+2)
@@ -1069,16 +1056,16 @@ end
 
 function sysCall_init()
     partToEdit=-1
-    lastT=sim.getSystemTimeInMs(-1)
-    model=sim.getObject('.')
+    lastT=sim.getSystemTime()*1000
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
     simBWF.checkIfCodeAndModelMatch(model,_CODEVERSION_,_info['version'])
     writeInfo(_info)
-    originalPartHolder=sim.getObject('./partRepository_modelParts')
-    functionalPartHolder=sim.getObject('./partRepository_functional')
-    proxSensor=sim.getObject('./partRepository_sensor')
+    originalPartHolder=sim.getObject('../partRepository_modelParts')
+    functionalPartHolder=sim.getObject('../partRepository_functional')
+    proxSensor=sim.getObject('../partRepository_sensor')
 	
 
     
@@ -1099,7 +1086,7 @@ function sysCall_init()
     -- Following for backward compatibility:
     resolveDuplicateNames()
 
-    sim.setIntegerSignal('__brUndoPointCounter__',0)
+    sim.setInt32Signal('__brUndoPointCounter__',0)
     previousUndoPointCounter=0
     undoPointStayedSameCounter=-1
     
@@ -1118,7 +1105,7 @@ function sysCall_init()
 end
 
 showOrHideUi1IfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg1()
     else
@@ -1127,96 +1114,10 @@ showOrHideUi1IfNeeded=function()
 end
 
 removeAssociatedCustomizationScriptIfAvailable=function(h)
-    local sh=sim.getScriptHandle(sim.scripttype_customizationscript,h)
+    local sh=sim.getScript(sim.scripttype_customization,h)
     if sh>0 then
         sim.removeScript(sh)
     end
-end
-
-checkPotentialNewParts=function(potentialParts)
-    local retVal=false -- true means update the part list in the dialog (i.e. rebuild the dialog's part combo)
-    local functionType=0 -- 0=question, 1=make parts, 2=make orphans
-    for modC=1,#potentialParts,1 do
-        local h=potentialParts[modC]
-        local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
-        if not data then
-            -- This is not yet flagged as part
-            simBWF.markUndoPoint()
-            if functionType==0 then
-                local msg="Detected new children of object '"..sim.getObjectAlias(model,1).."'. Objects attached to that object should be repository parts. Do you wish to turn those new objects into repository parts? If you click 'no', then those new objects will be made orphan. If you click 'yes', then those new objects will be adjusted appropriately. Only shapes or models can be turned into repository parts." 
-                local ret=sim.msgBox(sim.msgbox_type_question,sim.msgbox_buttons_yesno,'Part Definition',msg)
-                if ret==sim.msgbox_return_yes then
-                    functionType=1
-                else
-                    functionType=2
-                end
-            end
-            if functionType==1 then
-                -- We want to accept it as a part
-                local allNames=getAllPartNameMap()
-                data=readPartInfo(h)
-                local nm=sim.getObjectAlias(h,1)
-                while true do
-                    if not allNames[nm] then
-                        data['name']=nm -- ok, that name doesn't exist yet!
-                        break
-                    end
-                    nm=nm..'_COPY'
-                end
-                writePartInfo(h,data) -- attach the XYZ_FEEDERPART_INFO tag
-                sim.setObjectPosition(h,model,{0,0,0}) -- keep the orientation as it is
-
-                if (sim.getModelProperty(h)&sim.modelproperty_not_model)>0 then
-                    -- Shape
-                    local p=(sim.getObjectProperty(h)|sim.objectproperty_dontshowasinsidemodel)
-                    sim.setObjectProperty(h,p)
-                else
-                    -- Model
-                    local p=(sim.getModelProperty(h)|sim.modelproperty_not_showasinsidemodel)
-                    sim.setModelProperty(h,p)
-                end
-                createPalletPointsIfNeeded(h)
-                removeAssociatedCustomizationScriptIfAvailable(h)
-                sim.setObjectParent(h,originalPartHolder,true)
-                retVal=true
-            end
-            if functionType==2 then
-                -- We reject it as a part
-                sim.setObjectParent(h,-1,true)
-            end
-        else
-            -- This is already flagged as part
-            data=readPartInfo(h)
-            
-            local allNames=getAllPartNameMap()
-            local nm=data['name']
-            while true do
-                if not allNames[nm] then
-                    data['name']=nm -- ok, that name doesn't exist yet!
-                    break
-                end
-                nm=nm..'_COPY'
-            end
-            writePartInfo(h,data) -- append additional tags that were maybe missing previously
-            -- just in case we are adding an item that was already tagged previously
-            sim.setObjectPosition(h,model,{0,0,0}) -- keep the orientation as it is
-            -- Make the model static, non-respondable, non-collidable, non-measurable, non-visible, etc.
-            if (sim.getModelProperty(h)&sim.modelproperty_not_model)>0 then
-                -- Shape
-                local p=(sim.getObjectProperty(h)|sim.objectproperty_dontshowasinsidemodel)
-                sim.setObjectProperty(h,p)
-            else
-                -- Model
-                local p=(sim.getModelProperty(h)|sim.modelproperty_not_showasinsidemodel)
-                sim.setModelProperty(h,p)
-            end
-            createPalletPointsIfNeeded(h)
-            removeAssociatedCustomizationScriptIfAvailable(h)
-            sim.setObjectParent(h,originalPartHolder,true)
-            retVal=true
-        end
-    end
-    return retVal
 end
 
 function sysCall_nonSimulation()
@@ -1224,7 +1125,7 @@ function sysCall_nonSimulation()
     updateVisualizeImage()
     -- Following is the central part where we set undo points:
     ---------------------------------
-    local cnt=sim.getIntegerSignal('__brUndoPointCounter__')
+    local cnt=sim.getInt32Signal('__brUndoPointCounter__')
     if cnt~=previousUndoPointCounter then
         undoPointStayedSameCounter=8
         previousUndoPointCounter=cnt
@@ -1239,16 +1140,6 @@ function sysCall_nonSimulation()
     end
     ---------------------------------
     
-    if sim.getSystemTimeInMs(lastT)>3000 then
-        lastT=sim.getSystemTimeInMs(-1)
-        local potentialNewParts=getPotentialNewParts()
-        if #potentialNewParts>0 then
-            if checkPotentialNewParts(potentialNewParts) then
-                removeDlg1() -- we need to update the dialog with the new parts
-            end
-        end
-    end
-
     pricingRequest_executeIfNeeded()
 end
 
@@ -1323,7 +1214,7 @@ function pricing_callback()
         for i=1,#tags,1 do
             local obj=sim.getObjectsWithTag(tags[i],true)
             for j=1,#obj,1 do
-                local ob=sim.callScriptFunction('ext_getItemData_pricing@'..sim.getObjectAlias(obj[j],1),sim.scripttype_customizationscript)
+                local ob=sim.callScriptFunction('ext_getItemData_pricing@'..sim.getObjectAlias(obj[j],1),sim.scripttype_customization)
                 objects[#objects+1]=ob
             end
         end

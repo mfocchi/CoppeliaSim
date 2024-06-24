@@ -1,8 +1,8 @@
 simBWF=require('simBWF')
 function getTriggerType()
     if stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -15,8 +15,8 @@ function getTriggerType()
         end
     end
     if startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -32,25 +32,25 @@ function getTriggerType()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     stopTriggerSensor=simBWF.getReferencedObjectHandle(model,1)
     startTriggerSensor=simBWF.getReferencedObjectHandle(model,2)
     getTriggerType()
     local err=sim.getInt32Param(sim.intparam_error_report_mode)
     sim.setInt32Param(sim.intparam_error_report_mode,0) -- do not report errors
-    textureB=sim.getObject('./genericPingPongPacker_textureB')
-    textureC=sim.getObject('./genericPingPongPacker_textureC')
-    jointB=sim.getObject('./genericPingPongPacker_jointB')
-    jointC=sim.getObject('./genericPingPongPacker_jointC')
+    textureB=sim.getObject('../genericPingPongPacker_textureB')
+    textureC=sim.getObject('../genericPingPongPacker_textureC')
+    jointB=sim.getObject('../genericPingPongPacker_jointB')
+    jointC=sim.getObject('../genericPingPongPacker_jointC')
     sim.setInt32Param(sim.intparam_error_report_mode,err) -- report errors again
-    textureA=sim.getObject('./genericPingPongPacker_textureA')
-    forwarderA=sim.getObject('./genericPingPongPacker_forwarderA')
+    textureA=sim.getObject('../genericPingPongPacker_textureA')
+    forwarderA=sim.getObject('../genericPingPongPacker_forwarderA')
     sensors={}
-    sensors[1]=sim.getObject('./genericPingPongPacker_cartridge1_sensor')
-    sensors[2]=sim.getObject('./genericPingPongPacker_cartridge2_sensor')
-    sensors[3]=sim.getObject('./genericPingPongPacker_cartridge2_sensor2')
+    sensors[1]=sim.getObject('../genericPingPongPacker_cartridge1_sensor')
+    sensors[2]=sim.getObject('../genericPingPongPacker_cartridge2_sensor')
+    sensors[3]=sim.getObject('../genericPingPongPacker_cartridge2_sensor2')
 
     lastT=sim.getSimulationTime()
     beltVelocity=0
@@ -58,7 +58,7 @@ function sysCall_init()
 end 
 
 function sysCall_actuation()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     maxVel=data['velocity']
     accel=data['acceleration']
@@ -114,7 +114,7 @@ function sysCall_actuation()
     sim.setObjectFloatParam(forwarderA,sim.shapefloatparam_init_velocity_y,absoluteLinearVelocity[2])
     sim.setObjectFloatParam(forwarderA,sim.shapefloatparam_init_velocity_z,absoluteLinearVelocity[3])
     data['encoderDistance']=totShift
-    sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+    sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
 end 
 
 function sysCall_actuation()

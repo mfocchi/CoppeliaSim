@@ -61,8 +61,8 @@ function sysCall_init()
     end
     path = sim.getStringParam(sim.stringparam_scene_path)
     fmts, fmtss = simUI.supportedImageFormats(';')
-    imageFile = sim.fileDialog(
-                    sim.filedlg_type_load, 'Open image...', path, '', 'Image files', fmtss
+    imageFiles = simUI.fileDialog(
+                    simUI.filedialog_type.load, 'Open image...', path, '', 'Image files', fmtss
                 )
     addCuboid = function(classTbl, x1, y1, x2, y2)
         local handles = {}
@@ -118,7 +118,7 @@ function sysCall_init()
         optimizationEnabled = simUI.getCheckboxValue(ui, 901) > 0
         invertImageValues = simUI.getCheckboxValue(ui, 902) > 0
         respondable = simUI.getCheckboxValue(ui, 911) > 0
-        im, res = sim.loadImage(0, imageFile)
+        im, res = sim.loadImage(0, imageFiles)
         c = {res[1] / 2, res[2] / 2}
         im = sim.transformBuffer(im, sim.buffer_uint8rgb, 1, 0, sim.buffer_uint8)
         im = sim.unpackUInt8Table(im)
@@ -161,7 +161,7 @@ function sysCall_init()
             handle, sim.objectspecialproperty_collidable | sim.objectspecialproperty_measurable |
                 sim.objectspecialproperty_detectable_all | sim.objectspecialproperty_renderable
         )
-        sim.setObjectSelection({handle})
+        sim.setObjectSel({handle})
         sim.announceSceneContentChange()
         closeUi()
     end
@@ -177,7 +177,7 @@ function sysCall_init()
         ui = nil
         leaveNow = true
     end
-    if imageFile then
+    if #imageFiles > 0 then
         ui = simUI.create(
                  [[<ui title="Import floorplan..." closeable="true" on-close="closeUi" resizable="true" modal="true" layout="vbox">
             <group layout="form">

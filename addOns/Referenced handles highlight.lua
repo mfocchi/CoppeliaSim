@@ -24,7 +24,7 @@ function highlight(handle)
         toRestore,
         {handle = handle, color = sim.getObjectInt32Param(handle, sim.objintparam_hierarchycolor)}
     )
-    sim.setObjectInt32Param(handle, sim.objintparam_hierarchycolor, 0)
+    sim.setObjectInt32Param(handle, sim.objintparam_hierarchycolor, 1)
 end
 
 function restore()
@@ -33,6 +33,10 @@ function restore()
         pcall(sim.setObjectInt32Param, t.handle, sim.objintparam_hierarchycolor, t.color)
     end
     toRestore = {}
+end
+
+function update()
+    sysCall_selChange {sel = sim.getObjectSel()}
 end
 
 function sysCall_selChange(inData)
@@ -49,12 +53,20 @@ function sysCall_selChange(inData)
     end
 end
 
+function sysCall_beforeCopy(inData)
+    restore()
+end
+
+function sysCall_afterCopy(inData)
+    update()
+end
+
 function sysCall_beforeSave()
     restore()
 end
 
 function sysCall_afterSave()
-    sysCall_selChange {sel = sim.getObjectSel()}
+    update()
 end
 
 function sysCall_beforeInstanceSwitch()
@@ -62,5 +74,5 @@ function sysCall_beforeInstanceSwitch()
 end
 
 function sysCall_afterInstanceSwitch()
-    sysCall_selChange {sel = sim.getObjectSel()}
+    update()
 end

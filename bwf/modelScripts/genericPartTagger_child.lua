@@ -24,8 +24,8 @@ function getAllParts()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.object_shape_type,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
+        if data and #data > 0 then
             retL[#retL+1]=l[i]
         end
     end
@@ -64,9 +64,9 @@ function isPartDetected(partHandle)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
---    sensor=sim.getObject('./genericPartTagger_sensor')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTTAGGER)
+    model=sim.getObject('..')
+--    sensor=sim.getObject('../genericPartTagger_sensor')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTTAGGER)
     data=sim.unpackTable(data)
     if (data['bitCoded']&8)>0 then
         console=sim.auxiliaryConsoleOpen('Tagged Parts',1000,4,nil,{600,300},nil,{0.9,0.9,1})
@@ -91,7 +91,7 @@ function sysCall_sensing()
         local newDestinationNameDistribution
         local newColorDistribution
         if #p>0 then
-            local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTTAGGER)
+            local data=sim.readCustomStringData(model,simBWF.modelTags.PARTTAGGER)
             data=sim.unpackTable(data)
             newNameDistribution='{'..data['partNameDistribution']..'}'
             local f=loadstring("return "..newNameDistribution)
@@ -110,7 +110,7 @@ function sysCall_sensing()
                     local nameChanged=false
                     local destinationChanged=false
                     local colorChanged=false
-                    local data=sim.readCustomDataBlock(p[i],simBWF.modelTags.PART)
+                    local data=sim.readCustomStringData(p[i],simBWF.modelTags.PART)
                     data=sim.unpackTable(data)
                     local lline="Object name '"..sim.getObjectAlias(p[i],1).."':\n"
                     lline=lline.."    --> from part with name '"..data['name'].."' and destination '"..data['destination'].."'\n" 
@@ -145,7 +145,7 @@ function sysCall_sensing()
                     lline=lline.."\n"
                     if nameChanged or destinationChanged or colorChanged then
                         line=line..lline
-                        sim.writeCustomDataBlock(p[i],simBWF.modelTags.PART,sim.packTable(data))
+                        sim.writeCustomStringData(p[i],simBWF.modelTags.PART,sim.packTable(data))
                     end
                     counter=counter+1
                 end

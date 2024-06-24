@@ -45,8 +45,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_PARTTELEPORTER_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_PARTTELEPORTER_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -57,9 +57,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_PARTTELEPORTER_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_PARTTELEPORTER_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_PARTTELEPORTER_INFO','')
+        sim.writeCustomStringData(model,'XYZ_PARTTELEPORTER_INFO','')
     end
 end
 
@@ -114,8 +114,8 @@ function getAvailableDestinations()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_PARTTELEPORTER_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_PARTTELEPORTER_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             if (data['bitCoded']&2)==0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
@@ -323,7 +323,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -340,7 +340,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

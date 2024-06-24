@@ -3,8 +3,8 @@
 function model.readInfo()
     -- Read all the data stored in the model
 
-    local data=sim.readCustomDataBlock(model.handle,model.tagName)
-    if data then
+    local data=sim.readCustomStringData(model.handle,model.tagName)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -67,9 +67,9 @@ function model.writeInfo(data)
     -- Write all the data stored in the model. Before writing, make sure to always first read with readInfo()
 
     if data then
-        sim.writeCustomDataBlock(model.handle,model.tagName,sim.packTable(data))
+        sim.writeCustomStringData(model.handle,model.tagName,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model.handle,model.tagName,'')
+        sim.writeCustomStringData(model.handle,model.tagName,'')
     end
 end
 
@@ -111,25 +111,25 @@ local isPick=(model.readInfo()['type']==0)
 model.handles={}
 
 if isPick then
-    model.handles.trackBox1=sim.getObject('./pickTrackingWindow_box1')
-    model.handles.trackBox2=sim.getObject('./pickTrackingWindow_box2')
-    model.handles.stopLineBox=sim.getObject('./pickTrackingWindow_stopLine')
-    model.handles.startLineBox=sim.getObject('./pickTrackingWindow_startLine')
-    model.handles.refFrame=sim.getObject('./pickTrackingWindow_refFrame')
-    model.handles.upstreamMarginBox=sim.getObject('./pickTrackingWindow_upstreamMargin')
+    model.handles.trackBox1=sim.getObject('../pickTrackingWindow_box1')
+    model.handles.trackBox2=sim.getObject('../pickTrackingWindow_box2')
+    model.handles.stopLineBox=sim.getObject('../pickTrackingWindow_stopLine')
+    model.handles.startLineBox=sim.getObject('../pickTrackingWindow_startLine')
+    model.handles.refFrame=sim.getObject('../pickTrackingWindow_refFrame')
+    model.handles.upstreamMarginBox=sim.getObject('../pickTrackingWindow_upstreamMargin')
 else
-    model.handles.trackBox1=sim.getObject('./placeTrackingWindow_box1')
-    model.handles.trackBox2=sim.getObject('./placeTrackingWindow_box2')
-    model.handles.stopLineBox=sim.getObject('./placeTrackingWindow_stopLine')
-    model.handles.startLineBox=sim.getObject('./placeTrackingWindow_startLine')
-    model.handles.refFrame=sim.getObject('./placeTrackingWindow_refFrame')
-    model.handles.upstreamMarginBox=sim.getObject('./placeTrackingWindow_upstreamMargin')
+    model.handles.trackBox1=sim.getObject('../placeTrackingWindow_box1')
+    model.handles.trackBox2=sim.getObject('../placeTrackingWindow_box2')
+    model.handles.stopLineBox=sim.getObject('../placeTrackingWindow_stopLine')
+    model.handles.startLineBox=sim.getObject('../placeTrackingWindow_startLine')
+    model.handles.refFrame=sim.getObject('../placeTrackingWindow_refFrame')
+    model.handles.upstreamMarginBox=sim.getObject('../placeTrackingWindow_upstreamMargin')
 end
 model.handles.calibrationBalls={}
 for i=1,3,1 do
     if isPick then
-        model.handles.calibrationBalls[i]=sim.getObject('./pickTrackingWindow_calibrationBall'..i)
+        model.handles.calibrationBalls[i]=sim.getObject('../pickTrackingWindow_calibrationBall'..i)
     else
-        model.handles.calibrationBalls[i]=sim.getObject('./placeTrackingWindow_calibrationBall'..i)
+        model.handles.calibrationBalls[i]=sim.getObject('../placeTrackingWindow_calibrationBall'..i)
     end
 end

@@ -80,7 +80,7 @@ function model.embedPartGeometry(partHandle)
     end
     
     -- 2. Write the geom's offsets relative to the shape's frame:
-    local pData=simBWF.readPartInfo(partHandle)--sim.readCustomDataBlock(partHandle,simBWF.modelTags.PART)
+    local pData=simBWF.readPartInfo(partHandle)--sim.readCustomStringData(partHandle,simBWF.modelTags.PART)
     pData.vertMinMax={minMaxX,minMaxY,minMaxZ}
     simBWF.writePartInfo(partHandle,pData)
     
@@ -94,7 +94,7 @@ function model.embedPartGeometry(partHandle)
     geomData.vertices=vertices
     geomData.indices=indices
     geomData.normals=normals
-    sim.writeCustomDataBlock(partHandle,simBWF.modelTags.GEOMETRY_PART,sim.packTable(geomData))
+    sim.writeCustomStringData(partHandle,simBWF.modelTags.GEOMETRY_PART,sim.packTable(geomData))
 end
 
 function model.getPartTable()
@@ -122,8 +122,8 @@ function model.getPartData(partHandle)
     local retL={}
     for i=1,#l,1 do
         if l[i]==partHandle then
-            local data=sim.readCustomDataBlock(partHandle,simBWF.modelTags.PART)
-            if data then
+            local data=sim.readCustomStringData(partHandle,simBWF.modelTags.PART)
+            if data and #data > 0 then
                 data=simBWF.readPartInfo(partHandle)
                 return data
             end
@@ -136,7 +136,7 @@ function model.updatePartData(partHandle,data)
     local retL={}
     for i=1,#l,1 do
         if l[i]==partHandle then
-            sim.writeCustomDataBlock(partHandle,simBWF.modelTags.PART,sim.packTable(data))
+            sim.writeCustomStringData(partHandle,simBWF.modelTags.PART,sim.packTable(data))
             model.updatePluginRepresentation_template(partHandle)
             break
         end
@@ -148,7 +148,7 @@ function model.removePart(partHandle)
     local retL={}
     for i=1,#l,1 do
         if l[i]==partHandle then
-            local pData=sim.readCustomDataBlock(partHandle,simBWF.modelTags.PART)
+            local pData=sim.readCustomStringData(partHandle,simBWF.modelTags.PART)
             pData=sim.unpackTable(pData)
             
             -- 1. Remove its plugin representation:
@@ -158,7 +158,7 @@ function model.removePart(partHandle)
             model.dlg.selectedPartId=-1
             local p=sim.getModelProperty(partHandle)
             if (p&sim.modelproperty_not_model)>0 then
-                sim.removeObject(partHandle)
+                sim.removeObjects({partHandle})
             else
                 sim.removeModel(partHandle)
             end
@@ -230,7 +230,7 @@ function model.getAllPartNameMap()
 end
 
 function model.removeAssociatedCustomizationScriptIfAvailable(h)
-    local sh=sim.getScriptHandle(sim.scripttype_customizationscript,h)
+    local sh=sim.getScript(sim.scripttype_customization,h)
     if sh>0 then
         sim.removeScript(sh)
     end

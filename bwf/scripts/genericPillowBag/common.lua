@@ -53,7 +53,7 @@ end
 -------------------------------------------------------
 model.specHandles={}
 
-model.specHandles.texture=sim.getObject('./genericPillowBag_texture')
-model.specHandles.smallLabel=sim.getObject('./genericPillowBag_smallLabel')
-model.specHandles.largeLabel=sim.getObject('./genericPillowBag_largeLabel')
-model.specHandles.convex=sim.getObject('./genericPillowBag_convex')
+model.specHandles.texture=sim.getObject('../genericPillowBag_texture')
+model.specHandles.smallLabel=sim.getObject('../genericPillowBag_smallLabel')
+model.specHandles.largeLabel=sim.getObject('../genericPillowBag_largeLabel')
+model.specHandles.convex=sim.getObject('../genericPillowBag_convex')

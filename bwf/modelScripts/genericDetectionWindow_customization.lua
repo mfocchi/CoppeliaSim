@@ -61,8 +61,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -73,9 +73,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO','')
+        sim.writeCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO','')
     end
 end
 
@@ -407,22 +407,22 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
     simBWF.checkIfCodeAndModelMatch(model,_CODEVERSION_,_info['version'])
     writeInfo(_info)
-    box=sim.getObject('./genericDetectionWindow_box')
-    sensor1=sim.getObject('./genericDetectionWindow_sensor1')
-    sensor2=sim.getObject('./genericDetectionWindow_sensor2')
+    box=sim.getObject('../genericDetectionWindow_box')
+    sensor1=sim.getObject('../genericDetectionWindow_sensor1')
+    sensor2=sim.getObject('../genericDetectionWindow_sensor2')
     
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

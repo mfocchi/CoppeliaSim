@@ -80,7 +80,7 @@ function sysCall_cleanup()
         -- This means the box is part of the part repository or that we want to finalize the model (i.e. won't be customizable anymore)
         sysCall_cleanup_specific()
         local c=model.readInfo()
-        sim.writeCustomDataBlock(model.handle,model.tagName,'')
+        sim.writeCustomStringData(model.handle,model.tagName,'')
     end
     model.dlg.cleanup()
 end

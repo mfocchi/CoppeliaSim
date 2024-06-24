@@ -1,5 +1,6 @@
 socket = require 'socket'
 
+package.preload.sim = function() end
 require 'actionServer-1'
 require 'actions.wait-1'
 
@@ -9,15 +10,15 @@ require 'tablex'
 sim = {getSystemTime = os.time}
 function sleep(tsec) socket.select(nil, nil, tsec) end
 
-actionServer = ActionServer()
+actionServer = ActionServer{hook_sysCall_actuation = false}
 events = {}
 actionServer:addListener('statusChanged', function(event, id)
     local event = id .. actionServer:getStatus(id):sub(1, 2)
     table.insert(events, event)
 end)
-actionServer:send({cmd = 'wait', duration = 1})
-id2 = actionServer:send({cmd = 'wait', duration = 100})
-id3 = actionServer:send({cmd = 'wait', duration = 100})
+actionServer:send('wait', {duration = 1})
+id2 = actionServer:send('wait', {duration = 100})
+id3 = actionServer:send('wait', {duration = 100})
 
 actionServer:cancel(id2)
 

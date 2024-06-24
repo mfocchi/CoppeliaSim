@@ -28,13 +28,13 @@ waitForSensor=function(ind,signal)
         else
             if r<=0 then break end
         end
-        sim.switchThread()
+        sim.step()
     end
 end
 
 enableConveyor=function(enable)
-    sim.setThreadAutomaticSwitch(false)
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    sim.setStepping(true)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     local r=data['stopRequests']
     if enable then
@@ -43,43 +43,43 @@ enableConveyor=function(enable)
         r[objectHandle]=true
     end
     data['stopRequests']=r
-    sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
-    sim.setThreadAutomaticSwitch(true)
+    sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+    sim.setStepping(false)
 end
 
 waitForCartridgeFull=function()
     while true do
-        local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         if data['putCartridgeDown'][2] then
             break
         end
-        sim.switchThread()
+        sim.step()
     end
 end
 
 setCartridgeEmpty=function()
-    sim.setThreadAutomaticSwitch(false)
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    sim.setStepping(true)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     data['putCartridgeDown'][2]=false
-    sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
-    sim.setThreadAutomaticSwitch(true)
+    sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+    sim.setStepping(false)
 end
 
-objectHandle=sim.getObject('.')
-model=sim.getObject('./genericPingPongPacker')
-local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+objectHandle=sim.getObject('..')
+model=sim.getObject('../genericPingPongPacker')
+local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
 data=sim.unpackTable(data)
 maxVel=data['cartridgeVelocity']
 maxAccel=data['cartridgeAcceleration']
 dwellTimeDown=data['cartridgeDwellTimeDown']
 dwellTimeUp=data['cartridgeDwellTimeUp']
-j=sim.getObject('./genericPingPongPacker_cartridge2_upDownJoint')
+j=sim.getObject('../genericPingPongPacker_cartridge2_upDownJoint')
 sens={}
-sens[1]=sim.getObject('./genericPingPongPacker_cartridge2_sensor')
-sens[2]=sim.getObject('./genericPingPongPacker_cartridge2_sensor2')
-stopper=sim.getObject('./genericPingPongPacker_cartridge2_stopper')
+sens[1]=sim.getObject('../genericPingPongPacker_cartridge2_sensor')
+sens[2]=sim.getObject('../genericPingPongPacker_cartridge2_sensor2')
+stopper=sim.getObject('../genericPingPongPacker_cartridge2_stopper')
 
 while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do
     waitForSensor(1,true)

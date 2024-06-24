@@ -51,8 +51,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -63,9 +63,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO','')
+        sim.writeCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO','')
     end
 end
 
@@ -73,8 +73,8 @@ function getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -247,7 +247,7 @@ function removeDlg()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -258,14 +258,14 @@ function sysCall_init()
         _info['sensor']=nil
     end
     writeInfo(_info)
-    box=sim.getObject('./staticPickWindow_box')
+    box=sim.getObject('../staticPickWindow_box')
     
     updatePluginRepresentation()
     previousDlgPos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

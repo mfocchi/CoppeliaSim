@@ -63,7 +63,7 @@ function model.updateModel()
     for i=1,#objs,1 do
         local h=objs[i]
         if h~=model.specHandles.texture and h~=model.specHandles.smallLabel and h~=model.specHandles.largeLabel then
-            sim.removeObject(h)
+            sim.removeObjects({h})
         end
     end
     
@@ -95,14 +95,14 @@ function model.updateModel()
             sim.setObjectOrientation(h,model.handle,theTable[2])
             local labelData={}
             labelData['labelIndex']=labelInd
-            sim.writeCustomDataBlock(h,simBWF.modelTags.LABEL_PART,sim.packTable(labelData))
+            sim.writeCustomStringData(h,simBWF.modelTags.LABEL_PART,sim.packTable(labelData))
         end
     end
 end
 
 function sysCall_cleanup_specific()
-    sim.removeObject(model.specHandles.texture)
-    sim.removeObject(model.specHandles.smallLabel)
-    sim.removeObject(model.specHandles.largeLabel)
+    sim.removeObjects({model.specHandles.texture})
+    sim.removeObjects({model.specHandles.smallLabel})
+    sim.removeObjects({model.specHandles.largeLabel})
 end
 

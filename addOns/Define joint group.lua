@@ -11,7 +11,7 @@ function sysCall_init()
 
     -- get selection, expand selected models:
     local sel = {}
-    for _, handle in ipairs(sim.getObjectSelection()) do
+    for _, handle in ipairs(sim.getObjectSel()) do
         table.insert(sel, handle)
         if sim.getModelProperty(handle) & sim.modelproperty_not_model == 0 then
             for _, handle1 in ipairs(sim.getObjectsInTree(handle, sim.handle_all, 1)) do
@@ -57,35 +57,16 @@ function sysCall_init()
         scriptText = scriptText .. string.format(...) .. '\n'
     end
 
-    appendLine("sim = require 'sim'")
-    appendLine("")
-    appendLine("function sysCall_init()")
-    appendLine("    self = sim.getObject '.'")
-    appendLine("end")
-    appendLine("")
-    appendLine("function getJoints()")
-    appendLine("    return sim.getReferencedHandles(self)")
-    appendLine("end")
-    appendLine("")
-    appendLine("function getConfig()")
-    appendLine("    return map(sim.getJointPosition, getJoints())")
-    appendLine("end")
-    appendLine("")
-    appendLine("function setConfig(cfg)")
-    appendLine("    foreach(sim.setJointPosition, getJoints(), cfg)")
-    appendLine("end")
+    appendLine("require 'models.jointGroup_customization'")
 
-    local jointGroupDummy = sim.createDummy(0.01)
-    sim.setReferencedHandles(jointGroupDummy, joints)
-    local script = sim.addScript(sim.scripttype_customizationscript)
-    sim.setScriptStringParam(script, sim.scriptstringparam_text, scriptText)
-    sim.associateScriptWithObject(script, jointGroupDummy)
-    sim.setObjectAlias(jointGroupDummy, name)
-    sim.setObjectParent(jointGroupDummy, modelHandle, false)
-    sim.setObjectPose(jointGroupDummy, {0, 0, 0, 0, 0, 0, 1}, modelHandle)
-    sim.setObjectInt32Param(jointGroupDummy, sim.objintparam_visibility_layer, 0)
-    sim.setObjectInt32Param(jointGroupDummy, sim.objintparam_manipulation_permissions, 0)
-    sim.writeCustomDataBlock(jointGroupDummy, '__jointGroup__', sim.packInt32Table {1})
+    local jointGroupScript = sim.createScript(sim.scripttype_customization, scriptText)
+    sim.setReferencedHandles(jointGroupScript, joints)
+    sim.setObjectAlias(jointGroupScript, name)
+    sim.setObjectParent(jointGroupScript, modelHandle, false)
+    sim.setObjectPose(jointGroupScript, {0, 0, 0, 0, 0, 0, 1}, modelHandle)
+    sim.setObjectInt32Param(jointGroupScript, sim.objintparam_visibility_layer, 0)
+    sim.setObjectInt32Param(jointGroupScript, sim.objintparam_manipulation_permissions, 0)
+    sim.writeCustomBufferData(jointGroupScript, '__jointGroup__', sim.packInt32Table {1})
 
     sim.announceSceneContentChange()
 

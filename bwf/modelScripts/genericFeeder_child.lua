@@ -45,7 +45,7 @@ setItemMass=function(handle,m)
             if sim.getObjectType(handle)==sim.object_shape_type then
                 local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                 if p==0 then
-                    local m0,i0,com0=sim.getShapeMassAndInertia(handle)
+                    local m0=sim.getShapeMass(handle)
                     currentMass=currentMass+m0
                 end
             end
@@ -70,12 +70,8 @@ setItemMass=function(handle,m)
             if sim.getObjectType(handle)==sim.object_shape_type then
                 local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                 if p==0 then
-                    local transf=sim.getObjectMatrix(handle,-1)
-                    local m0,i0,com0=sim.getShapeMassAndInertia(handle,transf)
-                    for i=1,9,1 do
-                        i0[i]=i0[i]*massScaling
-                    end
-                    sim.setShapeMassAndInertia(handle,m0*massScaling,i0,com0,transf)
+                    local m0=sim.getShapeMass(handle)
+                    sim.setShapeMass(handle,m0*massScaling)
                 end
             end
         end
@@ -97,7 +93,7 @@ removePart=function(handle,isModel)
     if isModel then
         sim.removeModel(handle)
     else
-        sim.removeObject(handle)
+        sim.removeObjects({handle})
     end
 end
 
@@ -137,8 +133,8 @@ getLabels=function(partH)
     local labels={}
     for objInd=1,#possibleLabels,1 do
         local h=possibleLabels[objInd]
-        local data=sim.readCustomDataBlock(h,'XYZ_PARTLABEL_INFO')
-        if data then
+        local data=sim.readCustomStringData(h,'XYZ_PARTLABEL_INFO')
+        if data and #data > 0 then
             labels[#labels+1]=h
         end
     end
@@ -146,7 +142,7 @@ getLabels=function(partH)
 end
 
 adjustSizeData=function(partH,sx,sy,sz)
-    local data=sim.unpackTable(sim.readCustomDataBlock(partH,simBWF.modelTags.PART))
+    local data=sim.unpackTable(sim.readCustomStringData(partH,simBWF.modelTags.PART))
     local labelData=data['labelData']
     if labelData then
         local s=labelData['smallLabelSize']
@@ -156,20 +152,20 @@ adjustSizeData=function(partH,sx,sy,sz)
         local s=labelData['boxSize']
         labelData['boxSize']={s[1]*sx,s[2]*sy,s[3]*sz}
         data['labelData']=labelData
-        sim.writeCustomDataBlock(partH,simBWF.modelTags.PART,sim.packTable(data))
+        sim.writeCustomStringData(partH,simBWF.modelTags.PART,sim.packTable(data))
     end
 end
 
 regenerateOrRemoveLabels=function(partH,enabledLabels)
     -- There can be up to 3 labels in this part:
     local possibleLabels=sim.getObjectsInTree(partH,sim.object_shape_type,1)
-    local labelData=sim.unpackTable(sim.readCustomDataBlock(partH,simBWF.modelTags.PART))['labelData']
+    local labelData=sim.unpackTable(sim.readCustomStringData(partH,simBWF.modelTags.PART))['labelData']
     for ind=1,3,1 do
         for objInd=1,#possibleLabels,1 do
             local h=possibleLabels[objInd]
             if h>=0 then
-                local data=sim.readCustomDataBlock(h,'XYZ_PARTLABEL_INFO')
-                if data then
+                local data=sim.readCustomStringData(h,'XYZ_PARTLABEL_INFO')
+                if data and #data > 0 then
                     data=sim.unpackTable(data)
                     if data['labelIndex']==ind then
                         local bits={1,2,4}
@@ -198,7 +194,7 @@ regenerateOrRemoveLabels=function(partH,enabledLabels)
                                 sim.setObjectOrientation(h,partH,theTable[2])
                             end
                         else
-                            sim.removeObject(h) -- we do not want this label
+                            sim.removeObjects({h}) -- we do not want this label
                             possibleLabels[objInd]=-1
                         end
                     end
@@ -231,18 +227,18 @@ end
 
 getSensorState=function()
     if sensorHandle>=0 then
-        local data=sim.readCustomDataBlock(sensorHandle,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(sensorHandle,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['detectionState']
         end
-        local data=sim.readCustomDataBlock(sensorHandle,'XYZ_STATICPICKWINDOW_INFO')
-        if data then
+        local data=sim.readCustomStringData(sensorHandle,'XYZ_STATICPICKWINDOW_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['triggerState']
         end
-        local data=sim.readCustomDataBlock(sensorHandle,simBWF.modelTags.OLDSTATICPLACEWINDOW)
-        if data then
+        local data=sim.readCustomStringData(sensorHandle,simBWF.modelTags.OLDSTATICPLACEWINDOW)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['triggerState']
         end
@@ -252,8 +248,8 @@ end
 
 getConveyorDistanceTrigger=function()
     if conveyorHandle>=0 then
-        local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local d=data['encoderDistance']
             if d then
@@ -286,7 +282,7 @@ updateStatisticsDialog=function(enabled)
 end
 
 wasMultiFeederTriggered=function()
-    local data=sim.unpackTable(sim.readCustomDataBlock(model,simBWF.modelTags.PARTFEEDER))
+    local data=sim.unpackTable(sim.readCustomStringData(model,simBWF.modelTags.PARTFEEDER))
     local val=data['multiFeederTriggerCnt']
     if val and val~=multiFeederTriggerLastState then
         multiFeederTriggerLastState=val
@@ -297,8 +293,8 @@ end
 
 function getStartStopTriggerType()
     if stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -311,8 +307,8 @@ function getStartStopTriggerType()
         end
     end
     if startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -367,11 +363,11 @@ function getBaseAndParts(h)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    producedPartsDummy=sim.getObject('./genericFeeder_ownedParts')
-    smallLabel=sim.getObject('./genericFeeder_smallLabel')
-    largeLabel=sim.getObject('./genericFeeder_largeLabel')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTFEEDER)
+    model=sim.getObject('..')
+    producedPartsDummy=sim.getObject('../genericFeeder_ownedParts')
+    smallLabel=sim.getObject('../genericFeeder_smallLabel')
+    largeLabel=sim.getObject('../genericFeeder_largeLabel')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTFEEDER)
     data=sim.unpackTable(data)
     prepareStatisticsDialog((data['bitCoded']&128)>0)
     productionCount=0
@@ -396,7 +392,7 @@ function sysCall_init()
     if parts then
         for i=1,#parts,1 do
             local h=parts[i][2]
-            local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+            local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
             data=sim.unpackTable(data)
             data['handle']=h
             partsData[data['name']]=data
@@ -421,7 +417,7 @@ function sysCall_actuation()
     local t=sim.getSimulationTime()
     local dt=sim.getSimulationTimeStep()
 
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTFEEDER)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTFEEDER)
     data=sim.unpackTable(data)
     local distributionExtent={data['length'],data['width'],data['height']}
     local dropFrequency=data['frequency']
@@ -561,7 +557,7 @@ function sysCall_actuation()
                         end
                         h=tble[1]
                         sim.setObjectParent(h,producedPartsDummy,true)
-                        local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+                        local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
                         data=sim.unpackTable(data)
                         local invisible=(data['bitCoded']&1)>0
                         local nonRespondableToOtherParts=(data['bitCoded']&2)>0
@@ -627,7 +623,7 @@ function sysCall_actuation()
                         sim.setObjectOrientation(h,model,itemOrientation)
 
                         data['instanciated']=true
-                        sim.writeCustomDataBlock(h,simBWF.modelTags.PART,sim.packTable(data))
+                        sim.writeCustomStringData(h,simBWF.modelTags.PART,sim.packTable(data))
                         
                         p=sim.getObjectPosition(h,-1)
                         local partData={h,t,p,isModel,true} -- handle, lastMovingTime, lastPosition, isModel, isActive
@@ -649,11 +645,11 @@ function sysCall_actuation()
                         end
                         sim.setObjectPosition(h,model,itemPosition)
                         sim.setObjectOrientation(h,model,itemOrientation)
-                        local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+                        local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
                         data=sim.unpackTable(data)
                         data['instanciated']=true
-                        sim.writeCustomDataBlock(h,simBWF.modelTags.PART,'')
-                        sim.writeCustomDataBlock(h,'XYZ_FEEDERPARTDUMMY_INFO',sim.packTable(data))
+                        sim.writeCustomStringData(h,simBWF.modelTags.PART,'')
+                        sim.writeCustomStringData(h,'XYZ_FEEDERPARTDUMMY_INFO',sim.packTable(data))
                         
                         p=sim.getObjectPosition(h,-1)
                         local partData={h,t,p,isModel,true} -- handle, lastMovingTime, lastPosition, isModel, isActive
@@ -677,7 +673,7 @@ function sysCall_actuation()
                             local mm=sim.getObjectMatrix(ih,hmitems[1])
                             sim.setObjectMatrix(iih,h,mm)
                             data['instanciated']=true
-                            sim.writeCustomDataBlock(iih,simBWF.modelTags.PART,sim.packTable(data))
+                            sim.writeCustomStringData(iih,simBWF.modelTags.PART,sim.packTable(data))
                             p=sim.getObjectPosition(iih,-1)
                             local partData={iih,t,p,true,true} -- handle, lastMovingTime, lastPosition, isModel, isActive
                             allProducedParts[#allProducedParts+1]=partData
@@ -692,9 +688,9 @@ function sysCall_actuation()
     while i<=#allProducedParts do
         local h=allProducedParts[i][1]
         if sim.isHandle(h) then
-            local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
-            if not data then
-                data=sim.readCustomDataBlock(h,'XYZ_FEEDERPARTDUMMY_INFO')
+            local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
+            if not data or data == '' then
+                data=sim.readCustomStringData(h,'XYZ_FEEDERPARTDUMMY_INFO')
             end
             data=sim.unpackTable(data)
             local p=sim.getObjectPosition(h,-1)

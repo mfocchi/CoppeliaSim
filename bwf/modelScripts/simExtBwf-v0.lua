@@ -18,14 +18,6 @@ function simBWF.createOpenBox(size,baseThickness,wallThickness,density,inertiaCo
         sim.setShapeColor(parts[i],'',sim.colorcomponent_ambient_diffuse,color)
     end
     local shape=sim.groupShapes(parts)
-    if math.abs(1-inertiaCorrectionFact)>0.001 then
-        local transf=sim.getObjectMatrix(shape,-1)
-        local m0,i0,com0=sim.getShapeMassAndInertia(shape,transf)
-        for i=1,#i0,1 do
-            i0[i]=i0[1]*inertiaCorrectionFact
-        end
-        sim.setShapeMassAndInertia(shape,m0,i0,com0,transf)
-    end
     if static then
         sim.setObjectInt32Param(shape,sim.shapeintparam_static,1)
     else
@@ -118,8 +110,8 @@ function simBWF.getCircularPalletPoints(radius,count,angleOffset,center,layers,l
 end
 
 function simBWF.readPartInfoV0(handle)
-    local data=sim.readCustomDataBlock(handle,simBWF.modelTags.PART)
-    if data then
+    local data=sim.readCustomStringData(handle,simBWF.modelTags.PART)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -279,7 +271,7 @@ function simBWF.getAllPossiblePartDestinationsV0()
     -- The pingpong packer destination:
     local lst=getObjectsWithTag(simBWF.modelTags.CONVEYOR,true)
     for i=1,#lst,1 do
-        local data=sim.readCustomDataBlock(lst[i],simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(lst[i],simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         if data['locationName'] then
             allDestinations[#allDestinations+1]=data['locationName']
@@ -287,7 +279,7 @@ function simBWF.getAllPossiblePartDestinationsV0()
     end
     -- The thermoformer destination:
     for i=1,#lst,1 do
-        local data=sim.readCustomDataBlock(lst[i],simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(lst[i],simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         if data['partName'] then
             allDestinations[#allDestinations+1]=data['partName']
@@ -296,7 +288,7 @@ function simBWF.getAllPossiblePartDestinationsV0()
     -- The location destination
     local lst=getObjectsWithTag(simBWF.modelTags.OLDLOCATION,true)
     for i=1,#lst,1 do
-        local data=sim.readCustomDataBlock(lst[i],simBWF.modelTags.OLDLOCATION)
+        local data=sim.readCustomStringData(lst[i],simBWF.modelTags.OLDLOCATION)
         data=sim.unpackTable(data)
         if data['name'] then
             allDestinations[#allDestinations+1]=data['name']
@@ -317,15 +309,15 @@ function simBWF.getAllPossibleTriggerableFeeders(except)
     for i=1,#allObjs,1 do
         local h=allObjs[i]
         if h~=except then
-            local data=sim.readCustomDataBlock(h,simBWF.modelTags.PARTFEEDER)
-            if data then
+            local data=sim.readCustomStringData(h,simBWF.modelTags.PARTFEEDER)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 if (data['bitCoded']&4+8+16)==16 then
                     allFeeders[#allFeeders+1]={sim.getObjectAlias(h,1),h}
                 end
             else
-                data=sim.readCustomDataBlock(h,simBWF.modelTags.MULTIFEEDER)
-                if data then
+                data=sim.readCustomStringData(h,simBWF.modelTags.MULTIFEEDER)
+                if data and #data > 0 then
                     data=sim.unpackTable(data)
                     if (data['bitCoded']&4+8+16)==16 then
                         allFeeders[#allFeeders+1]={sim.getObjectAlias(h,1),h}

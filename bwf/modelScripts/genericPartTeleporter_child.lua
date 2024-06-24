@@ -14,8 +14,8 @@ function getAllParts()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.object_shape_type,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
+        if data and #data > 0 then
             retL[#retL+1]=l[i]
         end
     end
@@ -28,7 +28,7 @@ function isPartDetected(partHandle)
 end
 
 isEnabled=function()
-    local data=sim.readCustomDataBlock(model,'XYZ_PARTTELEPORTER_INFO')
+    local data=sim.readCustomStringData(model,'XYZ_PARTTELEPORTER_INFO')
     data=sim.unpackTable(data)
     return (data['bitCoded']&1)>0
 end
@@ -44,8 +44,8 @@ getSensorPart=function()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,'XYZ_PARTTELEPORTER_INFO')
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,'XYZ_PARTTELEPORTER_INFO')
     data=sim.unpackTable(data)
     isSource=(data['bitCoded']&2)>0
     xSize=data['width']
@@ -53,8 +53,8 @@ function sysCall_init()
     zSize=data['height']
     destinationPod=simBWF.getReferencedObjectHandle(model,simBWF.TELEPORTER_DESTINATION_REF)
     if destinationPod>=0 then
-        local dataD=sim.readCustomDataBlock(destinationPod,'XYZ_PARTTELEPORTER_INFO')
-        if dataD then
+        local dataD=sim.readCustomStringData(destinationPod,'XYZ_PARTTELEPORTER_INFO')
+        if dataD and #dataD > 0 then
             dataD=sim.unpackTable(dataD)
             if (dataD['bitCoded']&2)==0 then
                 xSizeD=dataD['width']

@@ -9,19 +9,19 @@ function sysCall_init()
     simURDF = require 'simURDF'
 
     closeDialog()
-    local s = sim.getObjectSelection()
+    local s = sim.getObjectSel()
     local model = nil
-    if s and #s == 1 then
+    if #s == 1 then
         if sim.getModelProperty(s[1]) & sim.modelproperty_not_model == 0 and sim.getObjectType(s[1]) ==
             sim.object_shape_type then model = s[1] end
     end
     if model then
         local importExportDir = sim.getStringParam(sim.stringparam_importexportdir)
-        local file = simUI.fileDialog(
+        local fileNames = simUI.fileDialog(
                          simUI.filedialog_type.save, "Export URDF...", importExportDir, "",
                          "URDF file", "urdf", true
                      )
-        if file and #file == 1 and #file[1] > 0 then
+        if #fileNames > 0 then
             optionsInfo = {
                 [1] = {name = 'Reset joints', key = 'resetJoints'},
                 [2] = {
@@ -32,12 +32,12 @@ function sysCall_init()
             }
             options = {
                 model = model,
-                fileName = file[1],
+                fileName = fileNames[1],
                 resetJoints = true,
                 shapeAtJointloc = false,
                 redCubes = false,
             }
-            sim.setStringParam(sim.stringparam_importexportdir, file[1])
+            sim.setStringParam(sim.stringparam_importexportdir, options.fileName)
             done = false
             local xml = '<ui modal="true" layout="vbox" title="Exporting ' .. options.fileName ..
                             '..." closeable="true" on-close="closeDialog">\n'

@@ -64,7 +64,7 @@ setMass=function(m)
         if sim.getObjectType(handle)==sim.object_shape_type then
             local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
             if p==0 then
-                local m0,i0,com0=sim.getShapeMassAndInertia(handle)
+                local m0=sim.getShapeMass(handle)
                 currentMass=currentMass+m0
             end
         end
@@ -89,12 +89,8 @@ setMass=function(m)
         if sim.getObjectType(handle)==sim.object_shape_type then
             local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
             if p==0 then
-                local transf=sim.getObjectMatrix(handle,-1)
-                local m0,i0,com0=sim.getShapeMassAndInertia(handle,transf)
-                for i=1,9,1 do
-                    i0[i]=i0[i]*massScaling
-                end
-                sim.setShapeMassAndInertia(handle,m0*massScaling,i0,com0,transf)
+                local m0=sim.getShapeMass(handle)
+                sim.setShapeMass(handle,m0*massScaling)
             end
         end
     end
@@ -152,8 +148,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_PACKINGBOX_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_PACKINGBOX_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -164,9 +160,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_PACKINGBOX_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_PACKINGBOX_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_PACKINGBOX_INFO','')
+        sim.writeCustomStringData(model,'XYZ_PACKINGBOX_INFO','')
     end
 end
 
@@ -204,7 +200,7 @@ function updateModel()
     local springC=c['lidDamping']
     setObjectSize(model,w,l,th)
     setCuboidMassAndInertia(model,w,l,th,defMassPerVolume,inertiaFactor)
-    sim.removeObject(sides)
+    sim.removeObjects({sides})
     local p={}
     p[1]=sim.copyPasteObjects({bb},0)[1]
     setObjectSize(p[1],th,l,h)
@@ -709,7 +705,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -721,13 +717,13 @@ function sysCall_init()
     end
     simBWF.writePartInfo(model,data)
 
-    bb=sim.getObject('./genericPackingBox_bb')
-    sideConnection=sim.getObject('./genericPackingBox_sideConnection')
+    bb=sim.getObject('../genericPackingBox_bb')
+    sideConnection=sim.getObject('../genericPackingBox_sideConnection')
     sides=sim.getObjectChild(sideConnection,0)
     joints={}
     lids={}
     for i=1,4,1 do
-        joints[i]=sim.getObject('./genericPackingBox_j'..i)
+        joints[i]=sim.getObject('../genericPackingBox_j'..i)
         lids[i]=sim.getObjectChild(joints[i],0)
     end
 
@@ -737,7 +733,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else
@@ -774,20 +770,20 @@ function sysCall_cleanup()
     if (repo and (sim.getObjectParent(model)==modelHolder)) or finalizeModel then
         -- This means the box is part of the part repository or that we want to finalize the model (i.e. won't be customizable anymore)
         local c=readInfo()
-        sim.writeCustomDataBlock(model,'XYZ_PACKINGBOX_INFO','')
+        sim.writeCustomStringData(model,'XYZ_PACKINGBOX_INFO','')
         if (c['bitCoded']&1)==0 then
-            sim.removeObject(lids[1]) 
-            sim.removeObject(lids[2]) 
-            sim.removeObject(joints[1]) 
-            sim.removeObject(joints[2]) 
+            sim.removeObjects({lids[1]}) 
+            sim.removeObjects({lids[2]}) 
+            sim.removeObjects({joints[1]}) 
+            sim.removeObjects({joints[2]}) 
         end
         if (c['bitCoded']&2)==0 then
-            sim.removeObject(lids[3]) 
-            sim.removeObject(lids[4]) 
-            sim.removeObject(joints[3]) 
-            sim.removeObject(joints[4]) 
+            sim.removeObjects({lids[3]}) 
+            sim.removeObjects({lids[4]}) 
+            sim.removeObjects({joints[3]}) 
+            sim.removeObjects({joints[4]}) 
         end
-        sim.removeObject(bb)
+        sim.removeObjects({bb})
     end
     simBWF.writeSessionPersistentObjectData(model,"dlgPosAndSize",previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos)
 end

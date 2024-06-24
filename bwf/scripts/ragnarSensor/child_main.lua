@@ -52,10 +52,10 @@ function model.getAndApplySensorState()
     if model.plot.ui then
         local updatePlot=false
         if model.online then    
-            local dt=sim.getSystemTimeInMs(model.lastPlotVisualizeUpdateTimeInMs)
+            local dt=sim.getSystemTime()*1000 - model.lastPlotVisualizeUpdateTimeInMs
             if dt>plotVisUpdateFrequMs then
                 updatePlot=true
-                model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)
+                model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTime()*1000
             end
         else
             local t=(sim.getSimulationTime()+sim.getSimulationTimeStep())*1000
@@ -78,7 +78,7 @@ function sysCall_init()
     model.lastPlotVisualizeUpdateTimeInMs=-1000
     if model.online then
         model.simOrRealIndex=2
-        model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)-1000
+        model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTime()*1000-1000
     end
     model.sensorTriggerData={}
     model.sensorTriggerData.lastTime=0

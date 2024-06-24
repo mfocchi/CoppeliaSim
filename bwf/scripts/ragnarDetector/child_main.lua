@@ -13,8 +13,8 @@ function model.getFakeDetectedPartsInWindow()
                 if r>0 then
                     -- Only if we detected the same object (there might be overlapping objects)
                     while obj~=-1 do
-                        local data2=sim.readCustomDataBlock(obj,simBWF.modelTags.PART)
-                        if data2 then
+                        local data2=sim.readCustomStringData(obj,simBWF.modelTags.PART)
+                        if data2 and #data2 > 0 then
                             break
                         end
                         obj=sim.getObjectParent(obj)

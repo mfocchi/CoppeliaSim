@@ -19,9 +19,9 @@ displayGreyTargets=function(targets)
 end
 
 function sysCall_init()
-    model=sim.getObject('./genericPingPongPacker')
-    trackingWindowModel=sim.getObject('.')
-    local modelData=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    model=sim.getObject('../genericPingPongPacker')
+    trackingWindowModel=sim.getObject('..')
+    local modelData=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     modelData=sim.unpackTable(modelData)
     locationName=modelData['locationName']
 
@@ -40,7 +40,7 @@ end
 
 function sysCall_sensing()
     trackedLocations=allTrackedLocations[currentCartridgeIndex]
-    local data=sim.readCustomDataBlock(trackingWindowModel,simBWF.modelTags.TRACKINGWINDOW)
+    local data=sim.readCustomStringData(trackingWindowModel,simBWF.modelTags.TRACKINGWINDOW)
     data=sim.unpackTable(data)
     data['itemsToRemoveFromTracking']={}
 
@@ -58,10 +58,10 @@ function sysCall_sensing()
     end
     data['targetPositionsToMarkAsProcessed']={}
     if 1==smallestStage then -- full
-        local dat=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local dat=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         dat=sim.unpackTable(dat)
         dat['putCartridgeDown'][currentCartridgeIndex]=true
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(dat))
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(dat))
         for i=1,#trackedLocations,1 do
             trackedLocations[i]['processingStage']=0
         end
@@ -114,7 +114,7 @@ function sysCall_sensing()
         end
     end
 
-    local modelData=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    local modelData=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     modelData=sim.unpackTable(modelData)
     if modelData['putCartridgeDown'][currentCartridgeIndex]==true then
         data['trackedTargetsInWindow']={} -- that cartridge is not yet ready again
@@ -122,7 +122,7 @@ function sysCall_sensing()
         data['trackedTargetsInWindow']=trackedTargetsInWindow_currentLayer
     end
     data['trackedItemsInWindow']={}
-    sim.writeCustomDataBlock(trackingWindowModel,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+    sim.writeCustomStringData(trackingWindowModel,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
 
     if showPoints then
         displayTargets(trackedTargetsInWindow_currentLayer)

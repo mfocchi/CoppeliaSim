@@ -83,13 +83,13 @@ end
 getAllPartsFromInput=function()
     local dat={}
     if inputHandle~=-1 then
-        local data=sim.readCustomDataBlock(inputHandle,'XYZ_DETECTIONWINDOW_INFO')
+        local data=sim.readCustomStringData(inputHandle,'XYZ_DETECTIONWINDOW_INFO')
         if data then
             data=sim.unpackTable(data)
             dat=data['detectedItems']
         else
-            data=sim.readCustomDataBlock(inputHandle,simBWF.modelTags.TRACKINGWINDOW)
-            if data then
+            data=sim.readCustomStringData(inputHandle,simBWF.modelTags.TRACKINGWINDOW)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 dat=data['transferItems']
             end
@@ -159,8 +159,8 @@ end
 
 getConveyorEncoderDistance=function()
     if conveyorHandle~=-1 then
-        local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['encoderDistance']
         end
@@ -172,7 +172,7 @@ removeTrackedPart=function(partHandle)
     local h=trackedParts[partHandle]['dummyHandle']
     local objs=sim.getObjectsInTree(h) -- if the part is decorated, it could have several dummy children
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     trackedParts[partHandle]=nil
 end
@@ -203,9 +203,9 @@ attachDummiesAndDecorate=function(part,partData)
     if not partData['decorationInfo'] then
         local data=nil
         if overridePallet then
-            data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
+            data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
         else
-            data=sim.readCustomDataBlock(part,simBWF.modelTags.PART)
+            data=sim.readCustomStringData(part,simBWF.modelTags.PART)
         end
         data=sim.unpackTable(data)
         if #data['palletPoints']>0 then
@@ -228,10 +228,10 @@ attachDummiesAndDecorate=function(part,partData)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    trackingWindowShape=sim.getObject('./genericTrackingWindow_track')
-    stopLineShape=sim.getObject('./genericTrackingWindow_stopLine')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
+    model=sim.getObject('..')
+    trackingWindowShape=sim.getObject('../genericTrackingWindow_track')
+    stopLineShape=sim.getObject('../genericTrackingWindow_stopLine')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
     data=sim.unpackTable(data)
     local err=sim.getInt32Param(sim.intparam_error_report_mode)
     sim.setInt32Param(sim.intparam_error_report_mode,0)
@@ -299,7 +299,7 @@ function sensing_withConveyor()
     previousConveyorEncoderDistance=encoderDistance
     local trackDx={conveyorVector[1]*conveyorDl,conveyorVector[2]*conveyorDl,conveyorVector[3]*conveyorDl}
     local allInputParts=getAllPartsFromInput()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
     data=sim.unpackTable(data)
     for key,value in pairs(allPreviousInputParts) do
         if not allInputParts[key] then
@@ -450,28 +450,28 @@ function sensing_withConveyor()
     data['trackedTargetsInWindow']=trackedTargetsInWindow_currentLayer
     data['trackedItemsInWindow']=trackedPartsInTrackingWindow
     data['transferItems']=trackedPartsInTransferWindow
-    sim.writeCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+    sim.writeCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
     if stopConveyor then
         if conveyorHandle>=0 and (not stopRequest) then
-            local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 local stopRequests=data['stopRequests']
                 stopRequests[model]=true -- we have a stop request from this tracking window
                 data['stopRequests']=stopRequests
-                sim.writeCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+                sim.writeCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR,sim.packTable(data))
                 stopRequest=true
             end
         end
     else
         if stopRequest and conveyorHandle>=0 then
-            local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 local stopRequests=data['stopRequests']
                 stopRequests[model]=nil
                 data['stopRequests']=stopRequests
-                sim.writeCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+                sim.writeCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR,sim.packTable(data))
             end
             stopRequest=nil
         end
@@ -489,7 +489,7 @@ function sensing_withConveyor()
 end
 
 function sensing_withoutConveyor()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
     data=sim.unpackTable(data)
     if data['freezeStaticWindow'] then
         staticWindowFrozen=true
@@ -629,5 +629,5 @@ function sensing_withoutConveyor()
         end
         displayConsoleIfNeeded(trackedPartsInTrackingWindow)
     end
-    sim.writeCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+    sim.writeCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
 end

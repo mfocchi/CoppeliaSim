@@ -1,7 +1,7 @@
 function model.getTriggerType()
     if model.stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(model.stopTriggerSensor,simBWF.modelTags.BINARYSENSOR) 
-        if data then
+        local data=sim.readCustomStringData(model.stopTriggerSensor,simBWF.modelTags.BINARYSENSOR) 
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -14,8 +14,8 @@ function model.getTriggerType()
         end
     end
     if model.startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(model.startTriggerSensor,simBWF.modelTags.BINARYSENSOR) 
-        if data then
+        local data=sim.readCustomStringData(model.startTriggerSensor,simBWF.modelTags.BINARYSENSOR) 
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -32,8 +32,8 @@ end
 
 function model.overrideMasterMotionIfApplicable(override)
     if model.masterConveyor>=0 then
-        local data=sim.readCustomDataBlock(model.masterConveyor,simBWF.modelTags.THERMOFORMER) 
-        if data then
+        local data=sim.readCustomStringData(model.masterConveyor,simBWF.modelTags.THERMOFORMER) 
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local stopRequests=data['stopRequests']
             if override then
@@ -42,15 +42,15 @@ function model.overrideMasterMotionIfApplicable(override)
                 stopRequests[model.handle]=nil
             end
             data['stopRequests']=stopRequests
-            sim.writeCustomDataBlock(model.masterConveyor,simBWF.modelTags.THERMOFORMER,sim.packTable(data))
+            sim.writeCustomStringData(model.masterConveyor,simBWF.modelTags.THERMOFORMER,sim.packTable(data))
         end
     end
 end
 
 function model.getMasterDeltaShiftIfApplicable()
     if model.masterConveyor>=0 then
-        local data=sim.readCustomDataBlock(model.masterConveyor,simBWF.modelTags.THERMOFORMER) 
-        if data then
+        local data=sim.readCustomStringData(model.masterConveyor,simBWF.modelTags.THERMOFORMER) 
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local totalShift=data['encoderDistance']
             local retVal=totalShift
@@ -90,7 +90,7 @@ function sysCall_actuation()
     local t=sim.getSimulationTime()
     local dt=t-model.lastT
     model.lastT=t
-    local data=sim.readCustomDataBlock(model.handle,simBWF.modelTags.THERMOFORMER)
+    local data=sim.readCustomStringData(model.handle,simBWF.modelTags.THERMOFORMER)
     data=sim.unpackTable(data)
     if model.online then
         local ds=0
@@ -179,7 +179,7 @@ function model.thermoformer_actuation()
     local dt=t-model.lastT
     model.lastT=t
     local data=model.readInfo()
---    local data=sim.readCustomDataBlock(model.handle,simBWF.modelTags.THERMOFORMER)
+--    local data=sim.readCustomStringData(model.handle,simBWF.modelTags.THERMOFORMER)
 --    data=sim.unpackTable(data)
     local stationDisplacement=nil
     if model.online then
@@ -210,17 +210,17 @@ function model.thermoformer_actuation()
                 local maxVel=data.velocity
                 local accel=data.acceleration
                 local displ=data.thermo_rowColCnt[1]*data.thermo_rowColStep[1]+data.thermo_stationSpacing
-                model.rmlObject=sim.rmlPos(1,0.0001,-1,{0,0,0},{maxVel,accel,0},{1},{displ,0,0})
+                model.rmlObject=sim.ruckigPos(1,0.0001,-1,{0,0,0},{maxVel,accel,0},{1},{displ,0,0})
                 model.previousShift=0
             end
         else
-            local result,newPosVelAccel=sim.rmlStep(model.rmlObject,sim.getSimulationTimeStep())
+            local result,newPosVelAccel=sim.ruckigStep(model.rmlObject,sim.getSimulationTimeStep())
             if result~=-1 then
                 theShift=newPosVelAccel[1]-model.previousShift
                 model.previousShift=newPosVelAccel[1]
             end
             if result==1 or result==-1 then
-                sim.rmlRemove(model.rmlObject)
+                sim.ruckigRemove(model.rmlObject)
                 model.rmlObject=nil
                 if data.thermo_dwellTime>0 then
                     model.dwellTime=data.thermo_dwellTime
@@ -257,7 +257,7 @@ end
 function model.displaceBoxes(totShift)
     local objs=sim.getObjectsInTree(model.specHandles.boxes,sim.handle_all,1)
     for i=1,#objs,1 do
-        local d=sim.readCustomDataBlock(objs[i],'thermoformerOpenBox')
+        local d=sim.readCustomStringData(objs[i],'thermoformerOpenBox')
         d=sim.unpackTable(d)
         local p=sim.getObjectPosition(objs[i],model.handle)
         p[1]=d.initX+totShift
@@ -270,16 +270,16 @@ function model.newStationReached()
     local objs=sim.getObjectsInTree(model.specHandles.boxes,sim.handle_all,1)
     local bs={data.thermo_extrusionSize[1]+data.thermo_wallThickness*2,data.thermo_extrusionSize[2]+data.thermo_wallThickness*2,data.thermo_extrusionSize[3]+data.thermo_wallThickness}
     for i=1,#objs,1 do
-        local d=sim.readCustomDataBlock(objs[i],'thermoformerOpenBox')
+        local d=sim.readCustomStringData(objs[i],'thermoformerOpenBox')
         d=sim.unpackTable(d)
         d.stationIndex=d.stationIndex+1
-        sim.writeCustomDataBlock(objs[i],'thermoformerOpenBox',sim.packTable(d))
+        sim.writeCustomStringData(objs[i],'thermoformerOpenBox',sim.packTable(d))
         if d.stationIndex>=data.thermo_stationCnt-1 then
             local h=sim.createPureShape(0,8,bs,0.1)
             sim.setObjectPosition(h,objs[i],{0,0,0})
             sim.setObjectOrientation(h,objs[i],{0,0,0})
             sim.setShapeColor(objs[i],nil,sim.colorcomponent_ambient_diffuse,data.thermo_color)
-            sim.removeObject(objs[i])
+            sim.removeObjects({objs[i]})
 
             local partData=simBWF.readPartInfo(h)
             local itemPosition=sim.getObjectPosition(h,-1)

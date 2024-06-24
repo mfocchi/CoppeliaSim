@@ -3,8 +3,8 @@
 function model.readInfo()
     -- Read all the data stored in the model
     
-    local data=sim.readCustomDataBlock(model.handle,model.tagName)
-    if data then
+    local data=sim.readCustomStringData(model.handle,model.tagName)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -82,9 +82,9 @@ function model.writeInfo(data)
     -- Write all the data stored in the model. Before writing, make sure to always first read with readInfo()
     
     if data then
-        sim.writeCustomDataBlock(model.handle,model.tagName,sim.packTable(data))
+        sim.writeCustomStringData(model.handle,model.tagName,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model.handle,model.tagName,'')
+        sim.writeCustomStringData(model.handle,model.tagName,'')
     end
 end
 
@@ -123,16 +123,16 @@ model.objRefJobInfo={6,4} -- information about jobs stored in object references.
 -------------------------------------------------------
 model.handles={}
 model.handles.calibrationBalls={model.handle}
-model.handles.detectorBox=sim.getObject('./VisionWindow_detectorBox@silentError')
-model.handles.detectorSensor=sim.getObject('./VisionWindow_detectorSensor@silentError')
+model.handles.detectorBox=sim.getObject('../VisionWindow_detectorBox@silentError')
+model.handles.detectorSensor=sim.getObject('../VisionWindow_detectorSensor@silentError')
 for i=2,3,1 do
-    model.handles.calibrationBalls[i]=sim.getObject('./VisionWindow_calibrationBall'..i..'@silentError')
+    model.handles.calibrationBalls[i]=sim.getObject('../VisionWindow_calibrationBall'..i..'@silentError')
 end
 if model.handles.detectorBox==-1 then
     -- for backward compatibility:
-    model.handles.detectorBox=sim.getObject('./RagnarVision_detectorBox')
-    model.handles.detectorSensor=sim.getObject('./RagnarVision_detectorSensor')
+    model.handles.detectorBox=sim.getObject('../RagnarVision_detectorBox')
+    model.handles.detectorSensor=sim.getObject('../RagnarVision_detectorSensor')
     for i=2,3,1 do
-        model.handles.calibrationBalls[i]=sim.getObject('./RagnarVision_calibrationBall'..i)
+        model.handles.calibrationBalls[i]=sim.getObject('../RagnarVision_calibrationBall'..i)
     end
 end

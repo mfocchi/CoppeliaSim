@@ -6,8 +6,9 @@ function sysCall_info()
 end
 
 function sysCall_init()
-    if sim.msgbox_return_yes == sim.msgBox(
-        sim.msgbox_type_info, sim.msgbox_buttons_yesno, "Minimalistic Importer",
+    simUI = require 'simUI'
+    if simUI.msgbox_result.yes == sim.msgBox(
+        simUI.msgbox_type.info, simUI.msgbox_buttons.yesno, "Minimalistic Importer",
         "This add-on is a minimalistic importer, meant as an example. Content in folder 'exportedContent' will be imported. Do you want to proceed?"
     ) then
 
@@ -182,10 +183,11 @@ function sysCall_init()
                 end
             end
         end
-        sim.removeObjectFromSelection(sim.handle_all, -1)
+        local nsel = {}
         for i = 1, #newHandlesAndIds / 3, 1 do
-            sim.addObjectToSelection(sim.handle_single, newHandlesAndIds[3 * (i - 1) + 1])
+            nsel[i] = newHandlesAndIds[3 * (i - 1) + 1]
         end
+        sim.setObjectSel(nsel)
         sim.announceSceneContentChange()
     end
     return {cmd = 'cleanup'}

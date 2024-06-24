@@ -46,7 +46,7 @@ function sysCall_init()
     model.lastImgUpdateTimeInMs=-1000
     if model.online then
         model.simOrRealIndex=2
-        model.lastImgUpdateTimeInMs=sim.getSystemTimeInMs(-1)-1000
+        model.lastImgUpdateTimeInMs=sim.getSystemTime()*1000-1000
     end
     local data=model.readInfo()
     model.sensorResolution=data.resolution

@@ -24,8 +24,8 @@ function model.getAvailableTrackingWindows(pick)
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.TRACKINGWINDOW)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.TRACKINGWINDOW)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             if data['type']==theType then -- 0 is for pick, 1 is for place
                 retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
@@ -43,8 +43,8 @@ function model.getAvailableFrames(pick)
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.LOCATIONFRAME)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.LOCATIONFRAME)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             if data['type']==theType then -- 0 is for pick, 1 is for place
                 retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
@@ -58,8 +58,8 @@ function model.getAvailableConveyors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -70,8 +70,8 @@ function model.getAvailableInputBoxes()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.INPUTBOX)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.INPUTBOX)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -82,8 +82,8 @@ function model.getAvailableOutputBoxes()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.OUTPUTBOX)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.OUTPUTBOX)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -156,7 +156,7 @@ end
 function model.updateWs()
     local gripper=model.getGripper()
     if gripper>=0 then
-        local grData=sim.unpackTable(sim.readCustomDataBlock(gripper,simBWF.modelTags.RAGNARGRIPPER))
+        local grData=sim.unpackTable(sim.readCustomStringData(gripper,simBWF.modelTags.RAGNARGRIPPER))
     
         local inf=model.readInfo()
         local primaryArmL=inf['primaryArmLengthInMM']/1000
@@ -314,7 +314,7 @@ function model.adjustRobot()
     local p=sim.getObjectPosition(model.handles.frameModel,sim.handle_parent)
     sim.setObjectPosition(model.handles.frameModel,sim.handle_parent,{0,0,0})
     
-    model.workspaceUpdateRequest=sim.getSystemTimeInMs(-1)
+    model.workspaceUpdateRequest=sim.getSystemTime()*1000
 --]]
 end
 
@@ -480,7 +480,8 @@ function model.checkAndHandlePlatformAttachment()
     local objs=sim.getObjectsInTree(model.handle,sim.handle_all,1+2)-- first children of Ragnar model base only
     local newPlatform=-1
     for i=1,#objs,1 do
-        if sim.readCustomDataBlock(objs[i],simBWF.modelTags.RAGNARGRIPPERPLATFORM) then
+        local aab = sim.readCustomStringData(objs[i],simBWF.modelTags.RAGNARGRIPPERPLATFORM)
+        if aab and #aab > 0 then
             -- Yes!
             newPlatform=objs[i]
             break
@@ -504,7 +505,7 @@ function model.checkAndHandlePlatformAttachment()
         for i=1,#model.handles.ikTips,1 do
             local ld=sim.getLinkDummy(model.handles.ikTips[i])
             if ld>=0 then
-                sim.removeObject(ld) -- Yes, we delete the linked dummy on that old platform
+                sim.removeObjects({ld}) -- Yes, we delete the linked dummy on that old platform
             end
         end
         
@@ -568,8 +569,8 @@ function model.attachPlatformToEmptySpot(newPlatform)
     sim.setObjectParent(newPlatform,model.handles.ragnarGripperPlatformAttachment,true)
     local objs=sim.getObjectsInTree(newPlatform,sim.object_dummy_type,1)
     for i=1,#objs,1 do
-        local data=sim.readCustomDataBlock(objs[i],simBWF.modelTags.RAGNARGRIPPERPLATFORMIKPT)
-        if data then
+        local data=sim.readCustomStringData(objs[i],simBWF.modelTags.RAGNARGRIPPERPLATFORMIKPT)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local dum=sim.copyPasteObjects({objs[i]},0)[1]
             sim.setObjectParent(dum,objs[i],true)
@@ -598,7 +599,8 @@ function sysCall_init()
         -- since that can trigger many other calls.
         local objs=sim.getObjectsInTree(model.platform,sim.handle_all,1)
         for i=1,#objs,1 do
-            if sim.readCustomDataBlock(objs[i],simBWF.modelTags.RAGNARGRIPPER) then
+            local aab = sim.readCustomStringData(objs[i],simBWF.modelTags.RAGNARGRIPPER)
+            if aab and #aab > 0 then
                 model.gripper=objs[i]
                 break
             end
@@ -607,10 +609,10 @@ function sysCall_init()
     
     -- IK
     local targets={}
-    targets[1]=sim.getObject('./RagnarGripperPlatform_ikPt1')
-    targets[2]=sim.getObject('./RagnarGripperPlatform_ikPt2')
-    targets[3]=sim.getObject('./RagnarGripperPlatform_ikPt3')
-    targets[4]=sim.getObject('./RagnarGripperPlatform_ikPt4')
+    targets[1]=sim.getObject('../RagnarGripperPlatform_ikPt1')
+    targets[2]=sim.getObject('../RagnarGripperPlatform_ikPt2')
+    targets[3]=sim.getObject('../RagnarGripperPlatform_ikPt3')
+    targets[4]=sim.getObject('../RagnarGripperPlatform_ikPt4')
     model.handles.ikEnv=simIK.createEnvironment()
     model.handles.ikGroups={}
     model.handles.ikGroups[1]=simIK.createIkGroup(model.handles.ikEnv)
@@ -622,41 +624,41 @@ function sysCall_init()
     model.handles.ikGroups[4]=simIK.createIkGroup(model.handles.ikEnv)
     local ikElement,simToIkMap4=simIK.addIkElementFromScene(model.handles.ikEnv,model.handles.ikGroups[4],model.handles.ragnarRef,model.handles.ikTips[4],targets[4],simIK.constraint_position)
     
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_secondaryArm1a_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_primaryArm1_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_motor1_adjust')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_xRotLeftFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_zRotLeftFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_xOffsetLeftFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_yOffsetLeft')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('./Ragnar_zOffset')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_secondaryArm1a_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_primaryArm1_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_motor1_adjust')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_xRotLeftFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_zRotLeftFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_xOffsetLeftFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_yOffsetLeft')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap1[sim.getObject('../Ragnar_zOffset')],simIK.jointmode_passive)
     
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_secondaryArm4a_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_primaryArm4_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_motor4_adjust')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_xRotLeftRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_zRotLeftRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_xOffsetLeftRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_yOffsetLeft')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('./Ragnar_zOffset')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_secondaryArm4a_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_primaryArm4_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_motor4_adjust')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_xRotLeftRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_zRotLeftRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_xOffsetLeftRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_yOffsetLeft')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap4[sim.getObject('../Ragnar_zOffset')],simIK.jointmode_passive)
     
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_secondaryArm2a_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_primaryArm2_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_motor2_adjust')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_xRotRightFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_zRotRightFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_xOffsetRightFront')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_yOffsetRight')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('./Ragnar_zOffset')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_secondaryArm2a_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_primaryArm2_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_motor2_adjust')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_xRotRightFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_zRotRightFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_xOffsetRightFront')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_yOffsetRight')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap2[sim.getObject('../Ragnar_zOffset')],simIK.jointmode_passive)
     
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_secondaryArm3a_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_primaryArm3_adjustJ2')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_motor3_adjust')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_xRotRightRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_zRotRightRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_xOffsetRightRear')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_yOffsetRight')],simIK.jointmode_passive)
-    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('./Ragnar_zOffset')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_secondaryArm3a_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_primaryArm3_adjustJ2')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_motor3_adjust')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_xRotRightRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_zRotRightRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_xOffsetRightRear')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_yOffsetRight')],simIK.jointmode_passive)
+    simIK.setJointMode(model.handles.ikEnv,simToIkMap3[sim.getObject('../Ragnar_zOffset')],simIK.jointmode_passive)
 
     model.platformUniqueId=model.getPlatformUniqueId()
     model.gripperUniqueId=model.getGripperUniqueId()
@@ -669,7 +671,7 @@ function sysCall_nonSimulation()
     model.dlg.showOrHideDlgIfNeeded()
     model.checkAndHandlePlatformAttachment()
     model.updatePluginRepresentation()
-    if model.workspaceUpdateRequest and sim.getSystemTimeInMs(model.workspaceUpdateRequest)>2000 then
+    if model.workspaceUpdateRequest and (sim.getSystemTime()*1000 - model.workspaceUpdateRequest)>2000 then
         model.workspaceUpdateRequest=nil
         model.updateWs()
     end

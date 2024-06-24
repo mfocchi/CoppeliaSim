@@ -56,8 +56,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_SHIPPINGBOX_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_SHIPPINGBOX_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -68,9 +68,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_SHIPPINGBOX_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_SHIPPINGBOX_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_SHIPPINGBOX_INFO','')
+        sim.writeCustomStringData(model,'XYZ_SHIPPINGBOX_INFO','')
     end
 end
 
@@ -160,7 +160,7 @@ function updateModel()
     for i=1,#objs,1 do
         local h=objs[i]
         if h~=texture and h~=smallLabel and h~=largeLabel then
-            sim.removeObject(h)
+            sim.removeObjects({h})
         end
     end
     
@@ -192,7 +192,7 @@ function updateModel()
             sim.setObjectOrientation(h,model,theTable[2])
             local labelData={}
             labelData['labelIndex']=labelInd
-            sim.writeCustomDataBlock(h,'XYZ_PARTLABEL_INFO',sim.packTable(labelData))
+            sim.writeCustomStringData(h,'XYZ_PARTLABEL_INFO',sim.packTable(labelData))
         end
     end
 end
@@ -638,7 +638,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -649,16 +649,16 @@ function sysCall_init()
         data['name']='SHIPPINGBOX'
     end
     writePartInfo(data)
-    texture=sim.getObject('./genericShippingBox_texture')
-    smallLabel=sim.getObject('./genericShippingBox_smallLabel')
-    largeLabel=sim.getObject('./genericShippingBox_largeLabel')
+    texture=sim.getObject('../genericShippingBox_texture')
+    smallLabel=sim.getObject('../genericShippingBox_smallLabel')
+    largeLabel=sim.getObject('../genericShippingBox_largeLabel')
     
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else
@@ -695,10 +695,10 @@ function sysCall_cleanup()
     if (repo and (sim.getObjectParent(model)==modelHolder)) or finalizeModel then
         -- This means the box is part of the part repository or that we want to finalize the model (i.e. won't be customizable anymore)
         local c=readInfo()
-        sim.writeCustomDataBlock(model,'XYZ_SHIPPINGBOX_INFO','')
-        sim.removeObject(texture)
-        sim.removeObject(smallLabel)
-        sim.removeObject(largeLabel)
+        sim.writeCustomStringData(model,'XYZ_SHIPPINGBOX_INFO','')
+        sim.removeObjects({texture})
+        sim.removeObjects({smallLabel})
+        sim.removeObjects({largeLabel})
     end
     simBWF.writeSessionPersistentObjectData(model,"dlgPosAndSize",previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos)
 end

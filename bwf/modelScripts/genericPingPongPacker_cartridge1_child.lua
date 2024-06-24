@@ -28,40 +28,40 @@ waitForSensor=function(signal)
         else
             if r<=0 then break end
         end
-        sim.switchThread()
+        sim.step()
     end
 end
 
 waitForCartridgeFull=function()
     while true do
-        local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         if data['putCartridgeDown'][1] then
             break
         end
-        sim.switchThread()
+        sim.step()
     end
 end
 
 setCartridgeEmpty=function()
-    sim.setThreadAutomaticSwitch(false)
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    sim.setStepping(true)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     data['putCartridgeDown'][1]=false
-    sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
-    sim.setThreadAutomaticSwitch(true)
+    sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+    sim.setStepping(false)
 end
 
-model=sim.getObject('./genericPingPongPacker')
-local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+model=sim.getObject('../genericPingPongPacker')
+local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
 data=sim.unpackTable(data)
 maxVel=data['cartridgeVelocity']
 maxAccel=data['cartridgeAcceleration']
 dwellTimeDown=data['cartridgeDwellTimeDown']
 dwellTimeUp=data['cartridgeDwellTimeUp']
-j=sim.getObject('./genericPingPongPacker_cartridge1_upDownJoint')
-sens=sim.getObject('./genericPingPongPacker_cartridge1_sensor')
-stopper=sim.getObject('./genericPingPongPacker_cartridge1_stopper')
+j=sim.getObject('../genericPingPongPacker_cartridge1_upDownJoint')
+sens=sim.getObject('../genericPingPongPacker_cartridge1_sensor')
+stopper=sim.getObject('../genericPingPongPacker_cartridge1_stopper')
 
 while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do
     waitForSensor(true)

@@ -1,8 +1,8 @@
 simBWF=require('simBWF')
 function getTriggerType()
     if stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -15,8 +15,8 @@ function getTriggerType()
         end
     end
     if startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -33,8 +33,8 @@ end
 
 function overrideMasterMotionIfApplicable(override)
     if masterConveyor>=0 then
-        local data=sim.readCustomDataBlock(masterConveyor,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(masterConveyor,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local stopRequests=data['stopRequests']
             if override then
@@ -43,15 +43,15 @@ function overrideMasterMotionIfApplicable(override)
                 stopRequests[model]=nil
             end
             data['stopRequests']=stopRequests
-            sim.writeCustomDataBlock(masterConveyor,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+            sim.writeCustomStringData(masterConveyor,simBWF.modelTags.CONVEYOR,sim.packTable(data))
         end
     end
 end
 
 function getMasterDeltaShiftIfApplicable()
     if masterConveyor>=0 then
-        local data=sim.readCustomDataBlock(masterConveyor,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(masterConveyor,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local totalShift=data['encoderDistance']
             local retVal=totalShift
@@ -65,23 +65,23 @@ function getMasterDeltaShiftIfApplicable()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     stopTriggerSensor=simBWF.getReferencedObjectHandle(model,1)
     startTriggerSensor=simBWF.getReferencedObjectHandle(model,2)
     masterConveyor=simBWF.getReferencedObjectHandle(model,3)
     getTriggerType()
-    path=sim.getObject('./genericCurvedConveyorTypeA90_path')
-    endPad1=sim.getObject('./genericCurvedConveyorTypeA90_endPad1')
-    endPad2=sim.getObject('./genericCurvedConveyorTypeA90_endPad2')
+    path=sim.getObject('../genericCurvedConveyorTypeA90_path')
+    endPad1=sim.getObject('../genericCurvedConveyorTypeA90_endPad1')
+    endPad2=sim.getObject('../genericCurvedConveyorTypeA90_endPad2')
     lastT=sim.getSimulationTime()
     beltVelocity=0
     totShift=0
 end 
 
 function sysCall_actuation()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     maxVel=data['velocity']
     accel=data['acceleration']

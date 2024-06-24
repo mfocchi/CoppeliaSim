@@ -1,5 +1,5 @@
 local codeEditorInfos=[[
-simSDF.import(string fileName,map options={})
+simSDF.import(string fileName, map options={})
 simSDF.dump(string fileName)
 ]]
 

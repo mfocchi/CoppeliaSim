@@ -48,8 +48,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTSINK)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTSINK)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -60,9 +60,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.PARTSINK,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.PARTSINK,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.PARTSINK,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.PARTSINK,'')
     end
 end
 
@@ -221,20 +221,20 @@ function removeDlg()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
     simBWF.checkIfCodeAndModelMatch(model,_CODEVERSION_,_info['version'])
     writeInfo(_info)
-    sensor=sim.getObject('./genericPartSink_sensor')
+    sensor=sim.getObject('../genericPartSink_sensor')
     
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

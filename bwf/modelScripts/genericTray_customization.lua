@@ -50,8 +50,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_TRAY_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_TRAY_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -62,9 +62,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_TRAY_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_TRAY_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_TRAY_INFO','')
+        sim.writeCustomStringData(model,'XYZ_TRAY_INFO','')
     end
 end
 
@@ -114,9 +114,7 @@ function setShapeSize(h,x,y,z)
 end
 
 setShapeMass=function(handle,m)
-    local transf=sim.getObjectMatrix(handle,-1)
-    local m0,i0,com0=sim.getShapeMassAndInertia(handle,transf)
-    sim.setShapeMassAndInertia(handle,m,{0.01*m,0,0,0,0.01*m,0,0,0,0.01*m},{0,0,0},transf)
+    sim.setShapeMass(handle,m)
 end
 
 function setDlgItemContent()
@@ -169,7 +167,7 @@ function updateTray()
     local palletOffset=c['placeOffset']
     setShapeSize(model,width,length,height)
     if border~=-1 then
-        sim.removeObject(border)
+        sim.removeObjects({border})
         border=-1
     end
     local borders={}
@@ -779,22 +777,22 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
     simBWF.checkIfCodeAndModelMatch(model,_CODEVERSION_,_info['version'])
     writeInfo(_info)
-    connection=sim.getObject('./genericTray_borderConnection')
+    connection=sim.getObject('../genericTray_borderConnection')
     border=sim.getObjectChild(connection,0)
-    borderElement=sim.getObject('./genericTray_borderElement')
+    borderElement=sim.getObject('../genericTray_borderElement')
 	
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else
@@ -828,8 +826,8 @@ function sysCall_cleanup()
     local repo,modelHolder=simBWF.getPartRepositoryHandles()
     if (repo and (sim.getObjectParent(model)==modelHolder)) or finalizeModel then
         -- This means the box is part of the part repository or that we want to finalize the model (i.e. won't be customizable anymore)
-        sim.writeCustomDataBlock(model,'XYZ_TRAY_INFO','')
-        sim.removeObject(borderElement) 
+        sim.writeCustomStringData(model,'XYZ_TRAY_INFO','')
+        sim.removeObjects({borderElement}) 
     end
     simBWF.writeSessionPersistentObjectData(model,"dlgPosAndSize",previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos)
 end

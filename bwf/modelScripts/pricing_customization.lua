@@ -20,8 +20,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_PRICING_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_PRICING_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -32,9 +32,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_PRICING_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_PRICING_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_PRICING_INFO','')
+        sim.writeCustomStringData(model,'XYZ_PRICING_INFO','')
     end
 end
 
@@ -81,7 +81,7 @@ function removeDlg()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else
@@ -90,7 +90,7 @@ showOrHideUiIfNeeded=function()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -100,7 +100,7 @@ function sysCall_init()
     local objs=sim.getObjectsWithTag('XYZ_PRICING_INFO',true)
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
     if #objs>1 then
-        sim.removeObject(model)
+        sim.removeObjects({model})
         sim.removeObjectFromSelection(sim.handle_all)
         objs=sim.getObjectsWithTag('XYZ_PRICING_INFO',true)
         sim.addObjectToSelection(sim.handle_single,objs[1])

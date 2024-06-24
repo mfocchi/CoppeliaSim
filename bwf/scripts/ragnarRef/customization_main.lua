@@ -119,7 +119,7 @@ function model.dlg.removeDlg()
 end
 
 function model.dlg.showOrHideDlgIfNeeded()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model.handle then
         model.dlg.showDlg()
     else
@@ -152,33 +152,33 @@ end
 function sysCall_init()
     
     model.handles={}
-    model.handles.zOffsetJ=sim.getObject('./Ragnar_zOffset')
-    model.handles.xOffsetJ1=sim.getObject('./Ragnar_yOffsetLeft')
-    model.handles.xOffsetJ2=sim.getObject('./Ragnar_yOffsetRight')
-    model.handles.yOffsetJ1=sim.getObject('./Ragnar_xOffsetLeftFront')
-    model.handles.yOffsetJ2=sim.getObject('./Ragnar_xOffsetLeftRear')
-    model.handles.yOffsetJ3=sim.getObject('./Ragnar_xOffsetRightFront')
-    model.handles.yOffsetJ4=sim.getObject('./Ragnar_xOffsetRightRear')
-    model.handles.alphaOffsetJ1=sim.getObject('./Ragnar_zRotLeftFront')
-    model.handles.alphaOffsetJ2=sim.getObject('./Ragnar_zRotLeftRear')
-    model.handles.alphaOffsetJ3=sim.getObject('./Ragnar_zRotRightFront')
-    model.handles.alphaOffsetJ4=sim.getObject('./Ragnar_zRotRightRear')
-    model.handles.betaOffsetJ1=sim.getObject('./Ragnar_xRotLeftFront')
-    model.handles.betaOffsetJ2=sim.getObject('./Ragnar_xRotLeftRear')
-    model.handles.betaOffsetJ3=sim.getObject('./Ragnar_xRotRightFront')
-    model.handles.betaOffsetJ4=sim.getObject('./Ragnar_xRotRightRear')
-    model.handles.ikJ1_a=sim.getObject('./Ragnar_motor1')
-    model.handles.ikJ2_a=sim.getObject('./Ragnar_motor2')
-    model.handles.ikJ3_a=sim.getObject('./Ragnar_motor3')
-    model.handles.ikJ4_a=sim.getObject('./Ragnar_motor4')
-    model.handles.ikJ1_b=sim.getObject('./Ragnar_primaryArm1_j1')
-    model.handles.ikJ2_b=sim.getObject('./Ragnar_primaryArm2_j1')
-    model.handles.ikJ3_b=sim.getObject('./Ragnar_primaryArm3_j1')
-    model.handles.ikJ4_b=sim.getObject('./Ragnar_primaryArm4_j1')
+    model.handles.zOffsetJ=sim.getObject('../Ragnar_zOffset')
+    model.handles.xOffsetJ1=sim.getObject('../Ragnar_yOffsetLeft')
+    model.handles.xOffsetJ2=sim.getObject('../Ragnar_yOffsetRight')
+    model.handles.yOffsetJ1=sim.getObject('../Ragnar_xOffsetLeftFront')
+    model.handles.yOffsetJ2=sim.getObject('../Ragnar_xOffsetLeftRear')
+    model.handles.yOffsetJ3=sim.getObject('../Ragnar_xOffsetRightFront')
+    model.handles.yOffsetJ4=sim.getObject('../Ragnar_xOffsetRightRear')
+    model.handles.alphaOffsetJ1=sim.getObject('../Ragnar_zRotLeftFront')
+    model.handles.alphaOffsetJ2=sim.getObject('../Ragnar_zRotLeftRear')
+    model.handles.alphaOffsetJ3=sim.getObject('../Ragnar_zRotRightFront')
+    model.handles.alphaOffsetJ4=sim.getObject('../Ragnar_zRotRightRear')
+    model.handles.betaOffsetJ1=sim.getObject('../Ragnar_xRotLeftFront')
+    model.handles.betaOffsetJ2=sim.getObject('../Ragnar_xRotLeftRear')
+    model.handles.betaOffsetJ3=sim.getObject('../Ragnar_xRotRightFront')
+    model.handles.betaOffsetJ4=sim.getObject('../Ragnar_xRotRightRear')
+    model.handles.ikJ1_a=sim.getObject('../Ragnar_motor1')
+    model.handles.ikJ2_a=sim.getObject('../Ragnar_motor2')
+    model.handles.ikJ3_a=sim.getObject('../Ragnar_motor3')
+    model.handles.ikJ4_a=sim.getObject('../Ragnar_motor4')
+    model.handles.ikJ1_b=sim.getObject('../Ragnar_primaryArm1_j1')
+    model.handles.ikJ2_b=sim.getObject('../Ragnar_primaryArm2_j1')
+    model.handles.ikJ3_b=sim.getObject('../Ragnar_primaryArm3_j1')
+    model.handles.ikJ4_b=sim.getObject('../Ragnar_primaryArm4_j1')
 
     model.handles.ikTips={}
     for i=1,4,1 do
-        model.handles.ikTips[i]=sim.getObject('./Ragnar_secondaryArm'..i..'a_tip')
+        model.handles.ikTips[i]=sim.getObject('../Ragnar_secondaryArm'..i..'a_tip')
     end
 
     model.handles.ikGroups={}

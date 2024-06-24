@@ -56,8 +56,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,'XYZ_CYLINDER_INFO')
-    if data then
+    local data=sim.readCustomStringData(model,'XYZ_CYLINDER_INFO')
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -68,9 +68,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,'XYZ_CYLINDER_INFO',sim.packTable(data))
+        sim.writeCustomStringData(model,'XYZ_CYLINDER_INFO',sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,'XYZ_CYLINDER_INFO','')
+        sim.writeCustomStringData(model,'XYZ_CYLINDER_INFO','')
     end
 end
 
@@ -314,7 +314,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -322,7 +322,7 @@ function sysCall_init()
     writeInfo(_info)
     auxCylinders={}
     for i=1,2,1 do
-        auxCylinders[i]=sim.getObject('./genericCylinder_auxCylinder'..i)
+        auxCylinders[i]=sim.getObject('../genericCylinder_auxCylinder'..i)
     end
     local data=readPartInfo()
     if data['name']=='<partName>' then
@@ -335,7 +335,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else
@@ -372,16 +372,16 @@ function sysCall_cleanup()
     if (repo and (sim.getObjectParent(model)==modelHolder)) or finalizeModel then
         -- This means the box is part of the part repository or that we want to finalize the model (i.e. won't be customizable anymore)
         local c=readInfo()
-        sim.writeCustomDataBlock(model,'XYZ_CYLINDER_INFO','')
+        sim.writeCustomStringData(model,'XYZ_CYLINDER_INFO','')
         local fs=sim.getObjectsInTree(model,sim.object_forcesensor_type,1+2)
         for i=1,#fs,1 do
-            sim.removeObject(fs[i])
+            sim.removeObjects({fs[i]})
         end
         if c['count']<3 then
-            sim.removeObject(auxCylinders[2])
+            sim.removeObjects({auxCylinders[2]})
         end
         if c['count']<2 then
-            sim.removeObject(auxCylinders[1])
+            sim.removeObjects({auxCylinders[1]})
         else
             local dummy=sim.createDummy(0.01)
             sim.setObjectOrientation(dummy,model,{0,0,0})
@@ -389,7 +389,7 @@ function sysCall_cleanup()
             oss[#oss+1]=model
             local r=sim.groupShapes(oss)
             sim.reorientShapeBoundingBox(r,dummy)
-            sim.removeObject(dummy)
+            sim.removeObjects({dummy})
         end
     end
     simBWF.writeSessionPersistentObjectData(model,"dlgPosAndSize",previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos)

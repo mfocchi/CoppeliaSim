@@ -26,11 +26,11 @@ function model.dlg.generate_callback()
         -- Attach the generic part info struct:
         local data={}
         data.version=1
-        sim.writeCustomDataBlock(model.selectedObj,simBWF.modelTags.GENERIC_PART,sim.packTable(data))
+        sim.writeCustomStringData(model.selectedObj,simBWF.modelTags.GENERIC_PART,sim.packTable(data))
         -- Set/attach the correct customization script:
-        local s=sim.getScriptHandle(sim.scripttype_customizationscript,model.selectedObj)
+        local s=sim.getScript(sim.scripttype_customization,model.selectedObj)
         if s<0 then
-            s=sim.addScript(sim.scripttype_customizationscript)
+            s=sim.addScript(sim.scripttype_customization)
             sim.associateScriptWithObject(s,model.selectedObj)
         end
         sim.setScriptText(s,"require('/bwf/scripts/genericPart/main')")
@@ -43,7 +43,7 @@ end
 
 function model.dlg.onClose_callback()
     model.dlg.removeDlg()
-    sim.removeObject(model.handle)
+    sim.removeObjects({model.handle})
 end
 
 function model.dlg.createDlg()
@@ -78,12 +78,12 @@ end
 
 function model.dlg.showOrHideDlgIfNeeded()
     model.dlg.showDlg()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     local h=-1
     if s and #s==1 then
-        local t=sim.readCustomDataBlockTags(s[1])
+        local t=sim.readCustomDataTags(s[1])
         local ng=false
-        if t then
+        if #t > 0 then
             for i=1,#t,1 do
                 for key,value in pairs(simBWF.modelTags) do
                     if t[i]==value then

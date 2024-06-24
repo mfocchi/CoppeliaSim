@@ -26,7 +26,7 @@ function sysCall_init()
     </ui>]]
          )
     updateUi()
-    local sel = sim.getObjectSelection()
+    local sel = sim.getObjectSel()
     if #sel == 1 then
         local idx = table.find(comboRobotModelHandle, sel[1])
         if idx then simUI.setComboboxSelectedIndex(ui, ui_comboRobotModel, idx - 1, false) end
@@ -129,16 +129,10 @@ function onClose()
 end
 
 function generate()
-    local scriptText = ''
-    local function appendLine(...)
-        scriptText = scriptText .. string.format(...) .. '\n'
-    end
     local robotModel = getRobotModelHandle()
     local algorithmName = getAlgorithmName()
     local jointGroup = getJointGroupHandle()
-    local existingMotionPlanning = sim.getObject(
-                                       './MotionPlanning', {proxy = robotModel, noError = true}
-                                   )
+    local existingMotionPlanning = sim.getObject('./MotionPlanning', {proxy = robotModel, noError = true})
     if existingMotionPlanning ~= -1 then
         if simUI.msgbox_result.ok ~= simUI.msgBox(
             simUI.msgbox_type.warning, simUI.msgbox_buttons.okcancel,
@@ -153,15 +147,12 @@ function generate()
         sim.removeObjects {existingMotionPlanning}
     end
 
-    local motionPlanningDummy = sim.createDummy(0.01)
-    sim.setModelProperty(motionPlanningDummy, 0)
-    sim.setObjectAlias(motionPlanningDummy, 'MotionPlanning')
-    sim.setObjectParent(motionPlanningDummy, robotModel, false)
-    sim.setObjectPose(motionPlanningDummy, {0, 0, 0, 0, 0, 0, 1}, robotModel)
-    sim.setObjectInt32Param(motionPlanningDummy, sim.objintparam_visibility_layer, 0)
-    sim.setObjectInt32Param(motionPlanningDummy, sim.objintparam_manipulation_permissions, 0)
-
     local jointGroupPath = sim.getObjectAliasRelative(jointGroup, robotModel, 1)
+
+    local scriptText = ''
+    local function appendLine(...)
+        scriptText = scriptText .. string.format(...) .. '\n'
+    end
     appendLine("sim = require 'sim'")
     appendLine("simOMPL = require 'simOMPL'")
     appendLine("robotConfigPath = require 'models.robotConfigPath'")
@@ -174,8 +165,8 @@ function generate()
     appendLine("    robotCollection = sim.createCollection()")
     appendLine("    sim.addItemToCollection(robotCollection, sim.handle_tree, model, 0)")
     appendLine("")
-    appendLine("    startState = ObjectProxy './StartState'")
-    appendLine("    goalState = ObjectProxy './GoalState'")
+    appendLine("    startState = sim.getScriptFunctions(sim.getObject './StartState')")
+    appendLine("    goalState = sim.getScriptFunctions(sim.getObject './GoalState')")
     appendLine("")
     appendLine("    task = simOMPL.createTask 'main'")
     appendLine("")
@@ -207,43 +198,33 @@ function generate()
     appendLine("        robotConfigPath.create(path, model, '%s')", jointGroupPath)
     appendLine("    end")
     appendLine("end")
-    appendLine("")
-    appendLine("function ObjectProxy(p, t)")
-    appendLine("    t = t or sim.scripttype_customizationscript")
-    appendLine("    return sim.getScriptFunctions(sim.getScript(t, sim.getObject(p)))")
-    appendLine("end")
 
-    local startStateDummy = sim.createDummy(0.01)
-    sim.setObjectAlias(startStateDummy, 'StartState')
-    sim.setObjectParent(startStateDummy, motionPlanningDummy, false)
-    sim.setObjectPose(startStateDummy, {0, 0, 0, 0, 0, 0, 1}, motionPlanningDummy)
-    sim.setObjectInt32Param(startStateDummy, sim.objintparam_visibility_layer, 0)
-    sim.setObjectInt32Param(startStateDummy, sim.objintparam_manipulation_permissions, 0)
-    local goalStateDummy = sim.createDummy(0.01)
-    sim.setObjectAlias(goalStateDummy, 'GoalState')
-    sim.setObjectParent(goalStateDummy, motionPlanningDummy, false)
-    sim.setObjectPose(goalStateDummy, {0, 0, 0, 0, 0, 0, 1}, motionPlanningDummy)
-    sim.setObjectInt32Param(goalStateDummy, sim.objintparam_visibility_layer, 0)
-    sim.setObjectInt32Param(goalStateDummy, sim.objintparam_manipulation_permissions, 0)
+    local motionPlanningScript = sim.createScript(sim.scripttype_customization, scriptText)
+    sim.setModelProperty(motionPlanningScript, 0)
+    sim.setObjectAlias(motionPlanningScript, 'MotionPlanning')
+    sim.setObjectParent(motionPlanningScript, robotModel, false)
+    sim.setObjectPose(motionPlanningScript, {0, 0, 0, 0, 0, 0, 1}, robotModel)
+    sim.setObjectInt32Param(motionPlanningScript, sim.objintparam_visibility_layer, 0)
+    sim.setObjectInt32Param(motionPlanningScript, sim.objintparam_manipulation_permissions, 0)
 
-    local script = sim.addScript(sim.scripttype_customizationscript)
-    sim.setScriptStringParam(script, sim.scriptstringparam_text, scriptText)
-    sim.associateScriptWithObject(script, motionPlanningDummy)
-    local startStateScript = sim.addScript(sim.scripttype_customizationscript)
-    sim.setScriptStringParam(
-        startStateScript, sim.scriptstringparam_text, [[require 'models.robotConfig_customization'
+    local startStateScript = sim.createScript(sim.scripttype_customization, [[require 'models.robotConfig_customization-2'
 model = sim.getObject '::'
-jointGroupPath = ']] .. jointGroupPath .. "'"
-    )
-    sim.associateScriptWithObject(startStateScript, startStateDummy)
-    local goalStateScript = sim.addScript(sim.scripttype_customizationscript)
-    sim.setScriptStringParam(
-        goalStateScript, sim.scriptstringparam_text, [[require 'models.robotConfig_customization'
+jointGroupPath = ']] .. jointGroupPath .. "'")
+    sim.setObjectAlias(startStateScript, 'StartState')
+    sim.setObjectParent(startStateScript, motionPlanningScript, false)
+    sim.setObjectPose(startStateScript, {0, 0, 0, 0, 0, 0, 1}, motionPlanningScript)
+    sim.setObjectInt32Param(startStateScript, sim.objintparam_visibility_layer, 0)
+    sim.setObjectInt32Param(startStateScript, sim.objintparam_manipulation_permissions, 0)
+    local goalStateScript = sim.createScript(sim.scripttype_customization, [[require 'models.robotConfig_customization-2'
 model = sim.getObject'::'
 jointGroupPath = ']] .. jointGroupPath .. [['
-color = {0, 1, 0}]]
-    )
-    sim.associateScriptWithObject(goalStateScript, goalStateDummy)
+color = {0, 1, 0}]])
+    sim.setObjectAlias(goalStateScript, 'GoalState')
+    sim.setObjectParent(goalStateScript, motionPlanningScript, false)
+    sim.setObjectPose(goalStateScript, {0, 0, 0, 0, 0, 0, 1}, motionPlanningScript)
+    sim.setObjectInt32Param(goalStateScript, sim.objintparam_visibility_layer, 0)
+    sim.setObjectInt32Param(goalStateScript, sim.objintparam_manipulation_permissions, 0)
+
     sim.announceSceneContentChange()
 
     leaveNow = true

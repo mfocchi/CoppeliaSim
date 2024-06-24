@@ -1,13 +1,13 @@
 simBWF=require('simBWF')
-local isCustomizationScript=sim.getScriptAttribute(sim.getScriptAttribute(sim.handle_self,sim.scriptattribute_scripthandle),sim.scriptattribute_scripttype)==sim.scripttype_customizationscript
+local isCustomizationScript=sim.getScriptAttribute(sim.getScriptAttribute(sim.handle_self,sim.scriptattribute_scripthandle),sim.scriptattribute_scripttype)==sim.scripttype_customization
 
 if false then -- if not sim.isPluginLoaded('Bwf') then
     function sysCall_init()
     end
 else
     function sysCall_init()
-        -- sim.writeCustomDataBlock(sim.getObject('.'),'',nil) -- remove all tags and data
-        -- sim.writeCustomDataBlock(sim.getObject('.'),simBWF.modelTags.VISIONBOX,sim.packTable({version=1})) -- append the tag with data that just contains the version number
+        -- sim.writeCustomStringData(sim.getObject('..'),'',nil) -- remove all tags and data
+        -- sim.writeCustomStringData(sim.getObject('..'),simBWF.modelTags.VISIONBOX,sim.packTable({version=1})) -- append the tag with data that just contains the version number
         model={}
         simBWF.appendCommonModelData(model,simBWF.modelTags.VISIONBOX)
         if isCustomizationScript then

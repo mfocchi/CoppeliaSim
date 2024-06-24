@@ -8,8 +8,8 @@ function model.updatePluginRepresentation_template(partHandle)
     local data={}
     data.id=partHandle
     data.displayName=simBWF.getObjectAltName(partHandle)
-    local geomData=sim.readCustomDataBlock(partHandle,simBWF.modelTags.GEOMETRY_PART)
-    if geomData then
+    local geomData=sim.readCustomStringData(partHandle,simBWF.modelTags.GEOMETRY_PART)
+    if geomData and #geomData > 0 then
         geomData=sim.unpackTable(geomData)
         data.vertices=geomData.vertices
         data.indices=geomData.indices

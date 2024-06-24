@@ -73,7 +73,7 @@ function onWSMessage(server, connection, message)
 
     -- if first byte is '{', it *might* be a JSON payload
     if rawReq:byte(1) == 123 then
-        local req, ln, err = json.decode(rawReq)
+        local req, ln, err = json.decode(tostring(rawReq))
         if req ~= nil then
             local resp = wsRemoteApi.handleRequest(req)
             resp = json.encode(resp)
@@ -83,7 +83,7 @@ function onWSMessage(server, connection, message)
     end
 
     -- if we are here, it should be a CBOR payload
-    local status, req = pcall(cbor.decode, rawReq)
+    local status, req = pcall(cbor.decode, tostring(rawReq))
     if status then
         local resp = wsRemoteApi.handleRequest(req)
         resp = cbor.encode(resp)
@@ -111,13 +111,15 @@ end
 
 function sysCall_init()
     simWS = require 'simWS'
-    port = sim.getNamedInt32Param('wsRemoteApi.port') or 23050
-    if wsRemoteApi.verbose() > 0 then
+    local defaultPort = 23050 + sim.getInt32Param(sim.intparam_processid)
+    local port = sim.getNamedInt32Param('wsRemoteApi.port') or defaultPort
+    sim.setNamedInt32Param('wsRemoteApi.port', port)
+--    if wsRemoteApi.verbose() > 0 then
         sim.addLog(
             sim.verbosity_scriptinfos,
             string.format('WebSocket Remote API server starting (port=%d)...', port)
         )
-    end
+--    end
     json = require 'dkjson'
     -- cbor=require 'cbor' -- encodes strings as buffers, always. DO NOT USE!!
     cbor = require 'org.conman.cbor'

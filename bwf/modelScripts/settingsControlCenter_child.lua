@@ -1,8 +1,8 @@
 simBWF=require('simBWF')
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     version=sim.getInt32Param(sim.intparam_program_version)
-    local data=sim.unpackTable(sim.readCustomDataBlock(model,simBWF.modelTags.OLDOVERRIDE))
+    local data=sim.unpackTable(sim.readCustomStringData(model,simBWF.modelTags.OLDOVERRIDE))
     if (data['bitCoded']&8)>0 then
         if version>30303 then
             -- Check if some models are coincident
@@ -13,18 +13,16 @@ function sysCall_init()
                 local h=objects[i]
                 local p=sim.getModelProperty(h)
                 if (p&sim.modelproperty_not_model)==0 then
-                    local tags=sim.readCustomDataBlockTags(h)
-                    if tags then
-                        for j=1,#tags,1 do
-                            local tag=tags[j]
-                            if string.find(tag,'XYZ_')==1 or tag==simBWF.modelTags.RAGNAR or tag==simBWF.modelTags.CONVEYOR then
-                                if tag~=simBWF.modelTags.PART and tag~='XYZ_PARTLABEL_INFO' then
-                                    if modelsWithTags[tag]==nil then
-                                        modelsWithTags[tag]={}
-                                    end
-                                    modelsWithTags[tag][#modelsWithTags[tag]+1]=h
-                                    break
+                    local tags=sim.readCustomDataTags(h)
+                    for j=1,#tags,1 do
+                        local tag=tags[j]
+                        if string.find(tag,'XYZ_')==1 or tag==simBWF.modelTags.RAGNAR or tag==simBWF.modelTags.CONVEYOR then
+                            if tag~=simBWF.modelTags.PART and tag~='XYZ_PARTLABEL_INFO' then
+                                if modelsWithTags[tag]==nil then
+                                    modelsWithTags[tag]={}
                                 end
+                                modelsWithTags[tag][#modelsWithTags[tag]+1]=h
+                                break
                             end
                         end
                     end

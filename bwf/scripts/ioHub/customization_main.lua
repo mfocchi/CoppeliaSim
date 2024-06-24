@@ -2,8 +2,8 @@ function model.getAvailableConveyors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -14,8 +14,8 @@ function model.getAvailableInputBoxes()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.INPUTBOX)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.INPUTBOX)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end
@@ -26,8 +26,8 @@ function model.getAvailableOutputBoxes()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.OUTPUTBOX)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.OUTPUTBOX)
+        if data and #data > 0 then
             retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
         end
     end

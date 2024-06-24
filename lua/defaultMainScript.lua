@@ -1,5 +1,5 @@
 sim = require('sim')
-backCompatibility = require('defaultMainScriptBackCompatibility')
+backCompatibility = require('deprecated.defaultMainScriptBackCompatibility')
 -- This is the main script. The main script is not supposed to be modified,
 -- unless there is a very good reason to do it.
 -- Without main script, there is no simulation.
@@ -34,7 +34,7 @@ function sysCall_sensing()
 end
 
 function sysCall_cleanup()
-    sim.handleChildScripts(sim.syscb_cleanup)
+    sim.handleSimulationScripts(sim.syscb_cleanup)
     backCompatibility.handle(8)
     sim.resetProximitySensor(sim.handle_all_except_explicit)
     sim.resetVisionSensor(sim.handle_all_except_explicit)

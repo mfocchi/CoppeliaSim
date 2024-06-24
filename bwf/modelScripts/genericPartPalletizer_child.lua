@@ -111,8 +111,8 @@ end
 
 getConveyorEncoderDistance=function()
     if conveyorHandle~=-1 then
-        local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['encoderDistance']
         end
@@ -124,7 +124,7 @@ removeTrackedPart=function(partHandle)
     local h=trackedParts[partHandle]['dummyHandle']
     local objs=sim.getObjectsInTree(h) -- if the part is decorated, it could have several dummy children
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     trackedParts[partHandle]=nil
 end
@@ -174,8 +174,8 @@ generateTrackingLocations=function()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    palletizerData=sim.readCustomDataBlock(model,'XYZ_PARTPALLETIZER_INFO')
+    model=sim.getObject('..')
+    palletizerData=sim.readCustomStringData(model,'XYZ_PARTPALLETIZER_INFO')
     palletizerData=sim.unpackTable(palletizerData)
     conveyorHandle=simBWF.getReferencedObjectHandle(model,simBWF.PALLETIZER_CONVEYOR_REF)
     conveyorVector={1,0,0}

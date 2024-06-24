@@ -61,15 +61,15 @@ end
 
 function model.disp.updateDisplay()
     if model.camera>=0 and model.disp.ui then
---        local c=sim.unpackTable(sim.readCustomDataBlock(model.handle,simBWF.modelTags.VISIONWINDOW))
+--        local c=sim.unpackTable(sim.readCustomStringData(model.handle,simBWF.modelTags.VISIONWINDOW))
         local data={}
         data.id=model.handle
         local tp={'none','processed'}
        
-        local dt=sim.getSystemTimeInMs(model.lastImgUpdateTimeInMs)
+        local dt=sim.getSystemTime()*1000 - model.lastImgUpdateTimeInMs
         if (dt>model.imgUpdateFrequMs) and (model.disp.ui~=nil) then
             data.type=tp[model.imgToDisplay+1]
-            model.lastImgUpdateTimeInMs=sim.getSystemTimeInMs(-1)
+            model.lastImgUpdateTimeInMs=sim.getSystemTime()*1000
         else
             data.type=tp[1] -- i.e. 'none'
         end

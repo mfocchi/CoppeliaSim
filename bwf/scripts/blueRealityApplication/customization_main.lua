@@ -172,7 +172,7 @@ function sysCall_init()
     model.online=false
     model.onlineSwitch=nil
     model.simulation=false
-    sim.setIntegerSignal('__brUndoPointCounter__',0)
+    sim.setInt32Signal('__brUndoPointCounter__',0)
     model.previousUndoPointCounter=0
     model.undoPointStayedSameCounter=-1
     
@@ -201,7 +201,7 @@ function sysCall_nonSimulation()
     
     -- Following is the central part where we set undo points:
     ---------------------------------
-    local cnt=sim.getIntegerSignal('__brUndoPointCounter__')
+    local cnt=sim.getInt32Signal('__brUndoPointCounter__')
     if cnt~=model.previousUndoPointCounter then
         model.undoPointStayedSameCounter=8
         model.previousUndoPointCounter=cnt
@@ -294,7 +294,7 @@ function sysCall_beforeSimulation()
         if not model.online then
             sim.setBoolParam(sim.boolparam_realtime_simulation,true)
             sim.setArrayParam(sim.arrayparam_background_color2,{0.8,1,0.8})
-            sim.setIntegerSignal('__brOnline__',1)
+            sim.setInt32Signal('__brOnline__',1)
             model.online=true
     --        simBWF.query('online_start',{})
         end

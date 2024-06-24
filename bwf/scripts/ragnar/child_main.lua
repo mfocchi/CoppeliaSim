@@ -93,10 +93,10 @@ function model.getAndApplyRagnarState()
 
         local getData=false
         if model.online then    
-            local dt=sim.getSystemTimeInMs(model.lastMoveVisualizeUpdateTimeInMs)
+            local dt=sim.getSystemTime()*1000 - model.lastMoveVisualizeUpdateTimeInMs
             if dt>moveVisUpdateFrequMs then
                 getData=true
-                model.lastMoveVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)
+                model.lastMoveVisualizeUpdateTimeInMs=sim.getSystemTime()*1000
             end
         else
             local t=(sim.getSimulationTime()+sim.getSimulationTimeStep())*1000
@@ -109,10 +109,10 @@ function model.getAndApplyRagnarState()
         if getData then
             local updatePlot=false
             if model.online then    
-                local dt=sim.getSystemTimeInMs(model.lastPlotVisualizeUpdateTimeInMs)
+                local dt=sim.getSystemTime()*1000 - model.lastPlotVisualizeUpdateTimeInMs
                 if dt>plotVisUpdateFrequMs then
                     updatePlot=true
-                    model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)
+                    model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTime()*1000
                 end
             else
                 local t=(sim.getSimulationTime()+sim.getSimulationTimeStep())*1000
@@ -386,9 +386,9 @@ function sysCall_init()
     model.lastClearancePlotVisualizeUpdateTimeInMs=-1000
     if model.online then
         model.simOrRealIndex=2
-        model.lastMoveVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)-1000
-        model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)-1000
-        model.lastClearancePlotVisualizeUpdateTimeInMs=sim.getSystemTimeInMs(-1)-1000
+        model.lastMoveVisualizeUpdateTimeInMs=sim.getSystemTime()*1000-1000
+        model.lastPlotVisualizeUpdateTimeInMs=sim.getSystemTime()*1000-1000
+        model.lastClearancePlotVisualizeUpdateTimeInMs=sim.getSystemTime()*1000-1000
     end
     local data=model.readInfo()
     model.connectionBufferSize=data['connectionBufferSize'][model.simOrRealIndex]

@@ -79,12 +79,12 @@ function model.ext.getItemData_pricing()
     if #windowsTmp>0 then
         obj.software_configuration.belt_encoder_E1_enable=true
         local s=simBWF.callCustomizationScriptFunction('model.ext.getAssociatedSensorDetectorOrVisionHandle',windowsTmp[1])
-        obj.software_configuration.LATCH_E1_enabled=(sim.readCustomDataBlock(s,simBWF.modelTags.RAGNARSENSOR)~=nil)
+        obj.software_configuration.LATCH_E1_enabled=(sim.readCustomStringData(s,simBWF.modelTags.RAGNARSENSOR)~=nil)
     end
     if #windowsTmp>1 then
         obj.software_configuration.belt_encoder_E2_enable=true
         local s=simBWF.callCustomizationScriptFunction('model.ext.getAssociatedSensorDetectorOrVisionHandle',windowsTmp[2])
-        obj.software_configuration.LATCH_E2_enabled=(sim.readCustomDataBlock(s,simBWF.modelTags.RAGNARSENSOR)~=nil)
+        obj.software_configuration.LATCH_E2_enabled=(sim.readCustomStringData(s,simBWF.modelTags.RAGNARSENSOR)~=nil)
     end
     return obj
 end

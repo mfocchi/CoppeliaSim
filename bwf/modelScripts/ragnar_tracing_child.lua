@@ -25,9 +25,9 @@ getColorFromIntensity=function(intensity)
 end
 
 function sysCall_init()
-    dummy=sim.getObject('.')
+    dummy=sim.getObject('::')
     model=getRobotHandle(dummy)
-    local ragnarSettings=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+    local ragnarSettings=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
     ragnarSettings=sim.unpackTable(ragnarSettings)
     showTrajectory=simBWF.modifyAuxVisualizationItems((ragnarSettings['bitCoded']&1)>0)
     if showTrajectory then
@@ -41,7 +41,7 @@ end
 
 function sysCall_sensing()
     if showTrajectory then
-        local ragnarSettings=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+        local ragnarSettings=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
         ragnarSettings=sim.unpackTable(ragnarSettings)
         local maxSpeed=ragnarSettings.maxVel
 

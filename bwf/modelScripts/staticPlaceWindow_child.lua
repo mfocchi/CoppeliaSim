@@ -67,12 +67,12 @@ getPartMass=function(partHandle)
                 if sim.getObjectType(handle)==sim.object_shape_type then
                     local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                     if p==0 then
-                        m=m+sim.getShapeMassAndInertia(handle)
+                        m=m+sim.getShapeMass(handle)
                     end
                 end
             end
         else
-            m=m+sim.getShapeMassAndInertia(partHandle)
+            m=m+sim.getShapeMass(partHandle)
         end
     end
     return m
@@ -146,8 +146,8 @@ end
 
 getSensorState=function()
     if sensorHandle>=0 then
-        local data=sim.readCustomDataBlock(sensorHandle,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(sensorHandle,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['detectionState']
         end
@@ -194,7 +194,7 @@ removeTrackedPart=function(partHandle)
     local h=trackedParts[partHandle]['dummyHandle']
     local objs=sim.getObjectsInTree(h) -- if the part is decorated, it could have several dummy children
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     trackedParts[partHandle]=nil
 end
@@ -212,9 +212,9 @@ attachDummiesAndDecorate=function(part,partData)
     if not partData['decorationInfo'] then
         local data=nil
         if overridePallet then
-            data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
+            data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
         else
-            data=sim.readCustomDataBlock(part,simBWF.modelTags.PART)
+            data=sim.readCustomStringData(part,simBWF.modelTags.PART)
         end
         data=sim.unpackTable(data)
         if #data['palletPoints']>0 then
@@ -251,8 +251,8 @@ removeTrackedLocation=function(associatedDummyHandle)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
     data=sim.unpackTable(data)
     sensorHandle=simBWF.getReferencedObjectHandle(model,simBWF.STATICPLACEWINDOW_SENSOR_REF)
     width=data['width']
@@ -315,17 +315,17 @@ function sysCall_actuation()
         if sim.getSimulationTime()-waitTime>3 then
             trackedParts={}
             waitTime=nil
-            local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
+            local data=sim.readCustomStringData(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
             data=sim.unpackTable(data)
             data['detectionState']=data['detectionState']+1
-            sim.writeCustomDataBlock(model,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
+            sim.writeCustomStringData(model,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
         end
     end
 end
 
 function sysCall_sensing()
     local t=sim.getSimulationTime()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDSTATICPLACEWINDOW)
     data=sim.unpackTable(data)
     local sensorState=getSensorState()
 
@@ -457,7 +457,7 @@ function sysCall_sensing()
     data['trackedTargetsInWindow']=trackedTargetsInWindow_currentLayer
     data['trackedItemsInWindow']=trackedTargetsInWindow_currentLayer -- trackedPartsInTrackingWindow
     data['transferItems']=trackedPartsInTransferWindow
---    sim.writeCustomDataBlock(model,OLDSTATICPLACEWINDOW_TAG.TRACKINGWINDOW_TAG,sim.packTable(data))
+--    sim.writeCustomStringData(model,OLDSTATICPLACEWINDOW_TAG.TRACKINGWINDOW_TAG,sim.packTable(data))
 
 
 
@@ -472,7 +472,7 @@ function sysCall_sensing()
     end
 
 --    data['trackedItemsInWindow']=trackedParts
-    sim.writeCustomDataBlock(model,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
+    sim.writeCustomStringData(model,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
 
     previousSensorState=sensorState
 end

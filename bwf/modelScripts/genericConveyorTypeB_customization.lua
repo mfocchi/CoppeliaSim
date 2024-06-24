@@ -62,8 +62,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -74,9 +74,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,'')
     end
 end
 
@@ -122,8 +122,8 @@ function getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -135,8 +135,8 @@ function getAvailableMasterConveyors()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model then
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
@@ -230,7 +230,7 @@ function updateConveyor()
     while true do
         local h=sim.getObjectChild(path,0)
         if h>=0 then
-            sim.removeObject(h)
+            sim.removeObjects({h})
         else
             break
         end
@@ -723,7 +723,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -744,16 +744,16 @@ function sysCall_init()
     ----------------------------------------
     writeInfo(_info)
 
-    backSide=sim.getObject('./genericConveyorTypeB_backSide')
-    frontSide=sim.getObject('./genericConveyorTypeB_frontSide')
-    leftSide=sim.getObject('./genericConveyorTypeB_leftSide')
-    rightSide=sim.getObject('./genericConveyorTypeB_rightSide')
-    base=sim.getObject('./genericConveyorTypeB_base')
-    baseBack=sim.getObject('./genericConveyorTypeB_baseBack')
-    baseFront=sim.getObject('./genericConveyorTypeB_baseFront')
-    padBase=sim.getObject('./genericConveyorTypeB_padBase')
-    pad=sim.getObject('./genericConveyorTypeB_pad')
-    path=sim.getObject('./genericConveyorTypeB_path')
+    backSide=sim.getObject('../genericConveyorTypeB_backSide')
+    frontSide=sim.getObject('../genericConveyorTypeB_frontSide')
+    leftSide=sim.getObject('../genericConveyorTypeB_leftSide')
+    rightSide=sim.getObject('../genericConveyorTypeB_rightSide')
+    base=sim.getObject('../genericConveyorTypeB_base')
+    baseBack=sim.getObject('../genericConveyorTypeB_baseBack')
+    baseFront=sim.getObject('../genericConveyorTypeB_baseFront')
+    padBase=sim.getObject('../genericConveyorTypeB_padBase')
+    pad=sim.getObject('../genericConveyorTypeB_pad')
+    path=sim.getObject('../genericConveyorTypeB_path')
 
 	
     updatePluginRepresentation()
@@ -761,7 +761,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

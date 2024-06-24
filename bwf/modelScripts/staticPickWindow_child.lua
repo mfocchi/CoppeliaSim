@@ -17,8 +17,8 @@ end
 
 getSensorState=function()
     if sensorHandle>=0 then
-        local data=sim.readCustomDataBlock(sensorHandle,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(sensorHandle,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             return data['detectionState']
         end
@@ -48,12 +48,12 @@ getPartMass=function(partHandle)
                 if sim.getObjectType(handle)==sim.object_shape_type then
                     local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                     if p==0 then
-                        m=m+sim.getShapeMassAndInertia(handle)
+                        m=m+sim.getShapeMass(handle)
                     end
                 end
             end
         else
-            m=m+sim.getShapeMassAndInertia(partHandle)
+            m=m+sim.getShapeMass(partHandle)
         end
     end
     return m
@@ -142,14 +142,14 @@ removeTrackedPart=function(partHandle)
     local h=trackedParts[partHandle]['dummyHandle']
     local objs=sim.getObjectsInTree(h) -- if the part is decorated, it could have several dummy children
     for i=1,#objs,1 do
-        sim.removeObject(objs[i])
+        sim.removeObjects({objs[i]})
     end
     trackedParts[partHandle]=nil
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO')
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO')
     data=sim.unpackTable(data)
     sensorHandle=simBWF.getReferencedObjectHandle(model,simBWF.STATICPICKWINDOW_SENSOR_REF)
     width=data['width']
@@ -169,7 +169,7 @@ end
 
 function sysCall_sensing()
     local t=sim.getSimulationTime()
-    local data=sim.readCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO')
+    local data=sim.readCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO')
     data=sim.unpackTable(data)
     local sensorState=getSensorState()
 
@@ -210,7 +210,7 @@ function sysCall_sensing()
     end
 
     data['trackedItemsInWindow']=trackedParts
-    sim.writeCustomDataBlock(model,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
+    sim.writeCustomStringData(model,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
 
     previousSensorState=sensorState
 end

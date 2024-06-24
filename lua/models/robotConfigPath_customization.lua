@@ -89,7 +89,7 @@ function sysCall_init()
                             return transforms[t]
                         end
                         local sweptMesh = simIGL.sweptVolume(mesh, 'transform', #states, 40)
-                        local newShape = sim.createMeshShape(
+                        local newShape = sim.createShape(
                                              3, math.pi / 4, sweptMesh.vertices, sweptMesh.indices
                                          )
                         table.insert(sweptShapes, newShape)
@@ -124,7 +124,8 @@ function sysCall_init()
                 local tip = -1
                 sim.visitTree(
                     self, function(handle)
-                        if sim.readCustomDataBlock(handle, 'ikTip') then
+                        local _dat = sim.readCustomStringData(handle, 'ikTip')
+                        if _dat and #_dat > 0 then
                             tip = handle
                             return false
                         end
@@ -152,6 +153,6 @@ function sysCall_nonSimulation()
 end
 
 function ObjectProxy(p, t)
-    t = t or sim.scripttype_customizationscript
+    t = t or sim.scripttype_customization
     return sim.getScriptFunctions(sim.getScript(t, sim.getObject(p)))
 end

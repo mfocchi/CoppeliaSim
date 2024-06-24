@@ -110,8 +110,8 @@ function getObjectsWithTag(tagName, justModels)
     local objs = sim.getObjectsInTree(sim.handle_scene)
     for i = 1, #objs, 1 do
         if (not justModels) or ((sim.getModelProperty(objs[i]) & sim.modelproperty_not_model) == 0) then
-            local dat = sim.readCustomDataBlock(objs[i], tagName)
-            if dat then retObjs[#retObjs + 1] = objs[i] end
+            local dat = sim.readCustomStringData(objs[i], tagName)
+            if dat and #dat > 0 then retObjs[#retObjs + 1] = objs[i] end
         end
     end
     return retObjs
@@ -599,7 +599,7 @@ function utils.writeSessionPersistentObjectData(objectHandle, dataName, ...)
                    sim.getInt32Param(sim.intparam_scene_unique_id) ..
                    sim.getObjectStringParam(objectHandle, sim.objstringparam_dna) .. dataName
     data = sim.packTable(data)
-    sim.writeCustomDataBlock(sim.handle_app, nm, data)
+    sim.writeCustomBufferData(sim.handle_app, nm, data)
 end
 
 function utils.readSessionPersistentObjectData(objectHandle, dataName)
@@ -607,8 +607,8 @@ function utils.readSessionPersistentObjectData(objectHandle, dataName)
                    sim.getObjectAlias(objectHandle, 2) ..
                    sim.getInt32Param(sim.intparam_scene_unique_id) ..
                    sim.getObjectStringParam(objectHandle, sim.objstringparam_dna) .. dataName
-    local data = sim.readCustomDataBlock(sim.handle_app, nm)
-    if data then
+    local data = sim.readCustomBufferData(sim.handle_app, nm)
+    if data and #data > 0 then
         data = sim.unpackTable(data)
         return unpack(data)
     else
@@ -617,10 +617,10 @@ function utils.readSessionPersistentObjectData(objectHandle, dataName)
 end
 
 function utils.fastIdleLoop(enable)
-    local data = sim.readCustomDataBlock(sim.handle_app, '__IDLEFPSSTACKSIZE__')
+    local data = sim.readCustomBufferData(sim.handle_app, '__IDLEFPSSTACKSIZE__')
     local stage = 0
     local defaultIdleFps
-    if data then
+    if data and #data > 0 then
         data = sim.unpackInt32Table(data)
         stage = data[1]
         defaultIdleFps = data[2]
@@ -637,7 +637,7 @@ function utils.fastIdleLoop(enable)
     else
         sim.setInt32Param(sim.intparam_idle_fps, defaultIdleFps)
     end
-    sim.writeCustomDataBlock(
+    sim.writeCustomBufferData(
         sim.handle_app, '__IDLEFPSSTACKSIZE__', sim.packInt32Table({stage, defaultIdleFps})
     )
 end

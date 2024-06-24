@@ -55,7 +55,7 @@ end
 -------------------------------------------------------
 model.specHandles={}
 
-model.specHandles.texture=sim.getObject('./genericShippingBox_texture')
-model.specHandles.smallLabel=sim.getObject('./genericShippingBox_smallLabel')
-model.specHandles.largeLabel=sim.getObject('./genericShippingBox_largeLabel')
+model.specHandles.texture=sim.getObject('../genericShippingBox_texture')
+model.specHandles.smallLabel=sim.getObject('../genericShippingBox_smallLabel')
+model.specHandles.largeLabel=sim.getObject('../genericShippingBox_largeLabel')
 

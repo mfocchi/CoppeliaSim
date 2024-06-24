@@ -1,5 +1,5 @@
 function model.removePallet(palletHandle)
-    sim.removeObject(palletHandle)
+    sim.removeObjects({palletHandle})
     model.removeFromPluginRepresentation_onePallet(palletHandle)
     simBWF.markUndoPoint()
 end

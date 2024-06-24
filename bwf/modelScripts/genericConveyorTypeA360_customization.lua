@@ -50,8 +50,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -62,9 +62,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,'')
     end
 end
 
@@ -96,8 +96,8 @@ function getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -109,8 +109,8 @@ function getAvailableMasterConveyors()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model then
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
@@ -165,10 +165,10 @@ function updateConveyor()
 
     local err=sim.getInt32Param(sim.intparam_error_report_mode)
     sim.setInt32Param(sim.intparam_error_report_mode,0) -- do not report errors
-    local obj=sim.getObject('./genericCurvedConveyorTypeB_sides')
+    local obj=sim.getObject('../genericCurvedConveyorTypeB_sides')
     sim.setInt32Param(sim.intparam_error_report_mode,err) -- report errors again
     if obj>=0 then
-        sim.removeObject(obj)
+        sim.removeObjects({obj})
     end
 
     local sideParts={}
@@ -442,8 +442,8 @@ function onCloseClicked()
     local simStopped=sim.getSimulationState()==sim.simulation_stopped
     if simStopped then
         if sim.msgbox_return_yes==sim.msgBox(sim.msgbox_type_question,sim.msgbox_buttons_yesno,'Finalizing the conveyor belt',"By closing this customization dialog you won't be able to customize the conveyor belt anymore. Do you want to proceed?") then
-            sim.removeObject(sidePad)
-            sim.removeObject(textureHolder)
+            sim.removeObjects({sidePad})
+            sim.removeObjects({textureHolder})
             sim.removeScript(sim.handle_self)
         end
     end
@@ -561,7 +561,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -582,18 +582,18 @@ function sysCall_init()
     ----------------------------------------
     writeInfo(_info)
 
-    front=sim.getObject('./genericCurvedConveyorTypeA360_front')
-    middle=sim.getObject('./genericCurvedConveyorTypeA360_middle')
-    conveyor=sim.getObject('./genericCurvedConveyorTypeA360_conveyor')
-    sidePad=sim.getObject('./genericCurvedConveyorTypeA360_sidePad')
-    textureHolder=sim.getObject('./genericCurvedConveyorTypeA360_textureHolder')
+    front=sim.getObject('../genericCurvedConveyorTypeA360_front')
+    middle=sim.getObject('../genericCurvedConveyorTypeA360_middle')
+    conveyor=sim.getObject('../genericCurvedConveyorTypeA360_conveyor')
+    sidePad=sim.getObject('../genericCurvedConveyorTypeA360_sidePad')
+    textureHolder=sim.getObject('../genericCurvedConveyorTypeA360_textureHolder')
 	
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

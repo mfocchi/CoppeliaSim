@@ -1,5 +1,5 @@
 simBWF=require('simBWF')
-local isCustomizationScript=sim.getScriptAttribute(sim.getScriptAttribute(sim.handle_self,sim.scriptattribute_scripthandle),sim.scriptattribute_scripttype)==sim.scripttype_customizationscript
+local isCustomizationScript=sim.getScriptAttribute(sim.getScriptAttribute(sim.handle_self,sim.scriptattribute_scripthandle),sim.scriptattribute_scripttype)==sim.scripttype_customization
 
 if false then -- if not sim.isPluginLoaded('Bwf') then
     function sysCall_init()
@@ -8,7 +8,7 @@ else
     function sysCall_init()
         model={}
         model.dlg={}
-        model.handle=sim.getObject('.')
+        model.handle=sim.getObject('..')
         if isCustomizationScript then
             -- Customization script
             require("/bwf/scripts/ragnarRef/customization_main")

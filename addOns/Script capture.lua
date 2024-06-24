@@ -49,7 +49,7 @@ function sysCall_cleanup()
 end
 
 function sysCall_event(es)
-    es = cbor.decode(es)
+    es = cbor.decode(tostring(es))
     for _, e in ipairs(es) do
         if e.event == 'objectAdded' then
             onObjectAdded(e.handle)
@@ -63,7 +63,7 @@ end
 
 function sysCall_msg(e)
     if e.id == 'systemCall' then
-        local descr = sim.getScriptStringParam(e.data.script, sim.scriptstringparam_description)
+        local descr = sim.getObjectStringParam(e.data.script, sim.scriptstringparam_description)
         if captureAddonStart and e.data.callType == sim.syscb_init then
             insertComment('Started ' .. descr)
             updateCode()
@@ -103,7 +103,7 @@ function onObjectAdded(handle)
                            sim.getObjectInt32Param(handle, sim.shapeintparam_edge_visibility)
                    )
         else
-            code = string.format('%s=sim.createMeshShape(...)', id)
+            code = string.format('%s=sim.createShape(...)', id)
         end
     elseif objType == sim.object_joint_type then
         local jointType = sim.getJointType(handle)

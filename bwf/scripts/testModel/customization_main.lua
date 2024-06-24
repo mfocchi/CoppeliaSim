@@ -4,8 +4,8 @@ function model.getAvailableConnections()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model.handle then
-            local data=sim.readCustomDataBlock(l[i],model.tagName)
-            if data then
+            local data=sim.readCustomStringData(l[i],model.tagName)
+            if data and #data > 0 then
                 retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
             end
         end

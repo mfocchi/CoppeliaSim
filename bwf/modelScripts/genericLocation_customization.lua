@@ -35,8 +35,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDLOCATION)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDLOCATION)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -47,9 +47,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDLOCATION,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDLOCATION,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDLOCATION,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDLOCATION,'')
     end
 end
 
@@ -199,7 +199,7 @@ function removeDlg()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -211,7 +211,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

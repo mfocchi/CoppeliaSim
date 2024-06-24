@@ -9,7 +9,7 @@ function sysCall_init()
     cbor = require 'org.conman.cbor'
     sim.addLog(
         sim.verbosity_scriptinfos,
-        "This tool will display the custom data blocks attached to the selected object, or the custom data blocks attached to the scene, if no object is selected. Custom data blocks can be written and read with simWriteCustomDataBlock and simReadCustomDataBlock."
+        "This tool will display the custom data blocks attached to the selected object, or the custom data blocks attached to the scene, if no object is selected. Custom data blocks can be written and read with sim.writeCustomString/Buffer/TableData and sim.readCustomString/Buffer/TableData."
     )
     object = -1
     selectedDecoder = 1
@@ -22,13 +22,13 @@ end
 decoders = {
     {
         name = 'auto',
-        f = function(tag, data, type)
-            if type then
-                local d = getDecoderForType(type)
+        f = function(tag, data, _type)
+            if _type then
+                local d = getDecoderForType(_type)
                 if d then
-                    return d.f(tag, data, type)
+                    return d.f(tag, data, _type)
                 else
-                    error('unknown type: ' .. type)
+                    error('unknown type: ' .. _type)
                 end
             end
             return '<font color=#b75501>For automatic selection of decoder, there must be an \'__info__\' block with type information, e.g.: {blocks={myTagName={type=\'table\'}}}, which is normally written by sim.writeCustomTableData or sim.writeCustomDataBlockEx.</font>'
@@ -36,67 +36,75 @@ decoders = {
     },
     {
         name = 'binary',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return '<tt>' .. data:gsub('(.)', function(y) return string.format('%02X ', string.byte(y)) end) .. '</tt>'
         end,
     },
     {
         name = 'string',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return data
         end,
     },
     {
         name = 'table',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             local status, data = pcall(function() return sim.unpackTable(data) end)
             if status then
-                return _S.tableToString(data, {indent = true}):gsub('[\n ]', {['\n'] = '<br/>', [' '] = '&nbsp;'})
+                local s = nil
+                pcall(function()
+                    s = _S.tableToString(data, {indent = true}):gsub('[\n ]', {['\n'] = '<br/>', [' '] = '&nbsp;'})
+                end)
+                return s
             end
         end,
     },
     {
         name = 'cbor',
-        f = function(tag, data, type)
-            local status, data = pcall(function() return cbor.decode(data) end)
+        f = function(tag, data, _type)
+            local status, data = pcall(function() return cbor.decode(tostring(data)) end)
             if status then
-                return _S.tableToString(data, {indent = true}):gsub('[\n ]', {['\n'] = '<br/>', [' '] = '&nbsp;'})
+                if type(data) == 'table' then
+                    return _S.tableToString(data, {indent = true}):gsub('[\n ]', {['\n'] = '<br/>', [' '] = '&nbsp;'})
+                else
+                    return getAsString(data)
+                end
             end
         end,
     },
     {
         name = 'float[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackFloatTable(data))
         end,
     },
     {
         name = 'double[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackDoubleTable(data))
         end,
     },
     {
         name = 'int32[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackInt32Table(data))
         end,
     },
     {
         name = 'uint8[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackUInt8Table(data))
         end,
     },
     {
         name = 'uint16[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackUInt16Table(data))
         end,
     },
     {
         name = 'uint32[]',
-        f = function(tag, data, type)
+        f = function(tag, data, _type)
             return getAsString(sim.unpackUInt32Table(data))
         end,
     },
@@ -120,6 +128,35 @@ function sysCall_beforeInstanceSwitch()
     hideDlg()
 end
 
+function sysCall_event(events)
+    for _, e in ipairs(cbor.decode(tostring(events))) do
+        if e.handle == object and e.event == 'objectChanged' and e.data.customData then
+            local refreshSelectedTag = false
+            local oldKeys = table.keys(content)
+            table.sort(oldKeys)
+            for k, v in pairs(e.data.customData) do
+                content[k] = content[k] or {}
+                content[k][1] = v
+                if k == selectedTag then
+                    refreshSelectedTag = true
+                end
+            end
+            for k, v in pairs(content) do
+                if not e.data.customData[k] then
+                    content[k] = nil
+                end
+            end
+            local newKeys = table.keys(content)
+            table.sort(newKeys)
+            if not table.eq(oldKeys, newKeys) then
+                sysCall_selChange {sel = sim.getObjectSel()}
+            elseif refreshSelectedTag and ui then
+                onDecoderChanged()
+            end
+        end
+    end
+end
+
 function onDecoderChanged()
     local index = simUI.getComboboxSelectedIndex(ui, 700)
     selectedDecoder = index + 1
@@ -130,9 +167,7 @@ function onDecoderChanged()
             if html then
                 simUI.setText(ui, 800, html)
             else
-                simUI.setText(
-                    ui, 800, string.format('<font color=red>Not %s data</font>', decoder.name)
-                )
+                simUI.setText(ui, 800, string.format('<font color=red>Not %s data</font>', decoder.name))
             end
         end
     else
@@ -154,7 +189,7 @@ end
 
 function onClearClicked(ui, id)
     if selectedTag then
-        sim.writeCustomDataBlock(object, selectedTag, '')
+        sim.writeCustomBufferData(object, selectedTag, '')
         sim.announceSceneContentChange()
         hideDlg()
     end
@@ -175,14 +210,10 @@ function showDlg()
             title = "Custom data blocks in object '<b>" .. sim.getObjectAlias(object, 0) .. "</b>':"
         end
         if not ui then
-            xml =
-                '<ui title="Custom Data Block Explorer" activate="false" closeable="true" on-close="onCloseClicked" resizable="true" ' ..
-                    pos .. '>'
+            xml = '<ui title="Custom Data Block Explorer" activate="false" closeable="true" on-close="onCloseClicked" resizable="true" ' .. pos .. '>'
             xml = xml .. '<group flat="true"><label text="' .. title .. '" /></group>'
-            xml = xml ..
-                      '<table id="600" selection-mode="row" editable="false" on-selection-change="onSelectedBlockChanged">'
-            xml = xml ..
-                      '<header><item>Tag name</item><item>Size (bytes)</item><item>Type</item></header>'
+            xml = xml .. '<table id="600" selection-mode="row" editable="false" on-selection-change="onSelectedBlockChanged">'
+            xml = xml .. '<header><item>Tag name</item><item>Size (bytes)</item><item>Type</item></header>'
             local selectedIndex, i = -1, 0
             for tag, data in pairs(content) do
                 if tag == selectedTag then selectedIndex = i end
@@ -203,8 +234,7 @@ function showDlg()
             xml = xml .. '</combobox>'
             xml = xml .. '</group>'
             xml = xml .. '<text-browser id="800" read-only="true" />'
-            xml = xml ..
-                      '<button id="20" enabled="false" text="Clear selected tag" on-click="onClearClicked" />'
+            xml = xml .. '<button id="20" enabled="false" text="Clear selected tag" on-click="onClearClicked" />'
             xml = xml .. '</ui>'
             ui = simUI.create(xml)
             if selectedIndex ~= -1 then
@@ -241,11 +271,11 @@ function sysCall_selChange(inData)
         object = sim.handle_scene
     end
     if object ~= -1 then
-        tags = sim.readCustomDataBlockTags(object)
+        tags = sim.readCustomDataTags(object)
         info = sim.readCustomTableData(object, '__info__')
     end
     if previousObject ~= object then hideDlg() end
-    if tags then
+    if tags and #tags > 0 then
         content = {}
         for i, tag in ipairs(tags) do content[tag] = {sim.readCustomDataBlockEx(object, tag)} end
         local _ = function(x)

@@ -1,12 +1,41 @@
 -- The is the first versioned sim-namespace
 -- The very first API without namespace (e.g. simGetObjectHandle) is only
 -- included if 'supportOldApiNotation' is true in 'usrset.txt'
+
 local sim = _S.sim
 _S.sim = nil
 
 sim.addLog = addLog
 sim.quitSimulator = quitSimulator
 sim.registerScriptFuncHook = registerScriptFuncHook
+
+function sim.readCustomBufferData(obj, tag)
+    local retVal = sim.readCustomStringData(obj, tag)
+    if retVal then
+        retVal = tobuffer(retVal)
+    end
+    return retVal
+end
+
+function sim.writeCustomBufferData(obj, tag, data)
+    return sim.writeCustomStringData(obj, tag, data)
+end
+
+function sim.getBufferSignal(sigName)
+    local retVal = sim.getStringSignal(sigName)
+    if retVal then
+        retVal = tobuffer(retVal)
+    end
+    return retVal
+end
+
+function sim.setBufferSignal(sigName, data)
+    sim.setStringSignal(sigName, tostring(data))
+end
+
+function sim.clearBufferSignal(sigName)
+    sim.setClearStringSignal(sigName)
+end
 
 function sim.setStepping(enable)
     -- Convenience function, so that we have the same, more intuitive name also with external clients
@@ -42,49 +71,22 @@ function sim.step(wait)
     sim.yield()
 end
 
--- Backw. compat.:
----------------------------------
-sim.switchThread = sim.yield
-sim.getModuleName = sim.getPluginName
-sim.getModuleInfo = sim.getPluginInfo
-sim.setModuleInfo = sim.setPluginInfo
-sim.moduleinfo_extversionstr = sim.plugininfo_extversionstr
-sim.moduleinfo_builddatestr = sim.plugininfo_builddatestr
-sim.moduleinfo_extversionint = sim.plugininfo_extversionint
-sim.moduleinfo_verbosity = sim.plugininfo_verbosity
-sim.moduleinfo_statusbarverbosity = sim.plugininfo_statusbarverbosity
-sim.setThreadSwitchAllowed = setYieldAllowed
-sim.getThreadSwitchAllowed = getYieldAllowed
-sim.setThreadAutomaticSwitch = setAutoYield
-sim.getThreadAutomaticSwitch = getAutoYield
-function sim.setThreadSwitchTiming(dtInMs)
-    sim.setAutoYieldDelay(dtInMs / 1000.0)
-end
-function sim.getThreadSwitchTiming()
-    return sim.getAutoYieldDelay() * 1000.0
-end
-function sim.getIsRealTimeSimulation()
-    local ret = 0
-    if sim.getRealTimeSimulation() then
-        ret = 1
-    end
-    return ret
-end
----------------------------------
-
+require('mathx')
 require('stringx')
-require('tablex')
 require('checkargs')
 require('matrix')
 require('grid')
 require('functional')
 require('var')
+require('motion').extend(sim)
+require('deprecated.old').extend(sim)
+require('sim-deprecated').extend(sim)
 
 sim.stopSimulation = wrap(sim.stopSimulation, function(origFunc)
     return function(wait)
         origFunc()
-        local t = sim.getScriptInt32Param(sim.handle_self, sim.scriptintparam_type)
-        if wait and t ~= sim.scripttype_mainscript and t ~= sim.scripttype_childscript and getYieldAllowed() then
+        local t = sim.getObjectInt32Param(sim.getScript(sim.handle_self), sim.scriptintparam_type)
+        if wait and t ~= sim.scripttype_main and t ~= sim.scripttype_simulation and getYieldAllowed() then
             local cnt = 0
             while sim.getSimulationState() ~= sim.simulation_stopped and cnt < 20 do -- even if we run in a thread, we might not be able to yield (e.g. across a c-boundary)
                 cnt = cnt + 1
@@ -180,13 +182,11 @@ function sim.getObjectsWithTag(tagName, justModels)
     local objs = sim.getObjectsInTree(sim.handle_scene)
     for i = 1, #objs, 1 do
         if (not justModels) or ((sim.getModelProperty(objs[i]) & sim.modelproperty_not_model) == 0) then
-            local dat = sim.readCustomDataBlockTags(objs[i])
-            if dat then
-                for j = 1, #dat, 1 do
-                    if dat[j] == tagName then
-                        retObjs[#retObjs + 1] = objs[i]
-                        break
-                    end
+            local dat = sim.readCustomDataTags(objs[i])
+            for j = 1, #dat, 1 do
+                if dat[j] == tagName then
+                    retObjs[#retObjs + 1] = objs[i]
+                    break
                 end
             end
         end
@@ -205,10 +205,10 @@ function sim.executeLuaCode(theCode)
 end
 
 function sim.fastIdleLoop(enable)
-    local data = sim.readCustomDataBlock(sim.handle_app, '__IDLEFPSSTACKSIZE__')
+    local data = sim.readCustomStringData(sim.handle_app, '__IDLEFPSSTACKSIZE__')
     local stage = 0
     local defaultIdleFps
-    if data then
+    if data and #data > 0 then
         data = sim.unpackInt32Table(data)
         stage = data[1]
         defaultIdleFps = data[2]
@@ -225,7 +225,7 @@ function sim.fastIdleLoop(enable)
     else
         sim.setInt32Param(sim.intparam_idle_fps, defaultIdleFps)
     end
-    sim.writeCustomDataBlock(
+    sim.writeCustomStringData(
         sim.handle_app, '__IDLEFPSSTACKSIZE__', sim.packInt32Table({stage, defaultIdleFps})
     )
 end
@@ -234,7 +234,7 @@ function sim.getLoadedPlugins()
     local ret = {}
     local index = 0
     while true do
-        local moduleName = sim.getModuleName(index)
+        local moduleName = sim.getPluginName(index)
         if moduleName then
             table.insert(ret, moduleName)
         else
@@ -249,7 +249,7 @@ function sim.isPluginLoaded(pluginName)
     local index = 0
     local moduleName = ''
     while moduleName do
-        moduleName = sim.getModuleName(index)
+        moduleName = sim.getPluginName(index)
         if moduleName == pluginName then return (true) end
         index = index + 1
     end
@@ -414,371 +414,6 @@ function sim.getAlternateConfigs(...)
     return configs
 end
 
-function sim.moveToPose(...)
-    local flags, currentPoseOrMatrix, maxVel, maxAccel, maxJerk, targetPoseOrMatrix, callback,
-          auxData, metric, timeStep = checkargs({
-        {type = 'int'},
-        {type = 'table', size = '7..12'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', size = '7..12'},
-        {type = 'any'},
-        {type = 'any', default = NIL, nullable = true},
-        {type = 'table', size = 4, default = NIL, nullable = true},
-        {type = 'float', default = 0},
-    }, ...)
-
-    local maxMinVelCnt = #maxJerk
-    if flags >= 0 and (flags & sim.ruckig_minvel) ~= 0 then
-        maxMinVelCnt = maxMinVelCnt + #maxJerk
-    end
-    local maxMinAccelCnt = #maxJerk
-    if flags >= 0 and (flags & sim.ruckig_minaccel) ~= 0 then
-        maxMinAccelCnt = maxMinAccelCnt + #maxJerk
-    end
-
-    if #maxJerk < 1 or #maxVel < maxMinVelCnt or #maxAccel < maxMinAccelCnt then
-        error("Bad table size.")
-    end
-    if not metric and #maxJerk < 4 then
-        error("Argument #5 should be of size 4. (in function 'sim.moveToPose')")
-    end
-
-    local lb = sim.setStepping(true)
-
-    local usingMatrices = (#currentPoseOrMatrix >= 12)
-    local currentMatrix, targetMatrix
-    if usingMatrices then
-        currentMatrix = currentPoseOrMatrix
-        targetMatrix = targetPoseOrMatrix
-    else
-        currentMatrix = sim.buildMatrixQ(currentPoseOrMatrix, {
-            currentPoseOrMatrix[4], currentPoseOrMatrix[5],
-            currentPoseOrMatrix[6], currentPoseOrMatrix[7],
-        })
-        targetMatrix = sim.buildMatrixQ(targetPoseOrMatrix, {
-            targetPoseOrMatrix[4], targetPoseOrMatrix[5],
-            targetPoseOrMatrix[6], targetPoseOrMatrix[7],
-        })
-    end
-
-    local outMatrix = table.deepcopy(currentMatrix)
-    local axis, angle = sim.getRotationAxis(currentMatrix, targetMatrix)
-    local timeLeft = 0
-    if type(callback) == 'string' then callback = _G[callback] end
-    if metric then
-        -- Here we treat the movement as a 1 DoF movement, where we simply interpolate via t between
-        -- the start and goal pose. This always results in straight line movement paths
-        local dx = {
-            (targetMatrix[4] - currentMatrix[4]) * metric[1],
-            (targetMatrix[8] - currentMatrix[8]) * metric[2],
-            (targetMatrix[12] - currentMatrix[12]) * metric[3], angle * metric[4],
-        }
-        local distance = math.sqrt(dx[1] * dx[1] + dx[2] * dx[2] + dx[3] * dx[3] + dx[4] * dx[4])
-        if distance > 0.000001 then
-            local currentPosVelAccel = {0, 0, 0}
-            local maxVelAccelJerk = {maxVel[1], maxAccel[1], maxJerk[1]}
-            if flags >= 0 and (flags & sim.ruckig_minvel) ~= 0 then
-                maxVelAccelJerk[#maxVelAccelJerk + 1] = maxVel[2]
-            end
-            if flags >= 0 and (flags & sim.ruckig_minaccel) ~= 0 then
-                maxVelAccelJerk[#maxVelAccelJerk + 1] = maxAccel[2]
-            end
-            local targetPosVel = {distance, 0}
-            local ruckigObject = sim.ruckigPos(
-                                     1, 0.0001, flags, currentPosVelAccel, maxVelAccelJerk, {1},
-                                     targetPosVel
-                                 )
-            local result = 0
-            while result == 0 do
-                local dt = timeStep
-                if dt == 0 then dt = sim.getSimulationTimeStep() end
-                local syncTime
-                result, newPosVelAccel, syncTime = sim.ruckigStep(ruckigObject, dt)
-                if result >= 0 then
-                    if result == 0 then timeLeft = dt - syncTime end
-                    local t = newPosVelAccel[1] / distance
-                    outMatrix = sim.interpolateMatrices(currentMatrix, targetMatrix, t)
-                    local nv = {newPosVelAccel[2]}
-                    local na = {newPosVelAccel[3]}
-                    if not usingMatrices then
-                        local q = sim.getQuaternionFromMatrix(outMatrix)
-                        outMatrix = {
-                            outMatrix[4], outMatrix[8], outMatrix[12], q[1], q[2], q[3], q[4],
-                        }
-                    end
-                    if callback(outMatrix, nv, na, auxData) then break end
-                else
-                    error('sim.ruckigStep returned error code ' .. result)
-                end
-                if result == 0 then sim.step() end
-            end
-            sim.ruckigRemove(ruckigObject)
-        end
-    else
-        -- Here we treat the movement as a 4 DoF movement, where each of X, Y, Z and rotation
-        -- is handled and controlled individually. This can result in non-straight line movement paths,
-        -- due to how the Ruckig functions operate depending on 'flags'
-        local dx = {
-            targetMatrix[4] - currentMatrix[4], targetMatrix[8] - currentMatrix[8],
-            targetMatrix[12] - currentMatrix[12], angle,
-        }
-        local currentPosVelAccel = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        local maxVelAccelJerk = {
-            maxVel[1], maxVel[2], maxVel[3], maxVel[4], maxAccel[1], maxAccel[2], maxAccel[3],
-            maxAccel[4], maxJerk[1], maxJerk[2], maxJerk[3], maxJerk[4],
-        }
-        if flags >= 0 and (flags & sim.ruckig_minvel) ~= 0 then
-            for i = 1, 4, 1 do maxVelAccelJerk[#maxVelAccelJerk + 1] = maxVel[4 + i] end
-        end
-        if flags >= 0 and (flags & sim.ruckig_minaccel) ~= 0 then
-            for i = 1, 4, 1 do maxVelAccelJerk[#maxVelAccelJerk + 1] = maxAccel[4 + i] end
-        end
-        local targetPosVel = {dx[1], dx[2], dx[3], dx[4], 0, 0, 0, 0, 0}
-        local ruckigObject = sim.ruckigPos(
-                                 4, 0.0001, flags, currentPosVelAccel, maxVelAccelJerk,
-                                 {1, 1, 1, 1}, targetPosVel
-                             )
-        local result = 0
-        while result == 0 do
-            local dt = timeStep
-            if dt == 0 then dt = sim.getSimulationTimeStep() end
-            local syncTime
-            result, newPosVelAccel, syncTime = sim.ruckigStep(ruckigObject, dt)
-            if result >= 0 then
-                if result == 0 then timeLeft = dt - syncTime end
-                local t = 0
-                if math.abs(angle) > math.pi * 0.00001 then
-                    t = newPosVelAccel[4] / angle
-                end
-                outMatrix = sim.interpolateMatrices(currentMatrix, targetMatrix, t)
-                outMatrix[4] = currentMatrix[4] + newPosVelAccel[1]
-                outMatrix[8] = currentMatrix[8] + newPosVelAccel[2]
-                outMatrix[12] = currentMatrix[12] + newPosVelAccel[3]
-                local nv = {
-                    newPosVelAccel[5], newPosVelAccel[6], newPosVelAccel[7], newPosVelAccel[8],
-                }
-                local na = {
-                    newPosVelAccel[9], newPosVelAccel[10], newPosVelAccel[11], newPosVelAccel[12],
-                }
-                if not usingMatrices then
-                    local q = sim.getQuaternionFromMatrix(outMatrix)
-                    outMatrix = {outMatrix[4], outMatrix[8], outMatrix[12], q[1], q[2], q[3], q[4]}
-                end
-                if callback(outMatrix, nv, na, auxData) then break end
-            else
-                error('sim.ruckigStep returned error code ' .. result)
-            end
-            if result == 0 then sim.step() end
-        end
-        sim.ruckigRemove(ruckigObject)
-    end
-
-    sim.setStepping(lb)
-    return outMatrix, timeLeft
-end
-
-function sim.moveToConfig(...)
-    local flags, currentPos, currentVel, currentAccel, maxVel, maxAccel, maxJerk, targetPos,
-          targetVel, callback, auxData, cyclicJoints, timeStep = checkargs({
-        {type = 'int'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float', nullable = true},
-        {type = 'table', item_type = 'float', nullable = true},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float'},
-        {type = 'table', item_type = 'float', nullable = true},
-        {type = 'any'},
-        {type = 'any', default = NIL, nullable = true},
-        {type = 'table', item_type = 'bool', default = NIL, nullable = true},
-        {type = 'float', default = 0},
-    }, ...)
-
-    local maxMinVelCnt = #currentPos
-    if flags >= 0 and (flags & sim.ruckig_minvel) ~= 0 then
-        maxMinVelCnt = maxMinVelCnt + #currentPos
-    end
-    local maxMinAccelCnt = #currentPos
-    if flags >= 0 and (flags & sim.ruckig_minaccel) ~= 0 then
-        maxMinAccelCnt = maxMinAccelCnt + #currentPos
-    end
-
-    if #currentPos < 1 or maxMinVelCnt > #maxVel or maxMinAccelCnt > #maxAccel or #currentPos >
-        #maxJerk or #currentPos > #targetPos or (currentVel and #currentPos > #currentVel) or
-        (currentAccel and #currentPos > #currentAccel) or (targetVel and #currentPos > #targetVel) or
-        (cyclicJoints and #currentPos > #cyclicJoints) then error("Bad table size.") end
-
-    local lb = sim.setStepping(true)
-
-    local currentPosVelAccel = {}
-    local maxVelAccelJerk = {}
-    local targetPosVel = {}
-    local sel = {}
-    local outPos = {}
-    local outVel = {}
-    local outAccel = {}
-    for i = 1, #currentPos, 1 do
-        local v = currentPos[i]
-        currentPosVelAccel[i] = v
-        outPos[i] = v
-        maxVelAccelJerk[i] = maxVel[i]
-        local w = targetPos[i]
-        if cyclicJoints and cyclicJoints[i] then
-            while w - v >= math.pi * 2 do w = w - math.pi * 2 end
-            while w - v < 0 do w = w + math.pi * 2 end
-            if w - v > math.pi then w = w - math.pi * 2 end
-        end
-        targetPosVel[i] = w
-        sel[i] = 1
-    end
-    for i = #currentPos + 1, #currentPos * 2 do
-        if currentVel then
-            currentPosVelAccel[i] = currentVel[i - #currentPos]
-            outVel[i - #currentPos] = currentVel[i - #currentPos]
-        else
-            currentPosVelAccel[i] = 0
-            outVel[i - #currentPos] = 0
-        end
-        maxVelAccelJerk[i] = maxAccel[i - #currentPos]
-        if targetVel then
-            targetPosVel[i] = targetVel[i - #currentPos]
-        else
-            targetPosVel[i] = 0
-        end
-    end
-    for i = #currentPos * 2 + 1, #currentPos * 3 do
-        if currentAccel then
-            currentPosVelAccel[i] = currentAccel[i - #currentPos * 2]
-            outAccel[i - #currentPos * 2] = currentAccel[i - #currentPos * 2]
-        else
-            currentPosVelAccel[i] = 0
-            outAccel[i - #currentPos * 2] = 0
-        end
-        maxVelAccelJerk[i] = maxJerk[i - #currentPos * 2]
-    end
-    if flags >= 0 and (flags & sim.ruckig_minvel) ~= 0 then
-        for i = 1, #currentPos, 1 do
-            maxVelAccelJerk[#maxVelAccelJerk + 1] = maxVel[#currentPos + i]
-        end
-    end
-    if flags >= 0 and (flags & sim.ruckig_minaccel) ~= 0 then
-        for i = 1, #currentPos, 1 do
-            maxVelAccelJerk[#maxVelAccelJerk + 1] = maxAccel[#currentPos + i]
-        end
-    end
-
-    local ruckigObject = sim.ruckigPos(
-                             #currentPos, 0.0001, flags, currentPosVelAccel, maxVelAccelJerk, sel,
-                             targetPosVel
-                         )
-    local result = 0
-    local timeLeft = 0
-    if type(callback) == 'string' then callback = _G[callback] end
-    while result == 0 do
-        local dt = timeStep
-        if dt == 0 then dt = sim.getSimulationTimeStep() end
-        local syncTime
-        result, newPosVelAccel, syncTime = sim.ruckigStep(ruckigObject, dt)
-        if result >= 0 then
-            if result == 0 then timeLeft = dt - syncTime end
-            for i = 1, #currentPos, 1 do
-                outPos[i] = newPosVelAccel[i]
-                outVel[i] = newPosVelAccel[#currentPos + i]
-                outAccel[i] = newPosVelAccel[#currentPos * 2 + i]
-            end
-            if callback(outPos, outVel, outAccel, auxData) then break end
-        else
-            error('sim.ruckigStep returned error code ' .. result)
-        end
-        if result == 0 then sim.step() end
-    end
-    sim.ruckigRemove(ruckigObject)
-    sim.setStepping(lb)
-    return outPos, outVel, outAccel, timeLeft
-end
-
-function sim.generateTimeOptimalTrajectory(...)
-    simZMQ = require 'simZMQ'
-    local path, pathLengths, minMaxVel, minMaxAccel, trajPtSamples, boundaryCondition, timeout =
-        checkargs({
-            {type = 'table', item_type = 'float', size = '2..*'},
-            {type = 'table', item_type = 'float', size = '2..*'},
-            {type = 'table', item_type = 'float', size = '2..*'},
-            {type = 'table', item_type = 'float', size = '2..*'},
-            {type = 'int', default = 1000},
-            {type = 'string', default = 'not-a-knot'},
-            {type = 'float', default = 5},
-    }, ...)
-
-    local confCnt = #pathLengths
-    local dof = math.floor(#path / confCnt)
-
-    if (dof * confCnt ~= #path) or dof < 1 or confCnt < 2 or dof ~= #minMaxVel / 2 or
-        dof ~= #minMaxAccel / 2 then error("Bad table size.") end
-    local lb = sim.setStepping(true)
-
-    local pM = Matrix(confCnt, dof, path)
-    local mmvM = Matrix(2, dof, minMaxVel)
-    local mmaM = Matrix(2, dof, minMaxAccel)
-
-    sim.addLog(sim.verbosity_scriptinfos,
-        "Trying to connect via ZeroMQ to the 'toppra' service... " ..
-        "make sure the 'docker-image-zmq-toppra' container is running. " ..
-        "Details can be found at https://github.com/CoppeliaRobotics/docker-image-zmq-toppra"
-    )
-    local context = simZMQ.ctx_new()
-    local socket = simZMQ.socket(context, simZMQ.REQ)
-    simZMQ.setsockopt(socket, simZMQ.RCVTIMEO, sim.packInt32Table {1000 * timeout})
-    simZMQ.setsockopt(socket, simZMQ.LINGER, sim.packInt32Table {500})
-    local result = simZMQ.connect(socket, 'tcp://localhost:22505')
-    if result == -1 then
-        local err = simZMQ.errnum()
-        error('connect failed: ' .. err .. ': ' .. simZMQ.strerror(err))
-    end
-    local json = require 'dkjson'
-    local result = simZMQ.send(socket, json.encode {
-        samples = trajPtSamples,
-        ss_waypoints = pathLengths,
-        waypoints = pM:totable(),
-        velocity_limits = mmvM:totable(),
-        acceleration_limits = mmaM:totable(),
-        bc_type = boundaryCondition,
-    }, 0)
-    if result == -1 then
-        local err = simZMQ.errnum()
-        error('send failed: ' .. err .. ': ' .. simZMQ.strerror(err))
-    end
-    local msg = simZMQ.msg_new()
-    simZMQ.msg_init(msg)
-
-    local st = sim.getSystemTime()
-    result = -1
-    while sim.getSystemTime() - st < 2 do
-        local rc, revents = simZMQ.poll({socket}, {simZMQ.POLLIN}, 0)
-        if rc > 0 then
-            result = simZMQ.msg_recv(msg, socket, 0)
-            break
-        end
-    end
-    if result == -1 then
-        local err = simZMQ.errnum()
-        error('recv failed: ' .. err .. ': ' .. simZMQ.strerror(err))
-    end
-    local data = simZMQ.msg_data(msg)
-    simZMQ.msg_close(msg)
-    simZMQ.msg_destroy(msg)
-
-    local r = json.decode(data)
-    simZMQ.close(socket)
-    simZMQ.ctx_term(context)
-
-    sim.setStepping(lb)
-    return Matrix:fromtable(r.qs[1]):data(), r.ts
-end
-
 function sim.copyTable(t)
     return table.deepcopy(t)
 end
@@ -890,12 +525,7 @@ function sim.createPath(...)
             {type = 'table', item_type = 'float', size = '3', default = {0, 0, 1}},
         }, ...)
         local fl = setYieldAllowed(false)
-        retVal = sim.createDummy(0.04, {0, 0.68, 0.47, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-        sim.setObjectAlias(retVal, "Path")
-        local scriptHandle = sim.addScript(sim.scripttype_customizationscript)
-        local code = [[path=require('path_customization')
-
-function path.shaping(path,pathIsClosed,upVector)
+        local code = [[function path.shaping(path,pathIsClosed,upVector)
     local section={0.02,-0.02,0.02,0.02,-0.02,0.02,-0.02,-0.02,0.02,-0.02}
     local color={0.7,0.9,0.9}
     local options=0
@@ -906,14 +536,26 @@ function path.shaping(path,pathIsClosed,upVector)
     sim.setShapeColor(shape,nil,sim.colorcomponent_ambient_diffuse,color)
     return shape
 end]]
-        sim.setScriptText(scriptHandle, code)
-        sim.associateScriptWithObject(scriptHandle, retVal)
+        
+        retVal = sim.createDummy(0.04, {0, 0.68, 0.47, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+        sim.setObjectAlias(retVal, "Path")
+        local scriptHandle
+        if sim.getBoolParam(sim.boolparam_usingscriptobjects) then
+            code = "path = require('models.path_customization-2')\n\n" .. code
+            scriptHandle = sim.createScript(sim.scripttype_customization, code)
+            sim.setObjectParent(scriptHandle, retVal)
+        else
+            scriptHandle = sim.addScript(sim.scripttype_customization)
+            code = "path = require('models.deprecated.path_customization')\n\n" .. code
+            sim.setScriptText(scriptHandle, code)
+            sim.associateScriptWithObject(scriptHandle, retVal)
+        end
         local prop = sim.getModelProperty(retVal)
         sim.setModelProperty(retVal, (prop | sim.modelproperty_not_model) - sim.modelproperty_not_model) -- model
         prop = sim.getObjectProperty(retVal)
         sim.setObjectProperty(retVal, prop | sim.objectproperty_canupdatedna | sim.objectproperty_collapsed)
         local data = sim.packTable({ctrlPts, options, subdiv, smoothness, orientationMode, upVector})
-        sim.writeCustomDataBlock(retVal, "ABC_PATH_CREATION", data)
+        sim.writeCustomStringData(retVal, "ABC_PATH_CREATION", data)
         sim.initScript(scriptHandle)
         setYieldAllowed(fl)
     end
@@ -998,8 +640,8 @@ function _S.getConfigDistance(confA, confB, metric, types)
             qcnt = qcnt + 1
             if qcnt == 4 then
                 qcnt = 0
-                local m1 = sim.buildMatrixQ({0, 0, 0}, {confA[j - 3], confA[j - 2], confA[j - 1], confA[j - 0]})
-                local m2 = sim.buildMatrixQ({0, 0, 0}, {confB[j - 3], confB[j - 2], confB[j - 1], confB[j - 0]})
+                local m1 = sim.poseToMatrix({0, 0, 0, confA[j - 3], confA[j - 2], confA[j - 1], confA[j - 0]})
+                local m2 = sim.poseToMatrix({0, 0, 0, confB[j - 3], confB[j - 2], confB[j - 1], confB[j - 0]})
                 local a, angle = sim.getRotationAxis(m1, m2)
                 dd = angle * metric[j - 3]
             end
@@ -1099,7 +741,7 @@ function sim.waitForSignal(...)
     local retVal
     while true do
         retVal = sim.getInt32Signal(sigName) or sim.getFloatSignal(sigName) or
-                     sim.getDoubleSignal(sigName) or sim.getStringSignal(sigName)
+                     sim.getStringSignal(sigName)
         if retVal then break end
         sim.step()
     end
@@ -1185,20 +827,6 @@ function sim.serialClose(...)
     if _S.serialPortData then _S.serialPortData[portHandle] = nil end
 end
 
-function sim.getShapeBB(handle)
-    local s = {}
-    local m = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_max_x)
-    local n = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_min_x)
-    s[1] = m - n
-    local m = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_max_y)
-    local n = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_min_y)
-    s[2] = m - n
-    local m = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_max_z)
-    local n = sim.getObjectFloatParam(handle, sim.objfloatparam_objbbox_min_z)
-    s[3] = m - n
-    return s
-end
-
 function sim.setShapeBB(handle, size)
     local s = sim.getShapeBB(handle)
     for i = 1, 3, 1 do if math.abs(s[i]) > 0.00001 then s[i] = size[i] / s[i] end end
@@ -1223,7 +851,7 @@ end
 function sim.readCustomDataBlockEx(handle, tag, options)
     -- Undocumented function (for now)
     options = options or {}
-    local data = sim.readCustomDataBlock(handle, tag)
+    local data = sim.readCustomStringData(handle, tag)
     if tag == '__info__' then
         return data, 'cbor'
     else
@@ -1237,7 +865,7 @@ end
 function sim.writeCustomDataBlockEx(handle, tag, data, options)
     -- Undocumented function (for now)
     options = options or {}
-    sim.writeCustomDataBlock(handle, tag, data)
+    sim.writeCustomStringData(handle, tag, data)
     if tag ~= '__info__' and options.dataType then
         local info = sim.readCustomTableData(handle, '__info__')
         info.blocks = info.blocks or {}
@@ -1254,23 +882,22 @@ function sim.readCustomTableData(...)
         {type = 'table', default = {}},
     }, ...)
     local data, dataType = sim.readCustomDataBlockEx(handle, tagName)
-    if data == nil then
+    if data == nil or #data == 0 then
         data = {}
     else
-        if #data > 0 then
-            if dataType == 'cbor' then
-                local cbor = require 'org.conman.cbor'
-                local data0 = data
-                data = cbor.decode(data0)
-                if type(data) ~= 'table' and tagName == '__info__' then
-                    -- backward compat: old __info__ blocks were encoded with sim.packTable
-                    data = sim.unpackTable(data0)
-                end
-            else
-                data = sim.unpackTable(data)
+        if isbuffer(data) then
+            data = tostring(data)
+        end
+        if dataType == 'cbor' then
+            local cbor = require 'org.conman.cbor'
+            local data0 = data
+            data = cbor.decode(data0)
+            if type(data) ~= 'table' and tagName == '__info__' then
+                -- backward compat: old __info__ blocks were encoded with sim.packTable
+                data = sim.unpackTable(data0)
             end
         else
-            data = {}
+            data = sim.unpackTable(data)
         end
     end
     return data
@@ -1502,19 +1129,33 @@ end
 
 function sim.getScriptFunctions(...)
     local args = {...}
+
+    -- shorthand: first arg can be an object path:
     if type(args[1]) == 'string' then
         assert(#args <= 2, 'too many args')
         args[1] = sim.getObject(args[1])
     end
-    if pcall(sim.getObjectType, args[1]) then
+
+    -- shorthand: first arg can be any object handle
+    -- script will be fetched via sim.getScript, second arg specifies script type
+    local scriptHandle
+    local ok, objType = pcall(sim.getObjectType, args[1])
+    if ok then
+        -- args[1] is a object handle (either new script, or other object)
         assert(#args <= 2, 'too many args')
-        args[1] = sim.getScript(args[2] or sim.scripttype_customizationscript, args[1])
+        if objType ~= sim.object_script_type then
+            scriptHandle = sim.getScript(args[2] or sim.scripttype_customization, args[1])
+        else
+            scriptHandle = args[1]
+        end
         args[2] = nil
+    else
+        -- args[1] is a old script handle
+        scriptHandle = args[1]
+        assert(scriptHandle and pcall(sim.getScriptName, scriptHandle), 'invalid script handle')
     end
-    local scriptHandle = args[1]
-    assert(#args >= 1, 'not enough args')
-    assert(#args <= 1, 'too many args')
-    assert(scriptHandle and pcall(sim.getScriptName, scriptHandle), 'invalid script handle')
+
+    -- at this point we have the script handle from every possible overload (scriptHandle)
     return setmetatable({}, {
         __index = function(self, k)
             return function(self_, ...)
@@ -1525,9 +1166,17 @@ function sim.getScriptFunctions(...)
     })
 end
 
-function sim.addReferencedHandle(objectHandle, referencedHandle, options)
+function sim.addReferencedHandle(objectHandle, referencedHandle, tag, options)
+    -- backwards compatibility: arg 'tag' was added at a later point
+    if type(tag) == 'table' and options == nil then
+        options = tag
+        tag = ''
+    end
+    -- .
+
+    tag = tag or ''
     options = options or {}
-    local refHandles = sim.getReferencedHandles(objectHandle)
+    local refHandles = sim.getReferencedHandles(objectHandle, tag)
     local handlesToAdd = {referencedHandle}
     if options.wholeTree then
         handlesToAdd = sim.getObjectsInTree(referencedHandle)
@@ -1535,21 +1184,27 @@ function sim.addReferencedHandle(objectHandle, referencedHandle, options)
     for _, handle in ipairs(handlesToAdd) do
         table.insert(refHandles, handle)
     end
-    sim.setReferencedHandles(objectHandle, refHandles)
+    sim.setReferencedHandles(objectHandle, refHandles, tag)
 end
 
-function sim.removeReferencedObjects(objectHandle)
-    local refHandles = sim.getReferencedHandles(objectHandle)
+function sim.removeReferencedObjects(objectHandle, tag)
+    tag = tag or ''
+    local refHandles = sim.getReferencedHandles(objectHandle, tag)
+    local toRemove = {}
     -- remove models with sim.removeModel, the rest with sim.removeObjects:
     for _, h in ipairs(refHandles) do
         if sim.isHandle(h) then
             if sim.getModelProperty(h) & sim.modelproperty_not_model == 0 then
                 sim.removeModel(h)
+            else
+                table.insert(toRemove, h)
             end
         end
     end
-    sim.removeObjects(refHandles)
-    sim.setReferencedHandles(objectHandle, {})
+    if #toRemove > 0 then
+        sim.removeObjects(toRemove)
+    end
+    sim.setReferencedHandles(objectHandle, {}, tag)
 end
 
 function sim.visitTree(...)
@@ -1566,6 +1221,56 @@ function sim.visitTree(...)
         if childHandle == -1 then return end
         sim.visitTree(childHandle, visitorFunc)
         i = i + 1
+    end
+end
+
+function sim.getShapeAppearance(handle, opts)
+    assert(sim.getObjectType(handle) == sim.object_shape_type, 'not a shape')
+    opts = opts or {}
+    local r = {}
+    if sim.getObjectInt32Param(handle, sim.shapeintparam_compound) > 0 then
+        r.subShapes = {}
+        local subShapesCopy = sim.ungroupShape((sim.copyPasteObjects{handle})[1])
+        for i, subShape in ipairs(subShapesCopy) do
+            r.subShapes[i] = sim.getShapeAppearance(subShape, opts)
+        end
+        sim.removeObjects(subShapesCopy)
+    else
+        r.edges = sim.getObjectInt32Param(handle, sim.shapeintparam_edge_visibility)
+        r.wireframe = sim.getObjectInt32Param(handle, sim.shapeintparam_wireframe)
+        r.visibilityLayer = sim.getObjectInt32Param(handle, sim.objintparam_visibility_layer)
+        r.culling = sim.getObjectInt32Param(handle, sim.shapeintparam_culling)
+        r.shadingAngle = sim.getObjectFloatParam(handle, sim.shapefloatparam_shading_angle)
+        r.color = {}
+        _, r.color.ambientDiffuse = sim.getShapeColor(handle, nil, sim.colorcomponent_ambient_diffuse)
+        _, r.color.specular = sim.getShapeColor(handle, nil, sim.colorcomponent_specular)
+        _, r.color.emission = sim.getShapeColor(handle, nil, sim.colorcomponent_emission)
+        _, r.color.transparency = sim.getShapeColor(handle, nil, sim.colorcomponent_transparency)
+    end
+    return r
+end
+
+function sim.setShapeAppearance(handle, savedData, opts)
+    assert(sim.getObjectType(handle) == sim.object_shape_type, 'not a shape')
+    opts = opts or {}
+    if sim.getObjectInt32Param(handle, sim.shapeintparam_compound) > 0 then
+        local subShapes = sim.ungroupShape(handle)
+        for i, subShape in ipairs(subShapes) do
+            sim.setShapeAppearance(subShape, (savedData.subShapes or {})[i] or (savedData.subShapes or {})[1] or savedData, opts)
+        end
+        return sim.groupShapes(subShapes)
+    else
+        savedData = (savedData.subShapes or {})[1] or savedData
+        sim.setObjectInt32Param(handle, sim.shapeintparam_edge_visibility, savedData.edges)
+        sim.setObjectInt32Param(handle, sim.shapeintparam_wireframe, savedData.wireframe)
+        sim.setObjectInt32Param(handle, sim.objintparam_visibility_layer, savedData.visibilityLayer)
+        sim.setObjectInt32Param(handle, sim.shapeintparam_culling, savedData.culling)
+        sim.setObjectFloatParam(handle, sim.shapefloatparam_shading_angle, savedData.shadingAngle)
+        sim.setShapeColor(handle, nil, sim.colorcomponent_ambient_diffuse, savedData.color.ambientDiffuse)
+        sim.setShapeColor(handle, nil, sim.colorcomponent_specular, savedData.color.specular)
+        sim.setShapeColor(handle, nil, sim.colorcomponent_emission, savedData.color.emission)
+        sim.setShapeColor(handle, nil, sim.colorcomponent_transparency, savedData.color.transparency)
+        return handle
     end
 end
 
@@ -1590,15 +1295,23 @@ function apropos(what)
             end
         end
     end
-    table.sort(
-        results, function(a, b)
-            return a[1] < b[1]
-        end
-    )
+    table.sort(results, function(a, b) return a[1] < b[1] end)
     local s = ''
     for i, result in ipairs(results) do s = s .. (s == '' and '' or '\n') .. result[2] end
     print(s)
 end
+
+-- wrap require() to load embedded scripts' code when called with a script handle, e.g. require(sim.getObject '/foo')
+require = wrap(require, function(origRequire)
+    return function (...)
+        local arg = ({...})[1]
+        if math.type(arg) == 'integer' and sim.isHandle(arg) and sim.getObjectType(arg) == sim.object_script_type then
+            local txt = sim.getObjectStringParam(arg, sim.scriptstringparam_text)
+            return loadstring(tostring(txt))()
+        end
+        return origRequire(...)
+    end
+end)
 
 -- Hidden, internal functions:
 ----------------------------------------------------------
@@ -1646,6 +1359,9 @@ end
 
 function _S.parseBool(v)
     if v == nil then return nil end
+    if isbuffer(v) then
+        v = tostring(v)
+    end
     if v == 'true' then return true end
     if v == 'false' then return false end
     if v == 'on' then return true end
@@ -1688,18 +1404,14 @@ function _S.linearInterpolate(conf1, conf2, t, types)
             qcnt = qcnt + 1
             if qcnt == 4 then
                 qcnt = 0
-                local m1 = sim.buildMatrixQ(
-                               {0, 0, 0}, {conf1[i - 3], conf1[i - 2], conf1[i - 1], conf1[i - 0]}
-                           )
-                local m2 = sim.buildMatrixQ(
-                               {0, 0, 0}, {conf2[i - 3], conf2[i - 2], conf2[i - 1], conf2[i - 0]}
-                           )
+                local m1 = sim.poseToMatrix({0, 0, 0, conf1[i - 3], conf1[i - 2], conf1[i - 1], conf1[i - 0]})
+                local m2 = sim.poseToMatrix({0, 0, 0, conf2[i - 3], conf2[i - 2], conf2[i - 1], conf2[i - 0]})
                 local m = sim.interpolateMatrices(m1, m2, t)
-                local q = sim.getQuaternionFromMatrix(m)
-                retVal[i - 3] = q[1]
-                retVal[i - 2] = q[2]
-                retVal[i - 1] = q[3]
-                retVal[i - 0] = q[4]
+                local p = sim.matrixToPose(m)
+                retVal[i - 3] = p[4]
+                retVal[i - 2] = p[5]
+                retVal[i - 1] = p[6]
+                retVal[i - 0] = p[7]
             end
         end
     end
@@ -1758,120 +1470,6 @@ end
 
 ----------------------------------------------------------
 
--- Old stuff, mainly for backward compatibility:
-----------------------------------------------------------
-function simRMLMoveToJointPositions(...)
-    require("sim_old")
-    return simRMLMoveToJointPositions(...)
-end
-function sim.rmlMoveToJointPositions(...)
-    require("sim_old")
-    return sim.rmlMoveToJointPositions(...)
-end
-function simRMLMoveToPosition(...)
-    require("sim_old")
-    return simRMLMoveToPosition(...)
-end
-function sim.rmlMoveToPosition(...)
-    require("sim_old")
-    return sim.rmlMoveToPosition(...)
-end
-function sim.boolOr32(...)
-    require("sim_old")
-    return sim.boolOr32(...)
-end
-function sim.boolAnd32(...)
-    require("sim_old")
-    return sim.boolAnd32(...)
-end
-function sim.boolXor32(...)
-    require("sim_old")
-    return sim.boolXor32(...)
-end
-function sim.boolOr16(...)
-    require("sim_old")
-    return sim.boolOr16(...)
-end
-function sim.boolAnd16(...)
-    require("sim_old")
-    return sim.boolAnd16(...)
-end
-function sim.boolXor16(...)
-    require("sim_old")
-    return sim.boolXor16(...)
-end
-function sim.setSimilarName(...)
-    require("sim_old")
-    return sim.setSimilarName(...)
-end
-function sim.tubeRead(...)
-    require("sim_old")
-    return sim.tubeRead(...)
-end
-function sim.getObjectHandle_noErrorNoSuffixAdjustment(...)
-    require("sim_old")
-    return sim.getObjectHandle_noErrorNoSuffixAdjustment(...)
-end
-function sim.moveToPosition(...)
-    require("sim_old")
-    return sim.moveToPosition(...)
-end
-function sim.moveToJointPositions(...)
-    require("sim_old")
-    return sim.moveToJointPositions(...)
-end
-function sim.moveToObject(...)
-    require("sim_old")
-    return sim.moveToObject(...)
-end
-function sim.followPath(...)
-    require("sim_old")
-    return sim.followPath(...)
-end
-function sim.include(...)
-    require("sim_old")
-    return sim.include(...)
-end
-function sim.includeRel(...)
-    require("sim_old")
-    return sim.includeRel(...)
-end
-function sim.includeAbs(...)
-    require("sim_old")
-    return sim.includeAbs(...)
-end
-function sim.canScaleObjectNonIsometrically(...)
-    require("sim_old")
-    return sim.canScaleObjectNonIsometrically(...)
-end
-function sim.canScaleModelNonIsometrically(...)
-    require("sim_old")
-    return sim.canScaleModelNonIsometrically(...)
-end
-function sim.scaleModelNonIsometrically(...)
-    require("sim_old")
-    return sim.scaleModelNonIsometrically(...)
-end
-function sim.UI_populateCombobox(...)
-    require("sim_old")
-    return sim.UI_populateCombobox(...)
-end
-function sim.displayDialog(...)
-    require("sim_old")
-    return sim.displayDialog(...)
-end
-function sim.endDialog(...)
-    require("sim_old")
-    return sim.endDialog(...)
-end
-function sim.getDialogInput(...)
-    require("sim_old")
-    return sim.getDialogInput(...)
-end
-function sim.getDialogResult(...)
-    require("sim_old")
-    return sim.getDialogResult(...)
-end
 _S.dlg = {}
 function _S.dlg.ok_callback(ui)
     local simUI = require 'simUI'
@@ -1942,26 +1540,32 @@ function _S.sysCallEx_cleanup()
     _S.dlg.switch() -- remove all
 end
 
-function _S.unpackTable(data, scheme)
-    if scheme == nil then
-        if #data > 0 then
-            if string.byte(data, 1) == 0 or string.byte(data, 1) == 5 then
-                return _S.unpackTableOrig(data)
+sim.unpackTable = wrap(sim.unpackTable, function(origFunc)
+    return function(data, scheme)
+        if scheme == nil then
+            if isbuffer(data) then
+                data = tostring(data)
+            end
+            if #data == 0 then
+                return {} -- since 20.03.2024: empty buffer results in an empty table
             else
-                local cbor = require 'org.conman.cbor'
-                return cbor.decode(data)
+                if string.byte(data, 1) == 0 or string.byte(data, 1) == 5 then
+                    return origFunc(data)
+                elseif (string.byte(data, 1) == 128) or (string.byte(data, 1) == 128 + 32) or (string.byte(data, 1) == 128 + 31) or (string.byte(data, 1) == 128 + 31 + 32) then
+                    local cbor = require 'org.conman.cbor'
+                    return cbor.decode(data)
+                else
+                    error('invalid input data.')
+                end
             end
         end
     end
-end
-_S.unpackTableOrig = sim.unpackTable
-sim.unpackTable = _S.unpackTable
+end)
+
 
 sim.registerScriptFuncHook('sysCall_init', '_S.sysCallEx_init', false) -- hook on *before* init is incompatible with implicit module load...
 sim.registerScriptFuncHook('sysCall_cleanup', '_S.sysCallEx_cleanup', false)
-sim.registerScriptFuncHook(
-    'sysCall_beforeInstanceSwitch', '_S.sysCallEx_beforeInstanceSwitch', false
-)
+sim.registerScriptFuncHook('sysCall_beforeInstanceSwitch', '_S.sysCallEx_beforeInstanceSwitch', false)
 sim.registerScriptFuncHook('sysCall_addOnScriptSuspend', '_S.sysCallEx_addOnScriptSuspend', false)
 ----------------------------------------------------------
 

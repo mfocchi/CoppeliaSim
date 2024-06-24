@@ -1,8 +1,8 @@
 model.floor={}
 model.floor.handles={}
-model.floor.handles.e1=sim.getObject('./ResizableFloor_10_50_element')
-model.floor.handles.e2=sim.getObject('./ResizableFloor_10_50_visibleElement')
-model.floor.handles.itemsHolder=sim.getObject('./Floor_floorItems')
+model.floor.handles.e1=sim.getObject('../ResizableFloor_10_50_element')
+model.floor.handles.e2=sim.getObject('../ResizableFloor_10_50_visibleElement')
+model.floor.handles.itemsHolder=sim.getObject('../Floor_floorItems')
 
 function model.floor.update()
     local c=model.readInfo()
@@ -12,7 +12,7 @@ function model.floor.update()
     sim.setObjectParent(model.floor.handles.e1,-1,true)
     local child=sim.getObjectChild(model.floor.handles.itemsHolder,0)
     while child~=-1 do
-        sim.removeObject(child)
+        sim.removeObjects({child})
         child=sim.getObjectChild(model.floor.handles.itemsHolder,0)
     end
     local xPosInit=(sx-1)*-5*sizeFact
@@ -88,7 +88,7 @@ function model.floor.removeDlg()
 end
 
 function model.floor.showOrHideDlgIfNeeded()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[1]==model.handle then
         model.floor.showDlg()
     else

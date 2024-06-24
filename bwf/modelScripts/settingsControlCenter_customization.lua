@@ -36,8 +36,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDOVERRIDE)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDOVERRIDE)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -48,9 +48,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDOVERRIDE,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDOVERRIDE,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDOVERRIDE,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDOVERRIDE,'')
     end
 end
 
@@ -185,7 +185,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -195,7 +195,7 @@ function sysCall_init()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
     local objs=sim.getObjectsWithTag(simBWF.modelTags.OLDOVERRIDE,true)
     if #objs>1 then
-        sim.removeObject(model)
+        sim.removeObjects({model})
         sim.removeObjectFromSelection(sim.handle_all)
         objs=sim.getObjectsWithTag(simBWF.modelTags.OLDOVERRIDE,true)
         sim.addObjectToSelection(sim.handle_single,objs[1])
@@ -205,7 +205,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

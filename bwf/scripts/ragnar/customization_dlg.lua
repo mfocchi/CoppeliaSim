@@ -63,7 +63,7 @@ function model.dlg.visualizeWorkspaceClick_callback(uiHandle,id,newVal)
 
     if newVal>0 then
         sim.setObjectInt32Param(model.handles.ragnarWs,sim.objintparam_visibility_layer,1)
-        model.workspaceUpdateRequest=sim.getSystemTimeInMs(-1) -- to trigger recomputation
+        model.workspaceUpdateRequest=sim.getSystemTime()*1000 -- to trigger recomputation
     else
         sim.setObjectInt32Param(model.handles.ragnarWs,sim.objintparam_visibility_layer,0)
     end
@@ -1294,7 +1294,7 @@ function model.dlg.removeDlg()
 end
 
 function model.dlg.showOrHideDlgIfNeeded()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model.handle then
         model.dlg.showDlg()
     else

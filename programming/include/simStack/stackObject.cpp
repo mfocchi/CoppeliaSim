@@ -31,7 +31,12 @@ void CStackObject::buildItemOntoStack(int stackId,CStackObject* obj)
     else if (obj->getObjectType()==STACK_BOOL)
         simPushBoolOntoStack(stackId,((CStackBool*)obj)->getValue()); // Bool
     else if (obj->getObjectType()==STACK_NUMBER)
-        simPushDoubleOntoStack(stackId,((CStackNumber*)obj)->getValue()); // number
+    {
+        if (((CStackNumber*)obj)->isInt())
+            simPushInt64OntoStack(stackId,((CStackNumber*)obj)->getLongValue()); // int
+        else
+            simPushDoubleOntoStack(stackId,((CStackNumber*)obj)->getValue()); // number
+    }
     else if (obj->getObjectType()==STACK_STRING)
     { // string
         std::string str(((CStackString*)obj)->getValue());
@@ -45,7 +50,12 @@ void CStackObject::buildItemOntoStack(int stackId,CStackObject* obj)
         else if (arr->getSize()>0)
         {
             if (arr->isNumberArray())
-               simPushDoubleTableOntoStack(stackId,&arr->getDoubles()->at(0),int(arr->getDoubles()->size())); // number array
+            {
+                if (arr->isIntArray())
+                    simPushInt32TableOntoStack(stackId,&arr->getInts()->at(0),int(arr->getInts()->size())); // number array
+                else
+                    simPushDoubleTableOntoStack(stackId,&arr->getDoubles()->at(0),int(arr->getDoubles()->size())); // number array
+            }
             else
             { // mixed array
                 simPushTableOntoStack(stackId);

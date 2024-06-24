@@ -125,8 +125,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -137,9 +137,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.TRACKINGWINDOW,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.TRACKINGWINDOW,'')
     end
 end
 
@@ -147,8 +147,8 @@ function getAvailableConveyors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -160,9 +160,9 @@ function getAvailableDetectionOrTrackingWindows()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model then
-            local data1=sim.readCustomDataBlock(l[i],simBWF.modelTags.TRACKINGWINDOW)
-            local data2=sim.readCustomDataBlock(l[i],'XYZ_DETECTIONWINDOW_INFO')
-            if data1 or data2 then
+            local data1=sim.readCustomStringData(l[i],simBWF.modelTags.TRACKINGWINDOW)
+            local data2=sim.readCustomStringData(l[i],'XYZ_DETECTIONWINDOW_INFO')
+            if (data1 and #data1 > 0) or (data2 and #data2 > 0) then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
@@ -1110,7 +1110,7 @@ function removeDlg()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -1126,9 +1126,9 @@ function sysCall_init()
     end
     ----------------------------------------
     writeInfo(_info)
-    trackBox=sim.getObject('./genericTrackingWindow_track')
-    stopLineBox=sim.getObject('./genericTrackingWindow_stopLine')
-    transferBox=sim.getObject('./genericTrackingWindow_transfer')
+    trackBox=sim.getObject('../genericTrackingWindow_track')
+    stopLineBox=sim.getObject('../genericTrackingWindow_stopLine')
+    transferBox=sim.getObject('../genericTrackingWindow_transfer')
     
     -- Following for backward compatibility:
     createPalletPointsIfNeeded()
@@ -1137,7 +1137,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

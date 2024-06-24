@@ -314,8 +314,8 @@ function model.getLabels(partH)
     local labels={}
     for objInd=1,#possibleLabels,1 do
         local h=possibleLabels[objInd]
-        local data=sim.readCustomDataBlock(h,simBWF.modelTags.LABEL_PART)
-        if data then
+        local data=sim.readCustomStringData(h,simBWF.modelTags.LABEL_PART)
+        if data and #data > 0 then
             labels[#labels+1]=h
         end
     end
@@ -323,7 +323,7 @@ function model.getLabels(partH)
 end
 
 function model.adjustSizeData(partH,sx,sy,sz)
-    local data=sim.unpackTable(sim.readCustomDataBlock(partH,simBWF.modelTags.PART))
+    local data=sim.unpackTable(sim.readCustomStringData(partH,simBWF.modelTags.PART))
     local labelData=data['labelData']
     if labelData then
         local s=labelData['smallLabelSize']
@@ -333,7 +333,7 @@ function model.adjustSizeData(partH,sx,sy,sz)
         local s=labelData['boxSize']
         labelData['boxSize']={s[1]*sx,s[2]*sy,s[3]*sz}
         data['labelData']=labelData
-        sim.writeCustomDataBlock(partH,simBWF.modelTags.PART,sim.packTable(data))
+        sim.writeCustomStringData(partH,simBWF.modelTags.PART,sim.packTable(data))
     end
 end
 
@@ -358,7 +358,7 @@ function model.setItemMass(handle,m)
             if sim.getObjectType(handle)==sim.object_shape_type then
                 local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                 if p==0 then
-                    local m0,i0,com0=sim.getShapeMassAndInertia(handle)
+                    local m0=sim.getShapeMass(handle)
                     currentMass=currentMass+m0
                 end
             end
@@ -383,12 +383,8 @@ function model.setItemMass(handle,m)
             if sim.getObjectType(handle)==sim.object_shape_type then
                 local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                 if p==0 then
-                    local transf=sim.getObjectMatrix(handle,-1)
-                    local m0,i0,com0=sim.getShapeMassAndInertia(handle,transf)
-                    for i=1,9,1 do
-                        i0[i]=i0[i]*massScaling
-                    end
-                    sim.setShapeMassAndInertia(handle,m0*massScaling,i0,com0,transf)
+                    local m0=sim.getShapeMass(handle)
+                    sim.setShapeMass(handle,m0*massScaling)
                 end
             end
         end
@@ -398,13 +394,13 @@ end
 function model.regenerateOrRemoveLabels(partH,enabledLabels)
     -- There can be up to 3 labels in this part:
     local possibleLabels=sim.getObjectsInTree(partH,sim.object_shape_type,1)
-    local labelData=sim.unpackTable(sim.readCustomDataBlock(partH,simBWF.modelTags.PART))['labelData']
+    local labelData=sim.unpackTable(sim.readCustomStringData(partH,simBWF.modelTags.PART))['labelData']
     for ind=1,3,1 do
         for objInd=1,#possibleLabels,1 do
             local h=possibleLabels[objInd]
             if h>=0 then
-                local data=sim.readCustomDataBlock(h,simBWF.modelTags.LABEL_PART)
-                if data then
+                local data=sim.readCustomStringData(h,simBWF.modelTags.LABEL_PART)
+                if data and #data > 0 then
                     data=sim.unpackTable(data)
                     if data['labelIndex']==ind then
                         local bits={1,2,4}
@@ -433,7 +429,7 @@ function model.regenerateOrRemoveLabels(partH,enabledLabels)
                                 sim.setObjectOrientation(h,partH,theTable[2])
                             end
                         else
-                            sim.removeObject(h) -- we do not want this label
+                            sim.removeObjects({h}) -- we do not want this label
                             possibleLabels[objInd]=-1
                         end
                     end
@@ -448,9 +444,9 @@ function model.instanciatePart(partHandle,itemPosition,itemOrientation,itemMass,
     local p=sim.getModelProperty(partHandle)
     local tble=sim.copyPasteObjects({partHandle},1)
     local basePartCopy=tble[1]
-    sim.writeCustomDataBlock(basePartCopy,simBWF.modelTags.GEOMETRY_PART,'') -- remove the embedded part geometry
+    sim.writeCustomStringData(basePartCopy,simBWF.modelTags.GEOMETRY_PART,'') -- remove the embedded part geometry
     sim.setObjectParent(basePartCopy,model.handle,true)
-    local basePartCopyData=sim.readCustomDataBlock(basePartCopy,simBWF.modelTags.PART)
+    local basePartCopyData=sim.readCustomStringData(basePartCopy,simBWF.modelTags.PART)
     basePartCopyData=sim.unpackTable(basePartCopyData)
     local invisible=(basePartCopyData['bitCoded']&1)>0
     local nonRespondableToOtherParts=(basePartCopyData['bitCoded']&2)>0
@@ -506,14 +502,14 @@ function model.instanciatePart(partHandle,itemPosition,itemOrientation,itemMass,
 
     basePartCopyData['instanciated']=true
     basePartCopyData['type']=partHandle
-    sim.writeCustomDataBlock(basePartCopy,simBWF.modelTags.PART,sim.packTable(basePartCopyData))
+    sim.writeCustomStringData(basePartCopy,simBWF.modelTags.PART,sim.packTable(basePartCopyData))
     
     -- Now check if that parts has a pallet with other parts attached:
     local attachedPalletHandle=simBWF.getReferencedObjectHandle(partHandle,simBWF.PART_PALLET_REF) -- we have to read it from the original base part
     if attachedPalletHandle>=0 and allowChildItemsIfApplicable then
         -- Yes!
         local baseM=sim.getObjectMatrix(basePartCopy,-1)
-        local pallet=sim.unpackTable(sim.readCustomDataBlock(attachedPalletHandle,simBWF.modelTags.PALLET))
+        local pallet=sim.unpackTable(sim.readCustomStringData(attachedPalletHandle,simBWF.modelTags.PALLET))
         local palletM=sim.buildMatrix(basePartCopyData.palletOffset,{pallet.yaw,pallet.pitch,pallet.roll})
         for i=1,#pallet.palletItemList,1 do
             local palletItem=pallet.palletItemList[i]
@@ -527,7 +523,7 @@ function model.instanciatePart(partHandle,itemPosition,itemOrientation,itemMass,
                 local tble=sim.copyPasteObjects({childPart},1)
                 
                 childPartCopy=tble[1]
-                sim.writeCustomDataBlock(childPartCopy,simBWF.modelTags.GEOMETRY_PART,'') -- remove the embedded part geometry
+                sim.writeCustomStringData(childPartCopy,simBWF.modelTags.GEOMETRY_PART,'') -- remove the embedded part geometry
 
                 
                 if usePalletColors then
@@ -538,7 +534,7 @@ function model.instanciatePart(partHandle,itemPosition,itemOrientation,itemMass,
                 end
                 
                 sim.setObjectParent(childPartCopy,model.handle,true)
-                local data=sim.readCustomDataBlock(childPartCopy,simBWF.modelTags.PART)
+                local data=sim.readCustomStringData(childPartCopy,simBWF.modelTags.PART)
                 data=sim.unpackTable(data)
                 local invisible=(data['bitCoded']&1)>0
                 local nonRespondableToOtherParts=(data['bitCoded']&2)>0
@@ -557,7 +553,7 @@ function model.instanciatePart(partHandle,itemPosition,itemOrientation,itemMass,
                 sim.setObjectMatrix(childPartCopy,-1,palletItemM)
                 data['instanciated']=true
                 data['type']=childPart
-                sim.writeCustomDataBlock(childPartCopy,simBWF.modelTags.PART,sim.packTable(data))
+                sim.writeCustomStringData(childPartCopy,simBWF.modelTags.PART,sim.packTable(data))
                 if auxPartHandles==nil then
                     auxPartHandles={}
                 end
@@ -608,8 +604,8 @@ function model.tryToAttach(part)
                 -- Check if that object is a part or linked to a part:
                 local pp=part2
                 while pp>=0 do
-                    local data=sim.readCustomDataBlock(pp,simBWF.modelTags.PART)
-                    if data then
+                    local data=sim.readCustomStringData(pp,simBWF.modelTags.PART)
+                    if data and #data > 0 then
                         local sens=sim.createForceSensor(0,{0,1,1,0,0},{0.001,1,1,0,0})
                         sim.setObjectInt32Param(sens,sim.objintparam_visibility_layer,0) -- hidden
                         sim.setObjectPosition(sens,part,{0,0,0})
@@ -637,7 +633,7 @@ function model.handleCreatedParts()
         local h=allProducedParts[i][1]
         if sim.isHandle(h) then
             local dataName=simBWF.modelTags.PART
-            local data=sim.readCustomDataBlock(h,dataName)
+            local data=sim.readCustomStringData(h,dataName)
             data=sim.unpackTable(data)
             local p=sim.getObjectPosition(h,-1)
             if allProducedParts[i][5] then
@@ -675,14 +671,14 @@ function model.handleCreatedParts()
                         data['vel']={dp[1]/dt,dp[2]/dt,dp[3]/dt}
                     end
                 end
-                sim.writeCustomDataBlock(h,dataName,sim.packTable(data))
+                sim.writeCustomStringData(h,dataName,sim.packTable(data))
             end
             -- Does it want to be destroyed?
             if data['destroy'] or p[3]<-1000 or data['giveUpOwnership'] then
                 if not data['giveUpOwnership'] then
                     sim.removeModel(h)
                 else
-                    sim.writeCustomDataBlock(h,simBWF.modelTags.PART,nil)
+                    sim.writeCustomStringData(h,simBWF.modelTags.PART,nil)
                 end
                 table.remove(allProducedParts,i)
             else
@@ -703,7 +699,7 @@ end
 
 function sysCall_sensing()
     timeForIdlePartToDeactivate=60
-    local data=sim.readCustomDataBlock(brAppObj,simBWF.modelTags.BLUEREALITYAPP)
+    local data=sim.readCustomStringData(brAppObj,simBWF.modelTags.BLUEREALITYAPP)
     data=sim.unpackTable(data)
     if data.deactivationTime then
         timeForIdlePartToDeactivate=data.deactivationTime

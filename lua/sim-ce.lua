@@ -1,6 +1,7 @@
 local codeEditorInfos = [[
 string info = sim.getLastInfo()
 int prevStepLevel = sim.setStepping(bool enabled)
+sim.systemSemaphore(string key, bool acquire)
 sim.addLog(int verbosityLevel, string logMessage)
 int drawingObjectHandle = sim.addDrawingObject(int objectType, float size, float duplicateTolerance, int parentObjectHandle, int maxItemCount, float[3] color=nil)
 int result = sim.addDrawingObjectItem(int drawingObjectHandle, float[] itemData)
@@ -11,13 +12,11 @@ int streamId = sim.addGraphStream(int graphHandle, string streamName, string uni
 sim.addItemToCollection(int collectionHandle, int what, int objectHandle, int options)
 int particleObjectHandle = sim.addParticleObject(int objectType, float size, float density, float[] params, float lifeTime, int maxItemCount, float[3] color=nil)
 sim.addParticleObjectItem(int objectHandle, float[] itemData)
-sim.addReferencedHandle(int objectHandle, int referencedHandle)
-int scriptHandle = sim.addScript(int scriptType)
+sim.addReferencedHandle(int objectHandle, int referencedHandle, string tag='', map opts={})
 int res = sim.adjustView(int viewHandleOrIndex, int objectHandle, int options, string viewLabel=nil)
 int result = sim.alignShapeBB(int shapeHandle, float[7] pose)
 float yawAngle, float pitchAngle, float rollAngle = sim.alphaBetaGammaToYawPitchRoll(float alphaAngle, float betaAngle, float gammaAngle)
 int result = sim.announceSceneContentChange()
-sim.associateScriptWithObject(int scriptHandle, int objectHandle)
 int result = sim.auxiliaryConsoleClose(int consoleHandle)
 int consoleHandle = sim.auxiliaryConsoleOpen(string title, int maxLines, int mode, int[2] position=nil, int[2] size=nil, float[3] textColor=nil, float[3] backgroundColor=nil)
 int result = sim.auxiliaryConsolePrint(int consoleHandle, string text)
@@ -25,7 +24,6 @@ int result = sim.auxiliaryConsoleShow(int consoleHandle, bool showState)
 sim.broadcastMsg(map message, int options=0)
 float[12] matrix = sim.buildIdentityMatrix()
 float[12] matrix = sim.buildMatrix(float[3] position, float[3] eulerAngles)
-float[12] matrix = sim.buildMatrixQ(float[3] position, float[4] quaternion)
 float[7] pose = sim.buildPose(float[3] position, float[3] eulerAnglesOrAxis, int mode=0, float[3] axis2=nil)
 ... = sim.callScriptFunction(string functionName, int scriptHandle, ...)
 int result = sim.cameraFitToView(int viewHandleOrIndex, int[] objectHandles=nil, int options=0, float scaling=1.0)
@@ -43,15 +41,16 @@ buffer theBuffer = sim.checkVisionSensorEx(int sensorHandle, int entityHandle, b
 sim.clearFloatSignal(string signalName)
 sim.clearInt32Signal(string signalName)
 sim.clearStringSignal(string signalName)
+sim.clearBufferSignal(string signalName)
 int result = sim.closeScene()
 buffer outImg = sim.combineRgbImages(buffer img1, int[2] img1Res, buffer img2, int[2] img2Res, int operation)
 int result = sim.computeMassAndInertia(int shapeHandle, float density)
-int shapeHandle = sim.convexDecompose(int shapeHandle, int options, int[4] intParams, float[3] floatParams)
 int[1..*] copiedObjectHandles = sim.copyPasteObjects(int[1..*] objectHandles, int options=0)
 any[] copy = sim.copyTable(any[] original)
 map copy = sim.copyTable(map original)
 int collectionHandle = sim.createCollection(int options=0)
 int dummyHandle = sim.createDummy(float size)
+int scriptHandle = sim.createScript(int scriptType, string scriptString, int options = 0, string lang = '')
 int sensorHandle = sim.createForceSensor(int options, int[5] intParams, float[5] floatParams)
 int shapeHandle = sim.createHeightfieldShape(int options, float shadingAngle, int xPointCount, int yPointCount, float xSize, float[] heights)
 int jointHandle = sim.createJoint(int jointType, int jointMode, int options, float[2] sizes=nil)
@@ -63,6 +62,8 @@ int sensorHandle = sim.createProximitySensor(int sensorType, int subType, int op
 int shapeHandle = sim.createShape(int options, float shadingAngle, float[] vertices, int[] indices, float[] normals, float[] textureCoordinates, buffer texture, int[2] textureResolution)
 int shapeHandle, int textureId, int[2] resolution = sim.createTexture(string fileName, int options, float[2] planeSizes=nil, float[2] scalingUV=nil, float[2] xy_g=nil, int fixedResolution=0, int[2] resolution=nil)
 int sensorHandle = sim.createVisionSensor(int options, int[4] intParams, float[11] floatParams)
+int order, int totalSiblingsCount = sim.getObjectHierarchyOrder(int objectHandle)
+sim.setObjectHierarchyOrder(int objectHandle, int order)
 sim.destroyCollection(int collectionHandle)
 sim.destroyGraphCurve(int graphHandle, int curveId)
 int curveId = sim.duplicateGraphCurveToStatic(int graphHandle, int curveId, string curveName='')
@@ -82,7 +83,6 @@ float posAlongPath = sim.getClosestPosOnPath(float[] path, float[] pathLengths, 
 int[] objectHandles = sim.getCollectionObjects(int collectionHandle)
 float distance = sim.getConfigDistance(float[] configA, float[] configB, float[] metric=nil, int[] types=nil)
 int[2] collidingObjects, float[3] collisionPoint, float[3] reactionForce, float[3] normalVector = sim.getContactInfo(int dynamicPass, int objectHandle, int index)
-float[] verticesOut, int[] indicesOut = sim.getDecimatedMesh(float[] verticesIn, int[] indicesIn, float decimationPercentage)
 bool boolParam = sim.getEngineBoolParam(int paramId, int objectHandle)
 float floatParam = sim.getEngineFloatParam(int paramId, int objectHandle)
 int int32Param = sim.getEngineInt32Param(int paramId, int objectHandle)
@@ -94,7 +94,7 @@ float signalValue = sim.getFloatSignal(string signalName)
 map[] events = sim.getGenesisEvents()
 buffer events = sim.getGenesisEvents()
 string label, int attributes, float[3] curveColor, float[] xData, float[] yData, float[6] minMax, int curveId, int curveWidth = sim.getGraphCurve(int graphHandle, int graphType, int curveIndex)
-int bitCoded, float[3] bgColor, float[3] fgColor, int bufferSize = sim.getGraphInfo(int graphHandle)
+int bitCoded, float[3] bgColor, float[3] fgColor = sim.getGraphInfo(int graphHandle)
 int intState = sim.getInt32Param(int parameter)
 int signalValue = sim.getInt32Signal(string signalName)
 bool result = sim.getRealTimeSimulation()
@@ -111,7 +111,6 @@ int jointType = sim.getJointType(int objectHandle)
 float velocity = sim.getJointVelocity(int jointHandle)
 int state, float[3] zero, float[3] diffusePart, float[3] specular = sim.getLightParameters(int lightHandle)
 int linkDummyHandle = sim.getLinkDummy(int dummyHandle)
-string[] tags = sim.getMatchingPersistentDataTags(string pattern)
 float[12] matrix = sim.getMatrixInverse(float[12] matrix)
 int property = sim.getModelProperty(int objectHandle)
 bool value = sim.getNamedBoolParam(string name)
@@ -149,30 +148,26 @@ float[] voxels = sim.getOctreeVoxels(int octreeHandle)
 int pageIndex = sim.getPage()
 float[] config = sim.getPathInterpolatedConfig(float[] path, float[] pathLengths, float t, map method={type='linear', strength=1.0, forceOpen=false}, int[] types=nil)
 float[] pathLengths, float totalLength = sim.getPathLengths(float[] path, int dof, func distCallback=nil)
-string[] tags = sim.getPersistentDataTags()
 float maxVoxelSize, int maxPtCntPerVoxel, int options, float pointSize = sim.getPointCloudOptions(int pointCloudHandle)
 float[] points = sim.getPointCloudPoints(int pointCloudHandle)
 float[7] pose = sim.getPoseInverse(float[7] pose)
-float[] verticesOut, int[] indicesOut = sim.getQHull(float[] verticesIn)
-float[4] quaternion = sim.getQuaternionFromMatrix(float[12] matrix)
 float randomNumber = sim.getRandom(int seed=nil)
-int[] referencedHandles = sim.getReferencedHandles(int objectHandle)
+int[] referencedHandles = sim.getReferencedHandles(int objectHandle, string tag='')
+string[] tags = sim.getReferencedHandlesTags(int objectHandle)
 float[3] axis, float angle = sim.getRotationAxis(float[12] matrixStart, float[12] matrixGoal)
 float[3] axis, float angle = sim.getRotationAxis(float[7] poseStart, float[7] poseGoal)
 buffer imageOut, int[2] effectiveResolutionOut = sim.getScaledImage(buffer imageIn, int[2] resolutionIn, int[2] desiredResolutionOut, int options)
-int scriptHandle = sim.getScript(int scriptType, int objectHandle=-1, string scriptName='')
+int scriptHandle = sim.getScript(int scriptType, string scriptName='')
 map wrapper = sim.getScriptFunctions(int scriptHandle)
-int parameter = sim.getScriptInt32Param(int scriptHandle, int parameterID)
-buffer parameter = sim.getScriptStringParam(int scriptHandle, int parameterID)
 bool value = sim.getSettingBool(string key)
 float value = sim.getSettingFloat(string key)
 int value = sim.getSettingInt32(string key)
 string value = sim.getSettingString(string key)
-float[3] size = sim.getShapeBB(int shapeHandle)
+float[3] size, float[7] pose = sim.getShapeBB(int shapeHandle)
 int result, float[] rgbData = sim.getShapeColor(int shapeHandle, string colorName, int colorComponent)
 int result, int pureType, float[4] dimensions = sim.getShapeGeomInfo(int shapeHandle)
-float[9] inertiaMatrix, float[12] transformationMatrix = sim.getShapeInertia(int shapeHandle)
-float mass = sim.getShapeMassAndInertia(int shapeHandle)
+float[9] inertiaMatrix, float[12] comMatrix = sim.getShapeInertia(int shapeHandle)
+float mass = sim.getShapeMass(int shapeHandle)
 float[] vertices, int[] indices, float[] normals = sim.getShapeMesh(int shapeHandle)
 int textureId = sim.getShapeTextureId(int shapeHandle)
 map data = sim.getShapeViz(int shapeHandle, int itemIndex)
@@ -183,7 +178,8 @@ float timeStep = sim.getSimulationTimeStep()
 int messageID, int[4] auxiliaryData, int[1..*] auxiliaryData2 = sim.getSimulatorMessage()
 string stacktraceback = sim.getStackTraceback(int scriptHandle=sim.handle_self)
 string stringState = sim.getStringParam(int parameter)
-buffer signalValue = sim.getStringSignal(string signalName)
+string signalValue = sim.getStringSignal(string signalName)
+buffer signalValue = sim.getBufferSignal(string signalName)
 float time = sim.getSystemTime()
 int textureId, int[2] resolution = sim.getTextureId(string textureName)
 bool stopping = sim.getSimulationStopping()
@@ -197,7 +193,7 @@ buffer image, int[2] resolution = sim.getVisionSensorImg(int sensorHandle, int o
 sim.getVisionSensorRes(int sensorHandle)
 int shapeHandle = sim.groupShapes(int[] shapeHandles, bool merge=false)
 int count = sim.handleAddOnScripts(int callType)
-int calledScripts = sim.handleChildScripts(int callType)
+int calledScripts = sim.handleSimulationScripts(int callType)
 int result = sim.handleDynamics(float deltaTime)
 int calledScripts = sim.handleEmbeddedScripts(int callType)
 sim.handleExtCalls()
@@ -232,9 +228,14 @@ sim.loadScene(string filename)
 sim.loadScene(buffer serializedScene)
 float[7] pose = sim.matrixToPose(float[12] matrix)
 int handle = sim.moduleEntry(int handle, string label=nil, int state=-1)
-float[] endPos, float[] endVel, float[] endAccel, float timeLeft = sim.moveToConfig(int flags, float[] currentPos, float[] currentVel, float[] currentAccel, float[] maxVel, float[] maxAccel, float[] maxJerk, float[] targetPos, float[] targetVel, func callback, any auxData=nil, bool[] cyclicJoints=nil, float timeStep=0.0)
-float[7] endPose, float timeLeft = sim.moveToPose(int flags, float[7] currentPose, float[] maxVel, float[] maxAccel, float[] maxJerk, float[7] targetPose, func callback, any auxData=nil, float[4] metric=nil, float timeStep=0.0)
-float[12] endMatrix, float timeLeft = sim.moveToPose(int flags, float[12] currentMatrix, float[] maxVel, float[] maxAccel, float[] maxJerk, float[12] targetMatrix, func callback, any auxData=nil, float[4] metric=nil, float timeStep=0.0)
+map data = sim.moveToConfig(map params)
+map motionObject = sim.moveToConfig_init(map params)
+int res, map data = sim.moveToConfig_step(map motionObject)
+sim.moveToConfig_cleanup(map motionObject)
+map data = sim.moveToPose(map params)
+map motionObject = sim.moveToPose_init(map params)
+int res, map data = sim.moveToPose_step(map motionObject)
+sim.moveToPose_cleanup(map motionObject)
 float[12] resultMatrix = sim.multiplyMatrices(float[12] matrixIn1, float[12] matrixIn2)
 float[7] resultPose = sim.multiplyPoses(float[7] poseIn1, float[7] poseIn2)
 float[] resultVectors = sim.multiplyVector(float[12] matrix, float[] inVectors)
@@ -248,15 +249,13 @@ buffer data = sim.packUInt16Table(int[] uint16Numbers, int startUint16Index=0, i
 buffer data = sim.packUInt32Table(int[] uint32Numbers, int startUInt32Index=0, int uint32Count=0)
 buffer data = sim.packUInt8Table(int[] uint8Numbers, int startUint8Index=0, int uint8count=0)
 sim.pauseSimulation()
-buffer dataValue = sim.persistentDataRead(string dataTag)
-sim.persistentDataWrite(string dataTag, buffer dataValue, int options=0)
 float[12] matrix = sim.poseToMatrix(float[7] pose)
 sim.pushUserEvent(string event, int handle, int uid, map eventData, int options=0)
 sim.quitSimulator()
-buffer data = sim.readCustomDataBlock(int objectHandle, string tagName)
-sim.readCustomDataBlockEx(int handle, string tagName, map options={})
-string[] tags = sim.readCustomDataBlockTags(int objectHandle)
-sim.readCustomTableData(int handle, string tagName, map options={})
+string data = sim.readCustomStringData(int objectHandle, string tagName)
+buffer data = sim.readCustomBufferData(int objectHandle, string tagName)
+map data = sim.readCustomTableData(int handle, string tagName, map options={})
+string[] tags = sim.readCustomDataTags(int objectHandle)
 int result, float[3] forceVector, float[3] torqueVector = sim.readForceSensor(int objectHandle)
 int result, float distance, float[3] detectedPoint, int detectedObjectHandle, float[3] normalVector = sim.readProximitySensor(int sensorHandle)
 buffer textureData = sim.readTexture(int textureId, int options, int posX=0, int posY=0, int sizeX=0, int sizeY=0)
@@ -264,12 +263,11 @@ int result, float[] auxPacket1, float[] auxPacket2 = sim.readVisionSensor(int se
 int result = sim.refreshDialogs(int refreshDegree)
 int result = sim.relocateShapeFrame(int shapeHandle, float[7] pose)
 sim.removeDrawingObject(int drawingObjectHandle)
-int objectCount = sim.removeModel(int objectHandle)
-sim.removeObjects(int[1..*] objectHandles)
+int objectCount = sim.removeModel(int objectHandle, bool delayedRemoval = false)
+sim.removeObjects(int[1..*] objectHandles, bool delayedRemoval = false)
 sim.removeParticleObject(int particleObjectHandle)
 int totalPointCnt = sim.removePointsFromPointCloud(int pointCloudHandle, int options, float[] points, float tolerance)
-sim.removeReferencedObjects(int objectHandle)
-sim.removeScript(int scriptHandle)
+sim.removeReferencedObjects(int objectHandle, string tag='')
 int totalVoxelCnt = sim.removeVoxelsFromOctree(int octreeHandle, int options, float[] points)
 float[] path = sim.resamplePath(float[] path, float[] pathLengths, int finalConfigCnt, map method={type='linear', strength=1.0, forceOpen=false}, int[] types=nil)
 sim.resetDynamicObject(int objectHandle)
@@ -345,17 +343,16 @@ sim.setObjectSpecialProperty(int objectHandle, int property)
 sim.setObjectStringParam(int objectHandle, int parameterID, buffer parameter)
 sim.setPage(int pageIndex)
 sim.setPointCloudOptions(int pointCloudHandle, float maxVoxelSize, int maxPtCntPerVoxel, int options, float pointSize)
-sim.setReferencedHandles(int objectHandle, int[] referencedHandles)
-sim.setScriptInt32Param(int scriptHandle, int parameterID, int parameter)
-sim.setScriptStringParam(int scriptHandle, int parameterID, buffer parameter)
+sim.setReferencedHandles(int objectHandle, int[] referencedHandles, string tag='')
 sim.setShapeBB(int shapeHandle, float[3] size)
 sim.setShapeColor(int shapeHandle, string colorName, int colorComponent, float[3] rgbData)
-sim.setShapeInertia(int shapeHandle, float[9] inertiaMatrix, float[12] transformationMatrix)
+sim.setShapeInertia(int shapeHandle, float[9] inertiaMatrix, float[12] comMatrix)
 sim.setShapeMass(int shapeHandle, float mass)
 sim.setShapeMaterial(int shapeHandle, int materialIdOrShapeHandle)
 sim.setShapeTexture(int shapeHandle, int textureId, int mappingMode, int options, float[2] uvScaling, float[3] position=nil, float[3] orientation=nil)
 sim.setStringParam(int parameter, string stringState)
-sim.setStringSignal(string signalName, buffer signalValue)
+sim.setStringSignal(string signalName, string signalValue)
+sim.setBufferSignal(string signalName, buffer signalValue)
 sim.setVisionSensorImg(int sensorHandle, buffer image, int options=0, int[2] pos={0, 0}, int[2] size={0, 0})
 sim.startSimulation()
 sim.stopSimulation(bool wait=false)
@@ -380,12 +377,14 @@ int[] uint8Numbers = sim.unpackUInt8Table(buffer data, int startUint8Index=0, in
 sim.visitTree(int rootHandle, func visitorFunc, map options={})
 float timeLeft = sim.wait(float dt, bool simulationTime=true)
 any sigVal = sim.waitForSignal(string sigName)
-sim.writeCustomDataBlock(int objectHandle, string tagName, buffer data)
-sim.writeCustomDataBlockEx(int handle, string tagName, string data, map options={})\n\nPass options {dataType="..."} to annotate the data block content type
+sim.writeCustomStringData(int objectHandle, string tagName, string data)
+sim.writeCustomBufferData(int objectHandle, string tagName, buffer data)
 sim.writeCustomTableData(int handle, string tagName, map theTable, map options={})\n\nPass options {dataType="cbor"} to encode using CBOR
 sim.writeTexture(int textureId, int options, buffer textureData, int posX=0, int posY=0, int sizeX=0, int sizeY=0, float interpol=0.0)
 float alphaAngle, float betaAngle, float gammaAngle = sim.yawPitchRollToAlphaBetaGamma(float yawAngle, float pitchAngle, float rollAngle)
 int ret = sim.testCB(int a, func cb, int b)
+map savedData = sim.getShapeAppearance(int handle, map opts={})
+int handle = sim.setShapeAppearance(int handle, map savedData, map opts={})
 sim.appobj_object_type
 sim.appobj_script_type
 sim.appobj_simulation_type
@@ -494,6 +493,7 @@ sim.cameraintparam_pov_focal_blur
 sim.cameraintparam_remotecameramode
 sim.cameraintparam_rendering_attributes
 sim.cameraintparam_trackedobject
+sim.octreefloatparam_voxelsize
 sim.colorcomponent_ambient
 sim.colorcomponent_ambient_diffuse
 sim.colorcomponent_auxiliary
@@ -526,34 +526,19 @@ sim.displayattribute_selected
 sim.displayattribute_thickEdges
 sim.displayattribute_trianglewireframe
 sim.displayattribute_useauxcomponent
-sim.drawing_12percenttransparency
-sim.drawing_25percenttransparency
-sim.drawing_50percenttransparency
-sim.drawing_auxchannelcolor1
-sim.drawing_auxchannelcolor2
-sim.drawing_backfaceculling
 sim.drawing_cubepts
 sim.drawing_cyclic
 sim.drawing_discpts
-sim.drawing_emissioncolor
-sim.drawing_facingcamera
-sim.drawing_followparentvisibility
-sim.drawing_itemcolors
-sim.drawing_itemsizes
-sim.drawing_itemtransparency
 sim.drawing_lines
 sim.drawing_linestrip
 sim.drawing_local
 sim.drawing_overlay
 sim.drawing_painttag
-sim.drawing_persistent
 sim.drawing_points
 sim.drawing_quadpts
 sim.drawing_spherepts
 sim.drawing_trianglepts
 sim.drawing_triangles
-sim.drawing_vertexcolors
-sim.drawing_wireframe
 sim.dummyfloatparam_size
 sim.dummyintparam_dummytype
 sim.dummystringparam_assemblytag
@@ -630,6 +615,7 @@ sim.handle_all
 sim.handle_all_except_explicit
 sim.handle_all_except_self
 sim.handle_app
+sim.handle_appstorage
 sim.handle_chain
 sim.handle_default
 sim.handle_inverse
@@ -671,6 +657,9 @@ sim.intparam_dynamic_engine
 sim.intparam_dynamic_iteration_count
 sim.intparam_dynamic_step_divider
 sim.intparam_dynamic_warning_disabled_mask
+sim.intparam_notifydeprecated
+sim.intparam_processid
+sim.intparam_processcnt
 sim.intparam_edit_mode_type
 sim.intparam_error_report_mode
 sim.intparam_exitcode
@@ -918,6 +907,7 @@ sim.newton_joint_pospid2
 sim.newton_joint_pospid3
 sim.object_camera_type
 sim.object_dummy_type
+sim.object_script_type
 sim.object_forcesensor_type
 sim.object_graph_type
 sim.object_joint_type
@@ -1048,20 +1038,18 @@ sim.lang_python
 sim.scriptintparam_enabled
 sim.scriptintparam_execcount
 sim.scriptintparam_execorder
-sim.scriptintparam_handle
-sim.scriptintparam_objecthandle
 sim.scriptintparam_type
-sim.scriptintparam_lang
 sim.scriptintparam_autorestartonerror
 sim.scriptstringparam_description
 sim.scriptstringparam_name
 sim.scriptstringparam_nameext
 sim.scriptstringparam_text
-sim.scripttype_addonscript
-sim.scripttype_childscript
-sim.scripttype_customizationscript
-sim.scripttype_mainscript
-sim.scripttype_sandboxscript
+sim.scripttype_addon
+sim.scripttype_simulation
+sim.scripttype_customization
+sim.scripttype_main
+sim.scripttype_sandbox
+sim.scripttype_passive
 sim.shape_multishape_subtype
 sim.shape_simpleshape_subtype
 sim.shapefloatparam_edge_angle

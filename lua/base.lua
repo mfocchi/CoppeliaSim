@@ -45,24 +45,14 @@ __oldModeConsts = {
     customizationscriptcall_aftercopy = true,
 }
 
-math.atan2 = math.atan2 or math.atan
-math.pow = math.pow or function(a, b)
-    return a ^ b
-end
-math.log10 = math.log10 or function(a)
-    return math.log(a, 10)
-end
-math.ldexp = math.ldexp or function(x, exp)
-    return x * 2.0 ^ exp
-end
-math.frexp = math.frexp or function(x)
-    return auxFunc('frexp', x)
-end
-math.mod = math.mod or math.fmod
 table.getn = table.getn or function(a)
     return #a
 end
-if _VERSION ~= 'Lua 5.1' then loadstring = load end
+
+if _VERSION ~= 'Lua 5.1' then 
+    loadstring = load 
+end
+
 if unpack then
     -- Lua5.1
     table.pack = function(...)
@@ -72,6 +62,23 @@ if unpack then
 else
     unpack = table.unpack
 end
+
+function wrap(originalFunction, wrapperFunctionGenerator)
+    --[[
+    e.g. a wrapper that print args before calling the original function:
+
+    sim.getObject = wrap(sim.getObject, function(origFunc)
+        return function(...)
+            print('you are calling sim.getObject with args:', ...)
+            return origFunc(...)
+        end
+    end)
+
+    ]]--
+    return wrapperFunctionGenerator(originalFunction)
+end
+
+require('buffer')
 
 _S.require = require
 function require(...)
@@ -119,7 +126,7 @@ function rerequire(name)
             if success then
                 return result
             else
-                sim.addLog(sim.verbosity_errors, result)
+                addLog(420, result)
                 return
             end
         end
@@ -273,11 +280,7 @@ function _S.tableToString(tt, opts)
                 if opts.indent then
                     table.insert(sb, string.rep(opts.indentString, opts.indent))
                 end
-                if type(key) == 'string' then
-                    table.insert(sb, _S.getShortString(key))
-                else
-                    table.insert(sb, tostring(key))
-                end
+                table.insert(sb, _S.tableKeyToString(key))
                 table.insert(sb, ' = ')
                 table.insert(sb, _S.anyToString(val, opts))
                 table.insert(sb, ',' .. (opts.indent and '\n' or ' '))
@@ -294,7 +297,11 @@ function _S.anyToString(x, opts)
     if t == 'nil' then
         return tostring(nil)
     elseif t == 'table' then
-        return _S.tableToString(x, opts)
+        if isbuffer(x) then
+            return string.format('[buffer (%s bytes)]', #x)
+        else
+            return _S.tableToString(x, opts)
+        end
     elseif t == 'string' then
         return _S.getShortString(x, opts)
     else
@@ -308,14 +315,14 @@ function _S.getShortString(x, opts)
 
     if type(x) == 'string' then
         if string.find(x, "\0") then
-            return "[buffer string]"
+            return string.format('[binary string (%s bytes)]', #x)
         else
             local a, b = string.gsub(x, "[%a%d%p%s]", "@")
             if b ~= #x then
-                return "[string containing special chars]"
+                return string.format('[binary string (%s bytes)]', #x)
             else
                 if opts.longStringThreshold and #x > opts.longStringThreshold then
-                    return "[long string]"
+                    return string.format('[long string (%s bytes)]', #x)
                 else
                     if opts.omitQuotes then
                         return string.format('%s', x)
@@ -327,6 +334,22 @@ function _S.getShortString(x, opts)
         end
     end
     return "[not a string]"
+end
+
+function _S.isIdentifier(x)
+    return type(x) == 'string' and x:match('^[a-zA-Z_][a-zA-Z0-9_]*$') ~= nil
+end
+
+function _S.tableKeyToString(x)
+    if type(x) == 'string' then
+        if _S.isIdentifier(x) then
+            return x
+        else
+            return '[' .. _S.getShortString(x) .. ']'
+        end
+    else
+        return '[' .. tostring(x) .. ']'
+    end
 end
 
 function getAsString(...)
@@ -442,15 +465,15 @@ function _evalExec(inputStr)
                     print(getAsString(table.unpack(ret, 1, ret.n)))
                 end
             else
-                sim.addLog(sim.verbosity_scripterrors | sim.verbosity_undecorated, err)
+                addLog(420 | 0x0f000, err)
             end
         else
-            sim.addLog(sim.verbosity_scripterrors | sim.verbosity_undecorated, err)
+            addLog(420 | 0x0f000, err)
         end
 
         if sim.getNamedBoolParam('simCmd.setConvenienceVars') ~= false then
             if H ~= sim.getObject then
-                sim.addLog(sim.verbosity_scriptwarnings | sim.verbosity_undecorated, "cannot change 'H' variable")
+                addLog(430 | 0x0f000, "cannot change 'H' variable")
             end
 
             H = sim.getObject

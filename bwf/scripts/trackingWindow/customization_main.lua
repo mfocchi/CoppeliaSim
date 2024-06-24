@@ -17,12 +17,12 @@ function model.getAvailableInputs()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model.handle then
-            local data1=sim.readCustomDataBlock(l[i],simBWF.modelTags.TRACKINGWINDOW)
-            local data2=sim.readCustomDataBlock(l[i],simBWF.modelTags.VISIONWINDOW)
-            local data3=sim.readCustomDataBlock(l[i],simBWF.modelTags.RAGNARSENSOR)
-            local data4=sim.readCustomDataBlock(l[i],simBWF.modelTags.RAGNARDETECTOR)
-            local data5=sim.readCustomDataBlock(l[i],simBWF.modelTags.THERMOFORMER) -- has internal trigger and pallet
-            if data1 or data2 or data3 or data4 or data5 then
+            local data1=sim.readCustomStringData(l[i],simBWF.modelTags.TRACKINGWINDOW)
+            local data2=sim.readCustomStringData(l[i],simBWF.modelTags.VISIONWINDOW)
+            local data3=sim.readCustomStringData(l[i],simBWF.modelTags.RAGNARSENSOR)
+            local data4=sim.readCustomStringData(l[i],simBWF.modelTags.RAGNARDETECTOR)
+            local data5=sim.readCustomStringData(l[i],simBWF.modelTags.THERMOFORMER) -- has internal trigger and pallet
+            if (data1 and #data1 > 0) or (data2 and #data2 > 0) or (data3 and #data3 > 0) or (data4 and #data4 > 0) or (data5 and #data5 > 0) then
                 retL[#retL+1]={simBWF.getObjectAltName(l[i]),l[i]}
             end
         end
@@ -36,7 +36,7 @@ function model.getAvailableParts()
         local retVal={}
         local l=sim.getObjectsInTree(partHolder,sim.handle_all,1+2)
         for i=1,#l,1 do
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
             if data then
                 data=sim.unpackTable(data)
                 retVal[#retVal+1]={simBWF.getObjectAltName(l[i]),l[i]}

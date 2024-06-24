@@ -40,10 +40,10 @@ function ragnar_endPickTime(winType)
         avgPickTm=_trackingWindowPickTime
     end
     if windowH>=0 then
-        local data=sim.readCustomDataBlock(windowH,simBWF.modelTags.TRACKINGWINDOW)
+        local data=sim.readCustomStringData(windowH,simBWF.modelTags.TRACKINGWINDOW)
         data=sim.unpackTable(data)
         data['associatedRobotTrackingCorrectionTime']=avgPickTm
-        sim.writeCustomDataBlock(windowH,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+        sim.writeCustomStringData(windowH,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
     end
 end
 
@@ -79,10 +79,10 @@ function ragnar_endPlaceTime(isOtherLocation)
         end
 
         if locationTrackingWindowHandle>=0 then
-            local data=sim.readCustomDataBlock(locationTrackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
+            local data=sim.readCustomStringData(locationTrackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
             data=sim.unpackTable(data)
             data['associatedRobotTrackingCorrectionTime']=correctionT
-            sim.writeCustomDataBlock(locationTrackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+            sim.writeCustomStringData(locationTrackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
         end
     end
 end
@@ -120,11 +120,11 @@ function ext_enableDisableStats_fromCustomizationScript(enableIt)
 end
 
 function getToolHandleAndStacking()
-    local toolAttachment=sim.getObject('./ragnar_toolAttachment')
+    local toolAttachment=sim.getObject('../ragnar_toolAttachment')
     local h=sim.getObjectChild(toolAttachment,0)
     if h>=0 then
-        local data=sim.readCustomDataBlock(h,simBWF.modelTags.RAGNARGRIPPER)
-        if data then
+        local data=sim.readCustomStringData(h,simBWF.modelTags.RAGNARGRIPPER)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local s=data['stacking']
             local ss=data['stackingShift']
@@ -142,14 +142,14 @@ function getListOfSelectedLocationsOrBuckets(ragnarSettings)
     for i=1,4,1 do
         local h=simBWF.getReferencedObjectHandle(model,simBWF.OLDRAGNAR_DROPLOCATION1_REF+i-1)
         if h>=0 then
-            local data=sim.readCustomDataBlock(h,'XYZ_BUCKET_INFO')
-            if data then
+            local data=sim.readCustomStringData(h,'XYZ_BUCKET_INFO')
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 local dimension={data['width'],data['length'],data['height']}
                 retL[#retL+1]={h,1,dimension} -- 0 is location, 1 is bucket
             else
-                data=sim.readCustomDataBlock(h,simBWF.modelTags.OLDLOCATION)
-                if data then
+                data=sim.readCustomStringData(h,simBWF.modelTags.OLDLOCATION)
+                if data and #data > 0 then
                     data=sim.unpackTable(data)
                     retL[#retL+1]={h,0,data['name']} -- 0 is location, 1 is bucket
                 end
@@ -177,7 +177,7 @@ function ragnar_getDropLocationInfo(locationName)
         if allSelectedLocationsOrBuckets[loc][2]==1 then
             -- This is a bucket
             -- Is that bucket the right bucket for the part, and is it operational? i.e. does it currently accept items?
-            local data=sim.unpackTable(sim.readCustomDataBlock(allSelectedLocationsOrBuckets[loc][1],'XYZ_BUCKET_INFO'))
+            local data=sim.unpackTable(sim.readCustomStringData(allSelectedLocationsOrBuckets[loc][1],'XYZ_BUCKET_INFO'))
             
             local nameIsSame=false
             for i=1,#allLocationNames,1 do
@@ -271,19 +271,19 @@ function ragnar_incrementTrackedLocationProcessingStage(trackingLocation)
     end
     if wind>=0 then
         if lastPlaceWindowIndex==2 then
-            local data=sim.readCustomDataBlock(wind,simBWF.modelTags.OLDSTATICPLACEWINDOW)
+            local data=sim.readCustomStringData(wind,simBWF.modelTags.OLDSTATICPLACEWINDOW)
             data=sim.unpackTable(data)
             local tbl=data['targetPositionsToMarkAsProcessed']
             tbl[#tbl+1]=trackingLocation['dummyHandle']
             data['targetPositionsToMarkAsProcessed']=tbl
-            sim.writeCustomDataBlock(wind,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
+            sim.writeCustomStringData(wind,simBWF.modelTags.OLDSTATICPLACEWINDOW,sim.packTable(data))
         else
-            local data=sim.readCustomDataBlock(wind,simBWF.modelTags.TRACKINGWINDOW)
+            local data=sim.readCustomStringData(wind,simBWF.modelTags.TRACKINGWINDOW)
             data=sim.unpackTable(data)
             local tbl=data['targetPositionsToMarkAsProcessed']
             tbl[#tbl+1]=trackingLocation['dummyHandle']
             data['targetPositionsToMarkAsProcessed']=tbl
-            sim.writeCustomDataBlock(wind,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+            sim.writeCustomStringData(wind,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
         end
     end
 end
@@ -291,7 +291,7 @@ end
 getAllTargetsInTrackingWindow=function(trackingWindowHandle,locationName,processingStage)
     local ret={}
     if trackingWindowHandle>=0 then
-        local data=sim.readCustomDataBlock(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
+        local data=sim.readCustomStringData(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
         data=sim.unpackTable(data)
         local trackedTargets=data['trackedTargetsInWindow']
         if trackedTargets then
@@ -378,7 +378,7 @@ end
 getAllTargetsInStaticWindow=function(windowHandle,locationName,processingStage)
     local ret={}
     if windowHandle>=0 then
-        local data=sim.readCustomDataBlock(windowHandle,'XYZ_STATICPLACEWINDOW_INFO')
+        local data=sim.readCustomStringData(windowHandle,'XYZ_STATICPLACEWINDOW_INFO')
         data=sim.unpackTable(data)
         local trackedTargets=data['trackedTargetsInWindow']
         local m=sim.getObjectMatrix(model,-1)
@@ -464,7 +464,7 @@ end
 getAllPartsInTrackingWindow=function(trackingWindowHandle)
     local ret={}
     if trackingWindowHandle>=0 then
-        local data=sim.readCustomDataBlock(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
+        local data=sim.readCustomStringData(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
         data=sim.unpackTable(data)
         local trackedParts=data['trackedItemsInWindow']
         -- Make all data relative to the robot's ref frame (is right now absolute):
@@ -534,7 +534,7 @@ end
 getAllPartsInStaticWindow=function(windowHandle)
     local ret={}
     if windowHandle>=0 then
-        local data=sim.readCustomDataBlock(windowHandle,'XYZ_STATICPICKWINDOW_INFO')
+        local data=sim.readCustomStringData(windowHandle,'XYZ_STATICPICKWINDOW_INFO')
         data=sim.unpackTable(data)
         local trackedParts=data['trackedItemsInWindow']
         -- Make all data relative to the robot's ref frame (is right now absolute):
@@ -574,7 +574,7 @@ end
 
 removePartFromTrackingWindow=function(trackingWindowHandle,partHandle)
     if trackingWindowHandle>=0 then
-        local data=sim.readCustomDataBlock(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
+        local data=sim.readCustomStringData(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW)
         data=sim.unpackTable(data)
         local tbl=data['itemsToRemoveFromTracking']
         tbl[#tbl+1]=partHandle
@@ -585,13 +585,13 @@ removePartFromTrackingWindow=function(trackingWindowHandle,partHandle)
         trackedParts[partHandle]=nil
         data['trackedItemsInWindow']=trackedParts
 
-        sim.writeCustomDataBlock(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+        sim.writeCustomStringData(trackingWindowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
     end
 end
 
 removePartFromStaticWindow=function(windowHandle,partHandle)
     if windowHandle>=0 then
-        local data=sim.readCustomDataBlock(windowHandle,'XYZ_STATICPICKWINDOW_INFO')
+        local data=sim.readCustomStringData(windowHandle,'XYZ_STATICPICKWINDOW_INFO')
         data=sim.unpackTable(data)
         local tbl=data['itemsToRemoveFromTracking']
         tbl[#tbl+1]=partHandle
@@ -602,16 +602,16 @@ removePartFromStaticWindow=function(windowHandle,partHandle)
         trackedParts[partHandle]=nil
         data['trackedItemsInWindow']=trackedParts
 
-        sim.writeCustomDataBlock(windowHandle,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
+        sim.writeCustomStringData(windowHandle,'XYZ_STATICPICKWINDOW_INFO',sim.packTable(data))
     end
 end
 
 freezeTrackingWindow=function(windowHandle)
     if windowHandle>=0 then
-        local data=sim.readCustomDataBlock(windowHandle,simBWF.modelTags.TRACKINGWINDOW)
+        local data=sim.readCustomStringData(windowHandle,simBWF.modelTags.TRACKINGWINDOW)
         data=sim.unpackTable(data)
         data['freezeStaticWindow']=true
-        sim.writeCustomDataBlock(windowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
+        sim.writeCustomStringData(windowHandle,simBWF.modelTags.TRACKINGWINDOW,sim.packTable(data))
     end
 end
 
@@ -702,10 +702,10 @@ ragnar_detachPart=function()
                 
                 if ragnar_getAttachToTarget() then
                     -- Give up ownership of the child parts in the stacking:
-                    local data=sim.readCustomDataBlock(attachedParts[i],simBWF.modelTags.PART)
+                    local data=sim.readCustomStringData(attachedParts[i],simBWF.modelTags.PART)
                     data=sim.unpackTable(data)
                     data['giveUpOwnership']=true
-                    sim.writeCustomDataBlock(attachedParts[i],simBWF.modelTags.PART,sim.packTable(data))
+                    sim.writeCustomStringData(attachedParts[i],simBWF.modelTags.PART,sim.packTable(data))
                 else
                     sim.setObjectParent(attachedParts[i],previousPartParent,true)
                 end
@@ -732,9 +732,9 @@ attachPart1ToPart2=function(part1,part2)
         sim.setObjectParent(part1,f,true)
         sim.setObjectParent(f,part2,true)
         
-        local data=sim.unpackTable(sim.readCustomDataBlock(part1,simBWF.modelTags.PART))
+        local data=sim.unpackTable(sim.readCustomStringData(part1,simBWF.modelTags.PART))
         data['giveUpOwnership']=true
-        sim.writeCustomDataBlock(part1,simBWF.modelTags.PART,sim.packTable(data))
+        sim.writeCustomStringData(part1,simBWF.modelTags.PART,sim.packTable(data))
         
         local objs=sim.getObjectsInTree(part1,sim.object_shape_type)
         for i=1,#objs,1 do
@@ -755,16 +755,16 @@ setFkMode=function()
     for i=1,#fkDrivingJoints_inIkEnv,1 do
         simIK.setJointMode(ikEnv,fkDrivingJoints_inIkEnv[i],simIK.jointmode_passive)
     end
-    sim.switchThread()
+    sim.step()
 end
 
 setIkMode=function()
-    sim.switchThread()
+    sim.step()
     simIK.setIkElementFlags(ikEnv,ikGroup,ikElementPlatform,1)
     for i=1,#fkDrivingJoints_inIkEnv,1 do
         simIK.setJointMode(ikEnv,fkDrivingJoints_inIkEnv[i],simIK.jointmode_ik)
     end
-    sim.switchThread()
+    sim.step()
 end
 
 --[[
@@ -774,9 +774,9 @@ RobMove = function(blend,nulling)
     while (mDone < 3) do
         local dt=sim.getSimulationTimeStep()
 
-        local rmlObj=sim.rmlPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,tarPV)
-        res,nextPVA=sim.rmlStep(rmlObj,dt)
-        sim.rmlRemove(rmlObj)
+        local rmlObj=sim.ruckigPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,tarPV)
+        res,nextPVA=sim.ruckigStep(rmlObj,dt)
+        sim.ruckigRemove(rmlObj)
 --        res,nextPVA,syncTime =simRMLPosition(4,dt,-1,curPVA,MaxVAJ,selVec,tarPV)
 
         newPos = {nextPVA[1],nextPVA[2],nextPVA[3]}
@@ -803,7 +803,7 @@ RobMove = function(blend,nulling)
         if (mDone == 2) and(dist2go < blend) then
             mDone =3
         end
-        sim.switchThread() -- Important, in order to have the thread synchronized with the simulation loop!
+        sim.step() -- Important, in order to have the thread synchronized with the simulation loop!
     end
 end
 --]]
@@ -848,9 +848,9 @@ RobPick = function(partData,attachPart,theStackingShift,approachHeight,blend,nul
         partPV = {partPos[1]+partVel[1]*dt,partPos[2]+partVel[2]*dt,partPos[3]+partVel[3]*dt+app,0.0,
              partVel[1]*dt,partVel[2]*dt,partVel[3]*dt,0.0}
         
-        local rmlObj=sim.rmlPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,partPV)
-        res,nextPVA=sim.rmlStep(rmlObj,dt)
-        sim.rmlRemove(rmlObj)
+        local rmlObj=sim.ruckigPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,partPV)
+        res,nextPVA=sim.ruckigStep(rmlObj,dt)
+        sim.ruckigRemove(rmlObj)
         
         
         newPos = {nextPVA[1],nextPVA[2],nextPVA[3]}
@@ -883,9 +883,9 @@ RobPick = function(partData,attachPart,theStackingShift,approachHeight,blend,nul
         if (mDone == 3) and(dist2go < blend) then
             mDone =4    
         end
-        sim.switchThread() -- Important, in order to have the thread synchronized with the simulation loop!
+        sim.step() -- Important, in order to have the thread synchronized with the simulation loop!
     end
-    sim.removeObject(dummyHandleToFollow)
+    sim.removeObjects({dummyHandleToFollow})
 end
 
 RobPlace = function(TrackPart,detachPart,approachHeight,blend,nulling,dwTime,attachToTrackingLocation)
@@ -924,9 +924,9 @@ RobPlace = function(TrackPart,detachPart,approachHeight,blend,nulling,dwTime,att
         --end
 
 
-        local rmlObj=sim.rmlPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,partPV)
-        res,nextPVA=sim.rmlStep(rmlObj,dt)
-        sim.rmlRemove(rmlObj)
+        local rmlObj=sim.ruckigPos(4,0.0001,-1,curPVA,MaxVAJ,selVec,partPV)
+        res,nextPVA=sim.ruckigStep(rmlObj,dt)
+        sim.ruckigRemove(rmlObj)
 
 
 
@@ -967,9 +967,9 @@ RobPlace = function(TrackPart,detachPart,approachHeight,blend,nulling,dwTime,att
         if (mDone == 3) and(dist2go < blend) then
             mDone =4    
         end
-        sim.switchThread() -- Important, in order to have the thread synchronized with the simulation loop!
+        sim.step() -- Important, in order to have the thread synchronized with the simulation loop!
     end
-    sim.removeObject(dummyHandleToFollow)
+    sim.removeObjects({dummyHandleToFollow})
 end
 
 ragnar_moveToPickLocation=function(partData,attachPart,theStackingShift)
@@ -1003,7 +1003,7 @@ ragnar_moveToDropLocation=function(dropLocationInfo,detachPart)
  --   p[3]=0.9 -- hard-code the drop height for now
     sim.setObjectPosition(dropDum,-1,p)
     RobPlace(dropDum,detachPart,placeApproachHeight,placeRounding,placeNulling,dwellTime)
-    sim.removeObject(dropDum)
+    sim.removeObjects({dropDum})
 end
 
 ragnar_moveToTrackingLocation=function(trackingLocationInfo,detachPart,attachToTrackingLocation)
@@ -1033,7 +1033,7 @@ ragnar_getAllTrackedParts=function()
 end
 
 ragnar_getAttachToTarget=function()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
     data=sim.unpackTable(data)
     return((data['bitCoded']&1024)>0)
 end
@@ -1043,13 +1043,13 @@ ragnar_getStacking=function()
 end
 
 ragnar_getPickWithoutTarget=function()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
     data=sim.unpackTable(data)
     return((data['bitCoded']&2048)>0)
 end
 
 ragnar_getEnabled=function()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
     data=sim.unpackTable(data)
     return((data['bitCoded']&64)>0)
 end
@@ -1097,7 +1097,7 @@ end
 --]]
 updateMotionParameters=function()
     -- 1. Read the current motion settings for the Ragnar:
-    local ragnarSettings=sim.unpackTable(sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR))
+    local ragnarSettings=sim.unpackTable(sim.readCustomStringData(model,simBWF.modelTags.RAGNAR))
     local mVel=ragnarSettings['maxVel']
     local mAccel=ragnarSettings['maxAccel']
     MaxVAJ = {mVel,mVel,mVel,angularVelocity,mAccel,mAccel,mAccel,angularAccel,2000,2000,2000,1000} -- pos,vel,acc128*dt
@@ -1139,27 +1139,27 @@ end
 
 function coroutineMain()
     -- Begin of the thread code:
-    sim.setThreadAutomaticSwitch(false)
-    model=sim.getObject('.')
-    simTipDummy=sim.getObject('./Ragnar_InvKinTip')
-    simTargetDummy=sim.getObject('./Ragnar_InvKinTarget')
-    simTip1=sim.getObject('./Ragnar_RLoopArmTip14')
-    simTarget1=sim.getObject('./Ragnar_RLoopArmTarget14')
-    simTip2=sim.getObject('./Ragnar_RLoopArmTip15')
-    simTarget2=sim.getObject('./Ragnar_RLoopArmTarget15')
-    simTip3=sim.getObject('./Ragnar_RLoopArmTip16')
-    simTarget3=sim.getObject('./Ragnar_RLoopArmTarget16')
+    sim.setStepping(true)
+    model=sim.getObject('..')
+    simTipDummy=sim.getObject('../Ragnar_InvKinTip')
+    simTargetDummy=sim.getObject('../Ragnar_InvKinTarget')
+    simTip1=sim.getObject('../Ragnar_RLoopArmTip14')
+    simTarget1=sim.getObject('../Ragnar_RLoopArmTarget14')
+    simTip2=sim.getObject('../Ragnar_RLoopArmTip15')
+    simTarget2=sim.getObject('../Ragnar_RLoopArmTarget15')
+    simTip3=sim.getObject('../Ragnar_RLoopArmTip16')
+    simTarget3=sim.getObject('../Ragnar_RLoopArmTarget16')
     
     simNotIkJoints={}
-    simNotIkJoints[1]=sim.getObject('./Ragnar_frontAdjust')
-    simNotIkJoints[2]=sim.getObject('./Ragnar_upperArmAdjust0')
-    simNotIkJoints[3]=sim.getObject('./Ragnar_lowerArmAdjustA0')
-    simNotIkJoints[4]=sim.getObject('./Ragnar_lowerArmAdjustB3')
-    simNotIkJoints[5]=sim.getObject('./Ragnar_upperArmAdjust3')
-    simNotIkJoints[6]=sim.getObject('./Ragnar_lowerArmAdjustB2')
-    simNotIkJoints[7]=sim.getObject('./Ragnar_upperArmAdjust2')
-    simNotIkJoints[8]=sim.getObject('./Ragnar_lowerArmAdjustA1')
-    simNotIkJoints[9]=sim.getObject('./Ragnar_upperArmAdjust1')
+    simNotIkJoints[1]=sim.getObject('../Ragnar_frontAdjust')
+    simNotIkJoints[2]=sim.getObject('../Ragnar_upperArmAdjust0')
+    simNotIkJoints[3]=sim.getObject('../Ragnar_lowerArmAdjustA0')
+    simNotIkJoints[4]=sim.getObject('../Ragnar_lowerArmAdjustB3')
+    simNotIkJoints[5]=sim.getObject('../Ragnar_upperArmAdjust3')
+    simNotIkJoints[6]=sim.getObject('../Ragnar_lowerArmAdjustB2')
+    simNotIkJoints[7]=sim.getObject('../Ragnar_upperArmAdjust2')
+    simNotIkJoints[8]=sim.getObject('../Ragnar_lowerArmAdjustA1')
+    simNotIkJoints[9]=sim.getObject('../Ragnar_upperArmAdjust1')
     
     -- Prepare the ik group, using the convenience function 'simIK.addIkElementFromScene':
     ikEnv=simIK.createEnvironment()
@@ -1178,10 +1178,10 @@ function coroutineMain()
     
     -- Following are the joints that we control when in FK mode:
     fkDrivingJoints={-1,-1,-1,-1}
-    fkDrivingJoints[1]=sim.getObject('./Ragnar_A1DrivingJoint1')
-    fkDrivingJoints[2]=sim.getObject('./Ragnar_A1DrivingJoint2')
-    fkDrivingJoints[3]=sim.getObject('./Ragnar_A1DrivingJoint3')
-    fkDrivingJoints[4]=sim.getObject('./Ragnar_A1DrivingJoint4')
+    fkDrivingJoints[1]=sim.getObject('../Ragnar_A1DrivingJoint1')
+    fkDrivingJoints[2]=sim.getObject('../Ragnar_A1DrivingJoint2')
+    fkDrivingJoints[3]=sim.getObject('../Ragnar_A1DrivingJoint3')
+    fkDrivingJoints[4]=sim.getObject('../Ragnar_A1DrivingJoint4')
 
     fkDrivingJoints_inIkEnv={}
     for i=1,#fkDrivingJoints,1 do
@@ -1190,12 +1190,12 @@ function coroutineMain()
     
     -- Following are the joints that we control when in IK mode (we use joints in order to be able to use the moveToConfig command here too):
     ikDrivingJoints={-1,-1,-1,-1}
-    ikDrivingJoints[1]=sim.getObject('./Ragnar_T_X')
-    ikDrivingJoints[2]=sim.getObject('./Ragnar_T_Y')
-    ikDrivingJoints[3]=sim.getObject('./Ragnar_T_X')
-    ikDrivingJoints[4]=sim.getObject('./Ragnar_T_TH')
+    ikDrivingJoints[1]=sim.getObject('../Ragnar_T_X')
+    ikDrivingJoints[2]=sim.getObject('../Ragnar_T_Y')
+    ikDrivingJoints[3]=sim.getObject('../Ragnar_T_X')
+    ikDrivingJoints[4]=sim.getObject('../Ragnar_T_TH')
 
-    local ragnarSettings=sim.readCustomDataBlock(model,simBWF.modelTags.RAGNAR)
+    local ragnarSettings=sim.readCustomStringData(model,simBWF.modelTags.RAGNAR)
     ragnarSettings=sim.unpackTable(ragnarSettings)
     toolHandle,stacking,stackingShift=getToolHandleAndStacking()
 
@@ -1299,7 +1299,7 @@ function coroutineMain()
         --[[
         -- 5. Avoid using too much processor time when idle
         if not didSomething then
-            sim.switchThread()
+            sim.step()
         end
 
         updateStatisticsDialog(cycleTime,auxCycleTime,totalCycleTime)

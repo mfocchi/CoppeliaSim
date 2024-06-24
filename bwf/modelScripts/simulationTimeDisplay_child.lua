@@ -1,7 +1,7 @@
 simBWF=require('simBWF')
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,'XYZ_SIMULATIONTIME_INFO')
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,'XYZ_SIMULATIONTIME_INFO')
     data=sim.unpackTable(data)
     simplified=(data['bitCoded']&1)==1
     if not sim.getBoolParam(sim.boolparam_headless) then
@@ -21,12 +21,12 @@ function sysCall_init()
             ui=simBWF.createCustomUi(xml,'Simulation Time','bottomLeft',true,nil,false,false,false,'layout="form"')
         end
     end
-    startTime=sim.getSystemTimeInMs(-1)
+    startTime=sim.getSystemTime()*1000
 end
 
 function sysCall_sensing()
     if ui then
-        local t={sim.getSimulationTime(),sim.getSystemTimeInMs(startTime)/1000}
+        local t={sim.getSimulationTime(),(sim.getSystemTime()*1000 - startTime)/1000}
         local cnt=2
         if simplified then
             cnt=1
@@ -40,7 +40,7 @@ function sysCall_sensing()
             local second=math.floor(v)
             v=v-second
             local hs=math.floor(v*100)
-            local str=simBWF.format("%02d",hour)..':'..simBWF.format("%02d",minute)..':'..simBWF.format("%02d",second)..'.'..simBWF.format("%02d",hs)
+            local str=simBWF.format("%02d",hour)..':'..simBWF.format("%02d",minute)..':'..simBWF.format("%02d",second).."."..simBWF.format("%02d",hs)
             simUI.setLabelText(ui,i,str,true)
         end
     end

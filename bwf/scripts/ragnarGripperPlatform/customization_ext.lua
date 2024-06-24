@@ -10,8 +10,8 @@ function model.ext.getItemData_pricing()
     local ob=sim.getObjectsInTree(model.handle)
     local dep={}
     for i=1,#ob,1 do
-        local data=sim.readCustomDataBlock(ob[i],simBWF.modelTags.RAGNARGRIPPER)
-        if data then
+        local data=sim.readCustomStringData(ob[i],simBWF.modelTags.RAGNARGRIPPER)
+        if data and #data > 0 then
             dep[#dep+1]=simBWF.getObjectAltName(ob[i])
             break
         end

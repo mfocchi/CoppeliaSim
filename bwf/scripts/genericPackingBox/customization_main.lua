@@ -42,7 +42,7 @@ function model.setMass(m)
         if sim.getObjectType(handle)==sim.object_shape_type then
             local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
             if p==0 then
-                local m0,i0,com0=sim.getShapeMassAndInertia(handle)
+                local m0=sim.getShapeMass(handle)
                 currentMass=currentMass+m0
             end
         end
@@ -67,12 +67,8 @@ function model.setMass(m)
         if sim.getObjectType(handle)==sim.object_shape_type then
             local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
             if p==0 then
-                local transf=sim.getObjectMatrix(handle,-1)
-                local m0,i0,com0=sim.getShapeMassAndInertia(handle,transf)
-                for i=1,9,1 do
-                    i0[i]=i0[i]*massScaling
-                end
-                sim.setShapeMassAndInertia(handle,m0*massScaling,i0,com0,transf)
+                local m0=sim.getShapeMass(handle)
+                sim.setShapeMass(handle,m0*massScaling)
             end
         end
     end
@@ -112,7 +108,7 @@ function model.updateModel()
     local springC=c.partSpecific['lidDamping']
     model.setObjectSize(model.handle,w,l,th)
     model.setCuboidMassAndInertia(model.handle,w,l,th,defMassPerVolume,inertiaFactor)
-    sim.removeObject(model.specHandles.sides)
+    sim.removeObjects({model.specHandles.sides})
     local p={}
     p[1]=sim.copyPasteObjects({model.specHandles.bb},0)[1]
     model.setObjectSize(p[1],th,l,h)
@@ -202,17 +198,17 @@ end
 function sysCall_cleanup_specific()
     local c=model.readInfo()
     if (c.partSpecific['bitCoded']&1)==0 then
-        sim.removeObject(model.specHandles.lids[1]) 
-        sim.removeObject(model.specHandles.lids[2]) 
-        sim.removeObject(model.specHandles.joints[1]) 
-        sim.removeObject(model.specHandles.joints[2]) 
+        sim.removeObjects({model.specHandles.lids[1]}) 
+        sim.removeObjects({model.specHandles.lids[2]}) 
+        sim.removeObjects({model.specHandles.joints[1]}) 
+        sim.removeObjects({model.specHandles.joints[2]}) 
     end
     if (c.partSpecific['bitCoded']&2)==0 then
-        sim.removeObject(model.specHandles.lids[3]) 
-        sim.removeObject(model.specHandles.lids[4]) 
-        sim.removeObject(model.specHandles.joints[3]) 
-        sim.removeObject(model.specHandles.joints[4]) 
+        sim.removeObjects({model.specHandles.lids[3]}) 
+        sim.removeObjects({model.specHandles.lids[4]}) 
+        sim.removeObjects({model.specHandles.joints[3]}) 
+        sim.removeObjects({model.specHandles.joints[4]}) 
     end
-    sim.removeObject(model.specHandles.bb)
+    sim.removeObjects({model.specHandles.bb})
 end
 

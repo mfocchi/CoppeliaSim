@@ -45,13 +45,6 @@ def appDir():
 
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = appDir()
 
-import platform
-plat = platform.system()
-if plat == 'Darwin':
-    fd = os.path.normpath(appDir() + '/../Frameworks')
-    os.environ['DYLD_LIBRARY_PATH'] = fd + ':' + os.environ.get('DYLD_LIBRARY_PATH', '')
-    print(f'If next step fails, do: export DYLD_LIBRARY_PATH={fd}:$DYLD_LIBRARY_PATH and relaunch.')
-
 coppeliaSimLib = cdll.LoadLibrary(builtins.coppeliasim_library)
 coppeliaSimLib.simRunGui.argtypes = [c_int]
 coppeliaSimLib.simRunGui.restype = c_void
@@ -164,6 +157,13 @@ const.sim_stack_table_circular_ref = -4
 const.sim_stack_table_not_table = -3
 const.sim_stack_table_map = -2
 const.sim_stack_table_empty = 0
+
+const.sim_scripttype_main = 0
+const.sim_scripttype_simulation = 1
+const.sim_scripttype_addon = 2
+const.sim_scripttype_customization = 6
+const.sim_scripttype_sandbox = 8
+const.sim_scripttype_passive = 9
 
 const.sim_scripttype_mainscript = 0
 const.sim_scripttype_childscript = 1

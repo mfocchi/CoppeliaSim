@@ -1,4 +1,7 @@
 function string.qsplit(s, pat) -- respects single and double quotes
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     local quotes = {}
     local retVal = {}
     local w = ''
@@ -38,6 +41,9 @@ function string.qsplit(s, pat) -- respects single and double quotes
 end
 
 function string.gsplit(text, pattern, plain)
+    if isbuffer(text) then
+        text = tostring(text)
+    end
     local splitStart, length = 1, #text
     return function()
         if splitStart then
@@ -64,46 +70,73 @@ function string.gsplit(text, pattern, plain)
 end
 
 function string.split(text, pattern, plain)
+    if isbuffer(text) then
+        text = tostring(text)
+    end
     local ret = {}
     for match in string.gsplit(text, pattern, plain) do table.insert(ret, match) end
     return ret
 end
 
 function string.startswith(s, prefix)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return prefix == '' or s:sub(1, #prefix) == prefix
 end
 
 function string.endswith(s, suffix)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return suffix == '' or s:sub(-#suffix) == suffix
 end
 
 function string.trim(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:gsub('^%s*(.-)%s*$', '%1')
 end
 
 function string.ltrim(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:gsub('^%s*', '')
 end
 
 function string.rtrim(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     local n = #s
     while n > 0 and s:find('^%s', n) do n = n - 1 end
     return s:sub(1, n)
 end
 
 function string.chars(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     local ret = {}
     for i = 1, #s do table.insert(ret, s:sub(i, i)) end
     return ret
 end
 
 function string.bytes(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     local ret = {}
     for i = 1, #s do table.insert(ret, string.byte(s:sub(i, i))) end
     return ret
 end
 
 function string.escpat(x)
+    if isbuffer(x) then
+        x = tostring(x)
+    end
     return (x
         :gsub('%%', '%%%%')
         :gsub('^%^', '%%^')
@@ -121,40 +154,74 @@ function string.escpat(x)
 end
 
 function string.isalnum(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:match('^%w*$')
 end
 
 function string.isalpha(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:match('^%a*$')
 end
 
 function string.isidentifier(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:match('^[_%a][_%w]*$')
 end
 
 function string.islower(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:lower() == s
 end
 
 function string.isnumeric(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:match('^%d*$')
 end
 
 function string.isprintable(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     if #s == 0 then return true end
     local b = string.byte(s)
     return b >= 32 and b < 127 and string.isprintable(s:sub(2))
 end
 
 function string.isspace(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:match('^%s*$')
 end
 
 function string.isupper(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     return s:upper() == s
 end
 
+function string.capitalize(s)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
+    return s:sub(1, 1):upper() .. s:sub(2)
+end
+
 function string.escapehtml(s, opts)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     opts = opts or {}
     opts.entities = opts.entities or true
 
@@ -173,6 +240,9 @@ function string.escapehtml(s, opts)
 end
 
 function string.stripmarkdown(s, opts)
+    if isbuffer(s) then
+        s = tostring(s)
+    end
     opts = opts or {}
 
     -- Remove headers (##, ###, ####, etc.)
@@ -239,5 +309,6 @@ if arg and #arg == 1 and arg[1] == 'test' then
     assert(not string.isspace 'abc ABC')
     assert(string.isupper 'ABC123')
     assert(not string.isupper 'abcABC123')
+    assert(string.capitalize 'robot' == 'Robot')
     print(debug.getinfo(1, 'S').source, 'tests passed')
 end

@@ -43,7 +43,7 @@ end
 
 getSensorState=function()
     if sensorHandle>=0 then
-        local data=sim.readCustomDataBlock(sensorHandle,'XYZ_BINARYSENSOR_INFO')
+        local data=sim.readCustomStringData(sensorHandle,'XYZ_BINARYSENSOR_INFO')
         data=sim.unpackTable(data)
         return data['detectionState']
     end
@@ -52,8 +52,8 @@ end
 
 getConveyorDistanceTrigger=function()
     if conveyorHandle>=0 then
-        local data=sim.readCustomDataBlock(conveyorHandle,simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(conveyorHandle,simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local d=data['encoderDistance']
             if d then
@@ -71,7 +71,7 @@ getConveyorDistanceTrigger=function()
 end
 
 wasMultiFeederTriggered=function()
-    local data=sim.unpackTable(sim.readCustomDataBlock(model,simBWF.modelTags.MULTIFEEDER))
+    local data=sim.unpackTable(sim.readCustomStringData(model,simBWF.modelTags.MULTIFEEDER))
     local val=data['multiFeederTriggerCnt']
     if val and val~=multiFeederTriggerLastState then
         multiFeederTriggerLastState=val
@@ -81,8 +81,8 @@ wasMultiFeederTriggered=function()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.MULTIFEEDER)
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.MULTIFEEDER)
     data=sim.unpackTable(data)
     sensorHandle=simBWF.getReferencedObjectHandle(model,1)
     conveyorHandle=simBWF.getReferencedObjectHandle(model,2)
@@ -110,7 +110,7 @@ function sysCall_actuation()
     local t=sim.getSimulationTime()
     local dt=sim.getSimulationTimeStep()
 
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.MULTIFEEDER)
+    local data=sim.readCustomStringData(model,simBWF.modelTags.MULTIFEEDER)
     data=sim.unpackTable(data)
     local triggerFrequency=data['frequency']
     local feederAlgo=data['algorithm']
@@ -165,20 +165,20 @@ function sysCall_actuation()
             if feederToTrigger and feederToTrigger>=0 then
                 counter=counter+1
                 if sim.isHandle(feederToTrigger) then
-                    local data=sim.readCustomDataBlock(feederToTrigger,simBWF.modelTags.PARTFEEDER)
-                    if data then
+                    local data=sim.readCustomStringData(feederToTrigger,simBWF.modelTags.PARTFEEDER)
+                    if data and #data > 0 then
                         data=sim.unpackTable(data)
                         if (data['bitCoded']&4+8+16)==16 then
                             data['multiFeederTriggerCnt']=data['multiFeederTriggerCnt']+1
-                            sim.writeCustomDataBlock(feederToTrigger,simBWF.modelTags.PARTFEEDER,sim.packTable(data))
+                            sim.writeCustomStringData(feederToTrigger,simBWF.modelTags.PARTFEEDER,sim.packTable(data))
                         end
                     else
-                        data=sim.readCustomDataBlock(feederToTrigger,simBWF.modelTags.MULTIFEEDER)
-                        if data then
+                        data=sim.readCustomStringData(feederToTrigger,simBWF.modelTags.MULTIFEEDER)
+                        if data and #data > 0 then
                             data=sim.unpackTable(data)
                             if (data['bitCoded']&4+8+16)==16 then
                                 data['multiFeederTriggerCnt']=data['multiFeederTriggerCnt']+1
-                                sim.writeCustomDataBlock(feederToTrigger,simBWF.modelTags.MULTIFEEDER,sim.packTable(data))
+                                sim.writeCustomStringData(feederToTrigger,simBWF.modelTags.MULTIFEEDER,sim.packTable(data))
                             end
                         end
                     end

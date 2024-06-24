@@ -6,7 +6,7 @@ destroyPartIfPart=function(objH)
             if isInstanciated then
                 local p=sim.getModelProperty(objH)
                 if (p&sim.modelproperty_not_model)>0 then
-                    sim.removeObject(objH)
+                    sim.removeObjects({objH})
                 else
                     sim.removeModel(objH)
                 end
@@ -50,9 +50,9 @@ updateStatisticsDialog=function(enabled)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    sensor=sim.getObject('./genericPartSink_sensor')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTSINK)
+    model=sim.getObject('..')
+    sensor=sim.getObject('../genericPartSink_sensor')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTSINK)
     data=sim.unpackTable(data)
     operational=data['status']~='disabled'
     destructionCount=0
@@ -70,10 +70,10 @@ function sysCall_actuation()
                     if r>0 then
                         if destroyPartIfPart(shapes[i]) then
                             destructionCount=destructionCount+1
-                            local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTSINK)
+                            local data=sim.readCustomStringData(model,simBWF.modelTags.PARTSINK)
                             data=sim.unpackTable(data)
                             data['destroyedCnt']=data['destroyedCnt']+1
-                            sim.writeCustomDataBlock(model,simBWF.modelTags.PARTSINK,sim.packTable(data))
+                            sim.writeCustomStringData(model,simBWF.modelTags.PARTSINK,sim.packTable(data))
                         end
                     end
                 end

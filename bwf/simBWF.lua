@@ -20,8 +20,8 @@ end
 function simBWF.modifyPartDeactivationTime(currentDeactivationTime)
     local objs=sim.getObjectsInTree(sim.handle_scene,sim.handle_all)
     for i=1,#objs,1 do
-        local dat=sim.readCustomDataBlock(objs[i],simBWF.modelTags.OLDOVERRIDE)
-        if dat then
+        local dat=sim.readCustomStringData(objs[i],simBWF.modelTags.OLDOVERRIDE)
+        if dat and #dat > 0 then
             dat=sim.unpackTable(dat)
             if (dat['bitCoded']&4)>0 then
                 return dat['deactivationTime']
@@ -35,8 +35,8 @@ end
 function simBWF.modifyAuxVisualizationItems(visualize)
     local objs=sim.getObjectsInTree(sim.handle_scene,sim.handle_all)
     for i=1,#objs,1 do
-        local dat=sim.readCustomDataBlock(objs[i],simBWF.modelTags.OLDOVERRIDE)
-        if dat then
+        local dat=sim.readCustomStringData(objs[i],simBWF.modelTags.OLDOVERRIDE)
+        if dat and #dat > 0 then
             dat=sim.unpackTable(dat)
             local v=(dat['bitCoded']&1+2)
             if v>0 then
@@ -52,8 +52,8 @@ end
 function simBWF.canOpenPropertyDialog(modelHandle)
     local objs=sim.getObjectsInTree(sim.handle_scene,sim.handle_all)
     for i=1,#objs,1 do
-        local dat=sim.readCustomDataBlock(objs[i],simBWF.modelTags.OLDOVERRIDE)
-        if dat then
+        local dat=sim.readCustomStringData(objs[i],simBWF.modelTags.OLDOVERRIDE)
+        if dat and #dat > 0 then
             dat=sim.unpackTable(dat)
             local v=(dat['bitCoded']&16)
             if v>0 then
@@ -209,8 +209,8 @@ function simBWF._getPickPlaceSettingsDefaultInfoForNonExistingFields(info)
 end
 
 function simBWF.readPartInfo(handle)
-    local data=sim.readCustomDataBlock(handle,simBWF.modelTags.PART)
-    if data then
+    local data=sim.readCustomStringData(handle,simBWF.modelTags.PART)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -256,18 +256,18 @@ end
 
 function simBWF.writePartInfo(handle,data)
     if data then
-        sim.writeCustomDataBlock(handle,simBWF.modelTags.PART,sim.packTable(data))
+        sim.writeCustomStringData(handle,simBWF.modelTags.PART,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(handle,simBWF.modelTags.PART,'')
+        sim.writeCustomStringData(handle,simBWF.modelTags.PART,'')
     end
 end
 
 function simBWF.readPalletInfo(palletHandle)
-    return sim.unpackTable(sim.readCustomDataBlock(palletHandle,simBWF.modelTags.PALLET))
+    return sim.unpackTable(sim.readCustomStringData(palletHandle,simBWF.modelTags.PALLET))
 end
 
 function simBWF.writePalletInfo(palletHandle,data)
-    sim.writeCustomDataBlock(palletHandle,simBWF.modelTags.PALLET,sim.packTable(data))
+    sim.writeCustomStringData(palletHandle,simBWF.modelTags.PALLET,sim.packTable(data))
 end
 
 
@@ -279,7 +279,7 @@ function simBWF.getPartRepositoryHandles()
 
     if #repoP==1 then
         local repo=repoP[1]
-        local partHolder=sim.getObject("./partRepository_modelParts",{proxy=repo})
+        local partHolder=sim.getObject("../partRepository_modelParts",{proxy=repo})
         if partHolder>=0 then
             return repo,partHolder
         end
@@ -292,8 +292,8 @@ function simBWF.getAllPartsFromPartRepositoryV0()
         local retVal={}
         local l=sim.getObjectsInTree(partHolder,sim.handle_all,1+2)
         for i=1,#l,1 do
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 retVal[#retVal+1]={data['name'],l[i]}
             end
@@ -308,8 +308,8 @@ function simBWF.getAllPartsFromPartRepository()
         local retVal={}
         local l=sim.getObjectsInTree(partHolder,sim.handle_all,1+2)
         for i=1,#l,1 do
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.PART)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.PART)
+            if data and #data > 0 then
                 data=sim.unpackTable(data)
                 retVal[#retVal+1]={simBWF.getObjectAltName(l[i]),l[i]}
             end
@@ -364,8 +364,8 @@ function simBWF.getAllInstanciatedParts()
 end
 
 function simBWF.isObjectPartAndInstanciated(h)
-    local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
-    if data then
+    local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
         return true, data.instanciated, data
     end
@@ -553,16 +553,16 @@ end
 function simBWF.writeSessionPersistentObjectData(objectHandle,dataName,...)
     -- Call utils function instead once version is stable
     local data={...}
-    local nm="___"..sim.getScriptHandle()..sim.getObjectAlias(objectHandle,1)..sim.getInt32Param(sim.intparam_scene_unique_id)..sim.getObjectStringParam(objectHandle,sim.objstringparam_dna)..dataName
+    local nm="___"..sim.getScript(sim.handle_self)..sim.getObjectAlias(objectHandle,1)..sim.getInt32Param(sim.intparam_scene_unique_id)..sim.getObjectStringParam(objectHandle,sim.objstringparam_dna)..dataName
     data=sim.packTable(data)
-    sim.writeCustomDataBlock(sim.handle_app,nm,data)
+    sim.writeCustomStringData(sim.handle_app,nm,data)
 end
 
 function simBWF.readSessionPersistentObjectData(objectHandle,dataName)
     -- Call utils function instead once version is stable
-    local nm="___"..sim.getScriptHandle()..sim.getObjectAlias(objectHandle,1)..sim.getInt32Param(sim.intparam_scene_unique_id)..sim.getObjectStringParam(objectHandle,sim.objstringparam_dna)..dataName
-    local data=sim.readCustomDataBlock(sim.handle_app,nm)
-    if data then
+    local nm="___"..sim.getScript(sim.handle_self)..sim.getObjectAlias(objectHandle,1)..sim.getInt32Param(sim.intparam_scene_unique_id)..sim.getObjectStringParam(objectHandle,sim.objstringparam_dna)..dataName
+    local data=sim.readCustomStringData(sim.handle_app,nm)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
         return unpack(data)
     else
@@ -601,72 +601,70 @@ function simBWF.getScaledVector(v,scalingFact)
 end
 
 function simBWF.getModelMainTag(objHandle)
-    local tags=sim.readCustomDataBlockTags(objHandle)
-    if tags then
-        for i=1,#tags,1 do
-            if tags[i]==simBWF.modelTags.OUTPUTBOX then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.INPUTBOX then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.IOHUB then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.VISIONBOX then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.TESTMODEL then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.LOCATIONFRAME then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.TRACKINGWINDOW then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNAR then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.CONVEYOR then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.PARTFEEDER then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.PARTTAGGER then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.PACKML then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.BLUEREALITYAPP then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.PARTSINK then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.LIFT then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNARGRIPPER then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNARGRIPPERPLATFORM then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.VISIONWINDOW then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNARCAMERA then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNARSENSOR then
-                return tags[i]
-            end
-            if tags[i]==simBWF.modelTags.RAGNARDETECTOR then
-                return tags[i]
-            end
+    local tags=sim.readCustomDataTags(objHandle)
+    for i=1,#tags,1 do
+        if tags[i]==simBWF.modelTags.OUTPUTBOX then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.INPUTBOX then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.IOHUB then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.VISIONBOX then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.TESTMODEL then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.LOCATIONFRAME then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.TRACKINGWINDOW then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNAR then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.CONVEYOR then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.PARTFEEDER then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.PARTTAGGER then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.PACKML then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.BLUEREALITYAPP then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.PARTSINK then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.LIFT then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNARGRIPPER then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNARGRIPPERPLATFORM then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.VISIONWINDOW then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNARCAMERA then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNARSENSOR then
+            return tags[i]
+        end
+        if tags[i]==simBWF.modelTags.RAGNARDETECTOR then
+            return tags[i]
         end
     end
     return ''
@@ -692,17 +690,17 @@ function simBWF.getModelTagsForMessages()
 end
 
 function simBWF.isSystemOnline()
-    return sim.getIntegerSignal('__brOnline__')~=nil
+    return sim.getInt32Signal('__brOnline__')~=nil
 end
 
 function simBWF.isInTestMode()
-    return sim.getIntegerSignal('__brTesting__')~=nil
+    return sim.getInt32Signal('__brTesting__')~=nil
 end
 
 function simBWF.markUndoPoint()
-    local cnt=sim.getIntegerSignal('__brUndoPointCounter__')
+    local cnt=sim.getInt32Signal('__brUndoPointCounter__')
     if cnt then
-        sim.setIntegerSignal('__brUndoPointCounter__',cnt+1)
+        sim.setInt32Signal('__brUndoPointCounter__',cnt+1)
     end
 end
 
@@ -759,19 +757,19 @@ function simBWF.callScriptFunction(funcName,objectId,scriptType,...)
 end
 
 function simBWF.callCustomizationScriptFunction(funcName,objectId,...)
-    return simBWF.callScriptFunction(funcName,objectId,sim.scripttype_customizationscript,...)
+    return simBWF.callScriptFunction(funcName,objectId,sim.scripttype_customization,...)
 end
 
 function simBWF.callChildScriptFunction(funcName,objectId,...)
-    return simBWF.callScriptFunction(funcName,objectId,sim.scripttype_childscript,...)
+    return simBWF.callScriptFunction(funcName,objectId,sim.scripttype_simulation,...)
 end
 
 function simBWF.callCustomizationScriptFunction_noError(funcName,objectId,...)
-    return simBWF.callScriptFunction_noError(funcName,objectId,sim.scripttype_customizationscript,...)
+    return simBWF.callScriptFunction_noError(funcName,objectId,sim.scripttype_customization,...)
 end
 
 function simBWF.callChildScriptFunction_noError(funcName,objectId,...)
-    return simBWF.callScriptFunction_noError(funcName,objectId,sim.scripttype_childscript,...)
+    return simBWF.callScriptFunction_noError(funcName,objectId,sim.scripttype_simulation,...)
 end
 
 function simBWF.getAvailablePallets()
@@ -844,8 +842,8 @@ function simBWF.forbidInputForTrackingWindowChainItems(inputItem)
     local modelTags={simBWF.modelTags.TRACKINGWINDOW,simBWF.modelTags.VISIONWINDOW,simBWF.modelTags.RAGNARSENSOR,simBWF.modelTags.RAGNARDETECTOR}
     local objs=sim.getObjectsInTree(sim.handle_scene)
     for i=1,#objs,1 do
-        local dat=sim.readCustomDataBlockTags(objs[i])
-        if dat then
+        local dat=sim.readCustomDataTags(objs[i])
+        if #dat > 0 then
             local leave=false
             for j=1,#dat,1 do
                 for k=1,#modelTags,1 do
@@ -1060,11 +1058,11 @@ function simBWF.format(fmt,...)
 end
 
 function simBWF.appendCommonModelData(model,modelTag,createModelDataWithVersionNumber)
-    model.handle=sim.getObject('.')
+    model.handle=sim.getObject('..')
     model.tagName=modelTag
     model.codeVersion=-1
-    local data=sim.readCustomDataBlock(model.handle,model.tagName)
-    if data then
+    local data=sim.readCustomStringData(model.handle,model.tagName)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
         model.modelVersion=data.version
     else
@@ -1072,7 +1070,7 @@ function simBWF.appendCommonModelData(model,modelTag,createModelDataWithVersionN
             model.modelVersion=createModelDataWithVersionNumber
             data={}
             data.version=createModelDataWithVersionNumber
-            sim.writeCustomDataBlock(model.handle,model.tagName,sim.packTable(data))
+            sim.writeCustomStringData(model.handle,model.tagName,sim.packTable(data))
         else
             model.modelVersion=-1
         end
@@ -1410,16 +1408,16 @@ end
 
 function simBWF.markModelAsCopy(modelHandle,isACopy)
     if isACopy then
-        sim.writeCustomDataBlock(modelHandle,simBWF.BR_MODEL_COPY_MARK,sim.packTable({}))
+        sim.writeCustomStringData(modelHandle,simBWF.BR_MODEL_COPY_MARK,sim.packTable({}))
     else
-        sim.writeCustomDataBlock(modelHandle,simBWF.BR_MODEL_COPY_MARK,nil)
+        sim.writeCustomStringData(modelHandle,simBWF.BR_MODEL_COPY_MARK,nil)
     end
 end
 
 function simBWF.isModelACopy_ifYesRemoveCopyTag(modelHandle)
-    local data=sim.readCustomDataBlock(modelHandle,simBWF.BR_MODEL_COPY_MARK)
-    if data then
-        sim.writeCustomDataBlock(modelHandle,simBWF.BR_MODEL_COPY_MARK,nil)
+    local data=sim.readCustomStringData(modelHandle,simBWF.BR_MODEL_COPY_MARK)
+    if data and #data > 0 then
+        sim.writeCustomStringData(modelHandle,simBWF.BR_MODEL_COPY_MARK,nil)
     end
     return data~=nil
 end

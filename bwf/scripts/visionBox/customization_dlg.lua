@@ -343,7 +343,7 @@ function model.dlg.removeDlg()
 end
 
 function model.dlg.showOrHideDlgIfNeeded()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model.handle then
         model.dlg.showDlg()
     else

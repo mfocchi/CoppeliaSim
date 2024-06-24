@@ -54,16 +54,16 @@ function isPartDetected(partHandle)
 end
 
 isEnabled=function()
-    local data=sim.readCustomDataBlock(model,'XYZ_BINARYSENSOR_INFO')
+    local data=sim.readCustomStringData(model,'XYZ_BINARYSENSOR_INFO')
     data=sim.unpackTable(data)
     return (data['bitCoded']&1)>0
 end
 
 setDetectionState=function(v)
-    local data=sim.readCustomDataBlock(model,'XYZ_BINARYSENSOR_INFO')
+    local data=sim.readCustomStringData(model,'XYZ_BINARYSENSOR_INFO')
     data=sim.unpackTable(data)
     data['detectionState']=v
-    sim.writeCustomDataBlock(model,'XYZ_BINARYSENSOR_INFO',sim.packTable(data))
+    sim.writeCustomStringData(model,'XYZ_BINARYSENSOR_INFO',sim.packTable(data))
 end
 
 checkSensor=function()
@@ -82,9 +82,9 @@ checkSensor=function()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    sensor=sim.getObject('./genericBinarySensor_sensor')
-    local data=sim.readCustomDataBlock(model,'XYZ_BINARYSENSOR_INFO')
+    model=sim.getObject('..')
+    sensor=sim.getObject('../genericBinarySensor_sensor')
+    local data=sim.readCustomStringData(model,'XYZ_BINARYSENSOR_INFO')
     data=sim.unpackTable(data)
     detectPartsOnly=(data['bitCoded']&2)>0
     onRise=(data['bitCoded']&8)>0

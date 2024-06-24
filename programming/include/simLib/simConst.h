@@ -1,13 +1,30 @@
 #if !defined(SIMCONST_INCLUDED_)
 #define SIMCONST_INCLUDED_
 
-#define SIM_PROGRAM_VERSION_NB 40600
-#define SIM_PROGRAM_VERSION "4.6.0"
+#define TOSTRING0(x) #x
+#define TOSTRING(x) TOSTRING0(x)
 
-#define SIM_PROGRAM_REVISION_NB 18
-#define SIM_PROGRAM_REVISION "(rev. 18)"
+#define SIM_VERSION_MAJOR 4
+#define SIM_VERSION_MINOR 7
+#define SIM_VERSION_PATCH 0
+#define SIM_VERSION_REVNB 2
 
+// for checking version:
+#define SIM_VERSION_CHECK(major, minor, patch, rev) ((((major) * 10000) + ((minor) * 100) + (patch)) * 100 + (rev))
+#define SIM_VERSION SIM_VERSION_CHECK(SIM_VERSION_MAJOR, SIM_VERSION_MINOR, SIM_VERSION_PATCH, SIM_VERSION_REVNB)
+#define SIM_VERSION_STR TOSTRING(SIM_VERSION_MAJOR) "." TOSTRING(SIM_VERSION_MINOR) "." TOSTRING(SIM_VERSION_PATCH) " (rev. " TOSTRING(SIM_VERSION_REVNB) ")"
+// e.g.: #if SIM_VERSION >= SIM_VERSION_CHECK(4, 6, 0, 2) ...
+
+// derive the old macros for backwards compatibility:
+#define SIM_PROGRAM_REVISION_NB SIM_VERSION_REVNB
+#define SIM_PROGRAM_VERSION_NB (((SIM_VERSION_MAJOR) * 10000) + ((SIM_VERSION_MINOR) * 100) + (SIM_VERSION_PATCH))
 #define SIM_PROGRAM_FULL_VERSION_NB ((SIM_PROGRAM_VERSION_NB) * 100 + (SIM_PROGRAM_REVISION_NB))
+#define SIM_PROGRAM_VERSION TOSTRING(SIM_VERSION_MAJOR) "." TOSTRING(SIM_VERSION_MINOR) "." TOSTRING(SIM_VERSION_PATCH)
+#define SIM_PROGRAM_REVISION "(rev. " TOSTRING(SIM_VERSION_REVNB) ")"
+
+#ifndef SIM_DISABLE_DEPRECATED_BEFORE
+#define SIM_DISABLE_DEPRECATED_BEFORE 0
+#endif
 
 /* Scene object types. Values are serialized */
 enum {
@@ -28,6 +45,7 @@ enum {
         sim_object_mirror_type,             /* deprecated */
         sim_object_octree_type,
         sim_object_pointcloud_type,
+        sim_object_script_type,
         sim_object_type_end=sim_object_path_type+100
 };
 
@@ -265,8 +283,10 @@ enum { /* Check the documentation instead of comments below!! */
 
         sim_message_eventcallback_lastinstancepass, /* deprecated */
         sim_message_eventcallback_uipass, /* deprecated */
-        sim_message_eventcallback_scriptstatedestroyed,
-        sim_message_eventcallback_scriptdestroyed,
+        sim_message_eventcallback_scriptstateabouttobedestroyed,
+        sim_message_eventcallback_scriptstatedestroyed = sim_message_eventcallback_scriptstateabouttobedestroyed,
+        sim_message_eventcallback_scriptabouttobedestroyed,
+        sim_message_eventcallback_scriptdestroyed = sim_message_eventcallback_scriptabouttobedestroyed,
 
         /* Following called before/after the main script's corresponding sections. auxData[0]=0:before, auxData[0]=1:after */
         sim_message_eventcallback_simulationinit,
@@ -429,20 +449,30 @@ enum { /* deprecated */
     sim_script_call_error               =16
 };
 
+
 enum { /* Script types (serialized!) */
-    sim_scripttype_mainscript=0,
-    sim_scripttype_childscript,
-    sim_scripttype_addonscript,
-    sim_scripttype_addonfunction, /* deprecated */
-    sim_scripttype_jointctrlcallback_old, /* deprecated */
-    sim_scripttype_contactcallback_old, /* deprecated */
-    sim_scripttype_customizationscript,
-    sim_scripttype_generalcallback_old, /* deprecated */
-    sim_scripttype_sandboxscript, /* special */
+    sim_scripttype_main = 0,
+    sim_scripttype_simulation = 1,
+    sim_scripttype_addon = 2,
+    sim_scripttype_customization = 6,
+    sim_scripttype_sandbox = 8,
+    sim_scripttype_passive = 9,
+};
+
+enum { /* deprecated */
+    sim_scripttype_mainscript = sim_scripttype_main,
+    sim_scripttype_childscript = sim_scripttype_simulation,
+    sim_scripttype_addonscript = sim_scripttype_addon,
+    sim_scripttype_addonfunction = 3,
+    sim_scripttype_jointctrlcallback_old = 4,
+    sim_scripttype_contactcallback_old = 5,
+    sim_scripttype_customizationscript = sim_scripttype_customization,
+    sim_scripttype_generalcallback_old = 7,
+    sim_scripttype_sandboxscript = sim_scripttype_sandbox,
 #if COPPELIASIM_ENABLE_DEPRECATED_SINCE >= 20201014
-    sim_scripttype_threaded=0x00f0 /* deprecated, do not use */
+    sim_scripttype_threaded = 0x00f0
 #else
-    sim_scripttype_threaded_old=0x00f0 /* deprecated, do not use */
+    sim_scripttype_threaded_old = 0x00f0
 #endif
 };
 
@@ -494,24 +524,6 @@ enum { /* System callbacks */
     sim_syscb_selchange, /* called when selection changed */
     sim_syscb_data, /* called when a custom data block changed */
     sim_syscb_endoflist
-};
-
-enum { /* Script int params */
-    sim_scriptintparam_execorder=0,
-    sim_scriptintparam_execcount,
-    sim_scriptintparam_type,
-    sim_scriptintparam_handle,
-    sim_scriptintparam_enabled,
-    sim_scriptintparam_objecthandle,
-    sim_scriptintparam_lang, /* 0 lua, 1 python */
-    sim_scriptintparam_autorestartonerror
-};
-
-enum { /* Script string params */
-    sim_scriptstringparam_description=0,
-    sim_scriptstringparam_name,
-    sim_scriptstringparam_text,
-    sim_scriptstringparam_nameext
 };
 
 enum { /* code lang (scripts) */
@@ -596,7 +608,8 @@ enum { /* special argument of some functions: */
     sim_handle_parent                   =-11,
     sim_handle_scene                    =-12,
     sim_handle_app                      =-13,
-    sim_handle_inverse                  =-14
+    sim_handle_inverse                  =-14,
+    sim_handle_appstorage               =-15,
 };
 
 enum { /* special handle flags: */
@@ -807,6 +820,7 @@ enum { /* Boolean parameters: */
     sim_boolparam_execunsafe,
     sim_boolparam_execunsafeext,
     sim_boolparam_cansave,
+    sim_boolparam_usingscriptobjects,
 };
 
 enum { /* Integer parameters: */
@@ -861,6 +875,9 @@ enum { /* Integer parameters: */
     sim_intparam_objectcreationcounter,
     sim_intparam_objectdestructioncounter,
     sim_intparam_hierarchychangecounter,
+    sim_intparam_notifydeprecated,
+    sim_intparam_processid,
+    sim_intparam_processcnt,
 };
 
 enum { /* uint64 parameters: */
@@ -1002,6 +1019,7 @@ enum { /* verbosity */
     sim_verbosity_default=sim_verbosity_loadinfos,
     sim_verbosity_undecorated=0x0f000,
     sim_verbosity_onlyterminal=0x10000,
+    sim_verbosity_once=0x20000,
 };
 
 enum { /* plugin info */
@@ -1324,7 +1342,7 @@ enum { /* Object int/double/string parameters */
     sim_visionintparam_perspective_operation= 1018,
     sim_visionfarrayparam_viewfrustum= 1019,
     sim_visionintparam_rgbignored= 1020,
-    sim_visionintparam_depthignored= 1020,
+    sim_visionintparam_depthignored= 1021,
 
     /* joints */
     sim_jointintparam_motor_enabled= 2000, /* deprecated */
@@ -1455,6 +1473,21 @@ enum { /* Object int/double/string parameters */
     sim_dummyfloatparam_size= 10003,
     sim_dummystringparam_assemblytag= 10004,
 
+    /* scripts */
+    sim_scriptintparam_execorder= 10100,
+    sim_scriptintparam_execcount= 10101,
+    sim_scriptintparam_type= 10102,
+    sim_scriptintparam_handle= 10103, /* deprecated */
+    sim_scriptintparam_enabled= 10104,
+    sim_scriptintparam_objecthandle= 10105, /* deprecated */
+    sim_scriptintparam_lang= 10106, /* deprecated */
+    sim_scriptintparam_autorestartonerror= 10107,
+    sim_scriptstringparam_description= 10108,
+    sim_scriptstringparam_name= 10109,
+    sim_scriptstringparam_text= 10110,
+    sim_scriptstringparam_nameext= 10111,
+    sim_scriptstringparam_lang= 10112,
+
     /* graphs */
     sim_graphintparam_needs_refresh= 10500,
 
@@ -1466,6 +1499,9 @@ enum { /* Object int/double/string parameters */
     sim_mirrorfloatparam_height= 12001,
     sim_mirrorfloatparam_reflectance= 12002,
     sim_mirrorintparam_enable= 12003,
+
+    /* oc trees */
+    sim_octreefloatparam_voxelsize= 13000,
 
     /* path planning */
     sim_pplanfloatparam_x_min= 20000,
@@ -1480,7 +1516,13 @@ enum { /* Object int/double/string parameters */
     /* motion planning */
     sim_mplanintparam_nodes_computed_old= 25000,
     sim_mplanintparam_prepare_nodes_old= 25001,
-    sim_mplanintparam_clear_nodes_old= 25002
+    sim_mplanintparam_clear_nodes_old= 25002,
+};
+
+enum { /* string types */
+    sim_string_text=0,
+    sim_string_binary,
+    sim_string_buffer
 };
 
 enum { /* stack item types */

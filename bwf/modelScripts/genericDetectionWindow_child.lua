@@ -67,12 +67,12 @@ getPartMass=function(partHandle)
                 if sim.getObjectType(handle)==sim.object_shape_type then
                     local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
                     if p==0 then
-                        m=m+sim.getShapeMassAndInertia(handle)
+                        m=m+sim.getShapeMass(handle)
                     end
                 end
             end
         else
-            m=m+sim.getShapeMassAndInertia(partHandle)
+            m=m+sim.getShapeMass(partHandle)
         end
     end
     return m
@@ -153,8 +153,8 @@ end
 function checkIfPartHasVisibleLabels(obj)
     local objs=sim.getObjectsInTree(obj,sim.object_shape_type,1)
     for i=1,#objs,1 do
-        local data=sim.readCustomDataBlock(objs[i],'XYZ_PARTLABEL_INFO')
-        if data then
+        local data=sim.readCustomStringData(objs[i],'XYZ_PARTLABEL_INFO')
+        if data and #data > 0 then
             -- This is a label
             local label=objs[i]
             local mmin=sim.getObjectFloatParam(label,sim.objfloatparam_objbbox_min_x )
@@ -191,8 +191,8 @@ function getAllVisiblePartsInWindow()
                 if r>0 then
                     -- Only if we detected the same object (there might be overlapping objects)
                     while obj~=-1 do
-                        local data2=sim.readCustomDataBlock(obj,simBWF.modelTags.PART)
-                        if data2 then
+                        local data2=sim.readCustomStringData(obj,simBWF.modelTags.PART)
+                        if data2 and #data2 > 0 then
                             break
                         end
                         obj=sim.getObjectParent(obj)
@@ -288,11 +288,11 @@ updateStatisticsDialog=function(totalP,detectedPNoLabel,detectedPWithLabel)
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    sensor1=sim.getObject('./genericDetectionWindow_sensor1')
-    sensor2=sim.getObject('./genericDetectionWindow_sensor2')
-    sensor3=sim.getObject('./genericDetectionWindow_sensor3')
-    local data=sim.readCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO')
+    model=sim.getObject('..')
+    sensor1=sim.getObject('../genericDetectionWindow_sensor1')
+    sensor2=sim.getObject('../genericDetectionWindow_sensor2')
+    sensor3=sim.getObject('../genericDetectionWindow_sensor3')
+    local data=sim.readCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO')
     data=sim.unpackTable(data)
     width=data['width']
     length=data['length']
@@ -370,10 +370,10 @@ function sysCall_sensing()
             end
         end
     end
-    local data=sim.readCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO')
+    local data=sim.readCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO')
     data=sim.unpackTable(data)
     data['detectedItems']=inf
-    sim.writeCustomDataBlock(model,'XYZ_DETECTIONWINDOW_INFO',sim.packTable(data))
+    sim.writeCustomStringData(model,'XYZ_DETECTIONWINDOW_INFO',sim.packTable(data))
     if showPoints then
         displayParts(detectedParts)
     end

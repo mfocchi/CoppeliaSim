@@ -143,6 +143,18 @@ function tomap(data)
     return d
 end
 
+cbornil = {
+    __tocbor = function(self)
+        return cbor.SIMPLE.null()
+    end,
+}
+
+function tonil()
+    local d = {}
+    setmetatable(d, cbornil)
+    return d
+end
+
 function sysCall_init(...)
     returnTypes = {}
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
@@ -528,12 +540,29 @@ function handleRequest(req)
 
             currentFunction = reqFunc
 
-            -- Handle function arguments:
+            -- Handle function arguments (up to a depth of 2):
             for i = 1, #args, 1 do
                 if type(args[i]) == 'string' then
+                    -- depth 1
                     if args[i]:sub(-5) == "@func" then
                         local nm = args[i]:sub(1, -6)
                         args[i] = function(...) return callRemoteFunction(nm, {...}, false, true) end
+                    end
+                else
+                    if type(args[i]) == 'table' then
+                        -- depth 2
+                        local cnt = 0
+                        for k, v in pairs(args[i]) do
+                            if type(v) == 'string' and v:sub(-5) == "@func" then
+                                local nm = v:sub(1, -6)
+                                v = function(...) return callRemoteFunction(nm, {...}, false, true) end
+                                args[i][k] = v
+                            end
+                            cnt = cnt + 1
+                            if cnt >= 16 then
+                                break -- parse no more than 16 items
+                            end
+                        end
                     end
                 end
             end
@@ -554,25 +583,38 @@ function handleRequest(req)
             doNotInterruptCommLevel = doNotInterruptCommLevel + 1
             local status, retvals = xpcall(
                 function()
-                    local ret = {func(unpack(args, 1, req.argsL))}
+                    local pret = table.pack(func(unpack(args, 1, req.argsL)))
+                    local ret = {}
+                    for i = 1, pret.n do
+                        if pret[i] ~= nil then
+                            ret[i] = pret[i]
+                        else
+                            ret[i] = tonil()
+                        end
+                    end
+                    --local ret = {func(unpack(args, 1, req.argsL))}
+                    
                     -- Try to assign correct types to text/buffers and arrays/maps:
                     local args = returnTypes[reqFunc]
                     if args then
                         local cnt = math.min(#ret, #args)
-                        for i = 1, cnt, 1 do
-                            if args[i] == 1 then
+                        for i = 1, cnt do
+                            if args[i] == 1 and type(ret[i]) == 'string' then
                                 ret[i] = totxt(ret[i])
-                            elseif args[i] == 2 then
+                            elseif args[i] == 2 and type(ret[i]) == 'string' then
                                 ret[i] = tobin(ret[i])
                             elseif type(ret[i]) == 'table' then
-                                if table.isarray(ret[i]) then
-                                    ret[i] = toarray(ret[i])
-                                else
-                                    ret[i] = tomap(ret[i])
+                                if (not isbuffer(ret[i])) and (getmetatable(ret[i]) ~= cbornil) then 
+                                    if table.isarray(ret[i]) then
+                                        ret[i] = toarray(ret[i])
+                                    else
+                                        ret[i] = tomap(ret[i])
+                                    end
                                 end
                             end
                         end
                     end
+
                     return ret
                 end, errHandler)
             doNotInterruptCommLevel = doNotInterruptCommLevel - 1
@@ -651,7 +693,7 @@ function receive()
 
         local rc, dat = simZMQ.recv(replySocket, 0)
         receiveIsNext = false
-        local status, req = pcall(cbor.decode, dat)
+        local status, req = pcall(cbor.decode, tostring(dat))
         if not status then
             if #dat < 2000 then
                 error(req .. "\n" .. sim.transformBuffer(dat, sim.buffer_uint8, 1, 0, sim.buffer_base64))
@@ -677,6 +719,30 @@ end
 
 function send(reply)
     if not receiveIsNext then
+        --[[
+        -- Make sure the data does not contain any function. If there is, convert it to string. We do that up to a depth of 2:
+        for i = 1, #reply do
+            local ob = reply[i]
+            if type(ob) == 'function' then
+                reply[i] = tostring(ob)
+                            print("bli")
+            else
+                if type(ob) == table and not isBuffer(ob) then
+                    local cnt = 0
+                    for k, v in pairs(ob) do
+                        if type(v) == 'function' then
+                            print("bla")
+                            ob[k] = tostring(v)
+                        end
+                        cnt = cnt + 1
+                        if cnt > 16 then
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        --]]
         local dat = reply
         local status, reply = pcall(cbor.encode, reply)
         if not status then
@@ -783,7 +849,7 @@ function checkPythonError()
             while pythonErrorMsg == nil do
                 local r, rep = simZMQ.__noError.recv(pySocket, simZMQ.DONTWAIT)
                 if r >= 0 then
-                    local rep, o, t = cbor.decode(rep)
+                    local rep, o, t = cbor.decode(tostring(rep))
                     if rep.err then
                         -- print(getAsString(rep.err))
                         local msg = getCleanErrorMsg(rep.err)
@@ -843,18 +909,29 @@ function checkPythonError()
 end
 
 function getFreePortStr()
-    local tmpContext = simZMQ.ctx_new()
-    local tmpSocket = simZMQ.socket(tmpContext, simZMQ.REP)
-    local p = 23259
+    local pythonWrapperPortStart = 23259
     while true do
-        if simZMQ.__noError.bind(tmpSocket, string.format('tcp://127.0.0.1:%d', p)) == 0 then
-            break
+        sim.systemSemaphore('pythonWrapper', true)
+        local dat = sim.readCustomBufferData(sim.handle_appstorage, 'nextPythonWrapperCommPort')
+        if dat == nil then
+            dat = sim.packInt32Table({pythonWrapperPortStart})
         end
-        p = p + 1
+        local p = sim.unpackInt32Table(dat)[1]
+        local np = p + 1
+        if np >= pythonWrapperPortStart + 800 then
+            np = pythonWrapperPortStart
+        end
+        sim.writeCustomBufferData(sim.handle_appstorage, 'nextPythonWrapperCommPort', sim.packInt32Table({np}))
+        sim.systemSemaphore('pythonWrapper', false)
+    
+        local tmpContext = simZMQ.ctx_new()
+        local tmpSocket = simZMQ.socket(tmpContext, simZMQ.REP)
+        if simZMQ.__noError.bind(tmpSocket, string.format('tcp://127.0.0.1:%d', p)) == 0 then
+            simZMQ.close(tmpSocket)
+            simZMQ.ctx_term(tmpContext)
+            return string.format('tcp://127.0.0.1:%d', p)
+        end
     end
-    simZMQ.close(tmpSocket)
-    simZMQ.ctx_term(tmpContext)
-    return string.format('tcp://127.0.0.1:%d', p)
 end
 
 function initPython(prog)
@@ -889,8 +966,8 @@ function initPython(prog)
             virtualPythonFilename = virtualPythonFilename .. '_' ..
                                         tostring(sim.getInt32Param(sim.intparam_scene_unique_id))
             virtualPythonFilename = virtualPythonFilename ..
-                                        sim.getScriptStringParam(
-                                            sim.handle_self, sim.scriptstringparam_nameext
+                                        sim.getObjectStringParam(
+                                            sim.getScript(sim.handle_self), sim.scriptstringparam_nameext
                                         )
             if sim.getInt32Param(sim.intparam_platform) == 0 then
                 virtualPythonFilename = "z:\\" .. virtualPythonFilename
@@ -911,7 +988,7 @@ function initPython(prog)
                 if r >= 0 then break end
             end
             if r >= 0 then
-                local rep, o, t = cbor.decode(rep)
+                local rep, o, t = cbor.decode(tostring(rep))
                 if rep.err then
                     errMsg = rep.err
                     errMsg = getCleanErrorMsg(errMsg)
@@ -948,8 +1025,8 @@ function initPython(prog)
                      "/usrset.txt with 'defaultPython', or via the named string parameter 'python' from the command line"
     end
     if errMsg then
-        if sim.getScriptInt32Param(sim.handle_self, sim.scriptintparam_type) ==
-            sim.scripttype_sandboxscript then
+        if sim.getObjectInt32Param(sim.getScript(sim.handle_self), sim.scriptintparam_type) ==
+            sim.scripttype_sandbox then
             sim.setNamedBoolParam("pythonSandboxInitFailed", true)
         end
         if pythonFailWarnOnly then
@@ -961,11 +1038,10 @@ function initPython(prog)
     end
 end
 
--- For Python, we should always return a string:
-_S.readCustomDataBlock = sim.readCustomDataBlock
 function sim.readCustomDataBlock(obj, tag)
-    local retVal = _S.readCustomDataBlock(obj, tag)
-    if retVal == nil then retVal = '' end
+    -- Backw. comp. For Python, we should always return a string:
+    local retVal = sim.readCustomStringData(obj, tag)
+    if retVal == nil or #retVal == 0 then retVal = '' end
     return retVal
 end
 
@@ -1175,24 +1251,36 @@ class RemoteAPIClient:
         self.context.term()
 
     def _send(self, req):
-        # convert a possible function to string:
-        if 'args' in req and req['args']!=None and (isinstance(req['args'],tuple) or isinstance(req['args'],list)):
+        def handle_func_arg(arg):
+            retArg = arg
+            if callable(arg):
+                funcStr = str(arg)
+                m = re.search(r"<function (.+) at 0x([0-9a-fA-F]+)(.*)", funcStr)
+                if m:
+                    funcStr = m.group(1) + '_' + m.group(2)
+                else:
+                    m = re.search(r"<(.*)method (.+) of (.+) at 0x([0-9a-fA-F]+)(.*)", funcStr)
+                    if m:
+                        funcStr = m.group(2) + '_' + m.group(4)
+                    else:
+                        funcStr = None
+                if funcStr:
+                    self.callbackFuncs[funcStr] = arg
+                    retArg = funcStr + "@func"
+            return retArg 
+
+        # convert a possible function to string (up to a depth of 2):
+        if 'args' in req and req['args'] != None and isinstance(req['args'], (tuple, list)):
             req['args'] = list(req['args'])
             for i in range(len(req['args'])):
-                if callable(req['args'][i]):
-                    funcStr = str(req['args'][i])
-                    m = re.search(r"<function (.+) at 0x([0-9a-fA-F]+)(.*)", funcStr)
-                    if m:
-                        funcStr = m.group(1) + '_' + m.group(2)
-                    else:
-                        m = re.search(r"<(.*)method (.+) of (.+) at 0x([0-9a-fA-F]+)(.*)", funcStr)
-                        if m:
-                            funcStr = m.group(2) + '_' + m.group(4)
-                        else:
-                            funcStr = None
-                    if funcStr:
-                        self.callbackFuncs[funcStr] = req['args'][i]
-                        req['args'][i] = funcStr + "@func"
+                req['args'][i] = handle_func_arg(req['args'][i]) # depth 1
+                if isinstance(req['args'][i], tuple):
+                    req['args'][i] = list(req['args'][i])
+                if isinstance(req['args'][i], list) and len(req['args'][i]) <= 16: # parse no more than 16 items
+                    for j in range(len(req['args'][i])):
+                        req['args'][i][j] = handle_func_arg(req['args'][i][j]) #depth 2
+                if isinstance(req['args'][i], dict) and len(req['args'][i]) <= 16:
+                    req['args'][i] = {key: handle_func_arg(value) for key, value in req['args'][i].items()} #depth 2
             req['argsL'] = len(req['args'])
 
         # pack and send:

@@ -40,6 +40,16 @@ typedef int (__cdecl *ptrSimSetSimulationPassesPerRenderingPass)(int p);
 typedef int (__cdecl *ptrSimGetSimulationPassesPerRenderingPass)();
 typedef int (__cdecl *ptrSimAdvanceSimulationByOneStep)();
 typedef int (__cdecl *ptrSimHandleMainScript)();
+typedef int (__cdecl *ptrSimGetScriptInt32Param)(int scriptHandle,int parameterID,int* parameter);
+typedef int (__cdecl *ptrSimSetScriptInt32Param)(int scriptHandle,int parameterID,int parameter);
+typedef char* (__cdecl *ptrSimGetScriptStringParam)(int scriptHandle,int parameterID,int* parameterLength);
+typedef int (__cdecl *ptrSimSetScriptStringParam)(int scriptHandle,int parameterID,const char* parameter,int parameterLength);
+typedef int (__cdecl *ptrSimAddScript)(int scriptProperty);
+typedef int (__cdecl *ptrSimRemoveScript)(int scriptHandle);
+typedef int (__cdecl *ptrSimAssociateScriptWithObject)(int scriptHandle,int associatedObjectHandle);
+typedef int (__cdecl *ptrSimPersistentDataWrite)(const char* dataName,const char* dataValue,int dataLength,int options);
+typedef char* (__cdecl *ptrSimPersistentDataRead)(const char* dataName,int* dataLength);
+typedef char* (__cdecl *ptrSimGetPersistentDataTags)(int* tagCount);
 
 
 extern ptrSimRunSimulator simRunSimulator;
@@ -84,6 +94,16 @@ extern ptrSimSetSimulationPassesPerRenderingPass simSetSimulationPassesPerRender
 extern ptrSimGetSimulationPassesPerRenderingPass simGetSimulationPassesPerRenderingPass;
 extern ptrSimAdvanceSimulationByOneStep simAdvanceSimulationByOneStep;
 extern ptrSimHandleMainScript simHandleMainScript;
+extern ptrSimGetScriptInt32Param simGetScriptInt32Param;
+extern ptrSimSetScriptInt32Param simSetScriptInt32Param;
+extern ptrSimGetScriptStringParam simGetScriptStringParam;
+extern ptrSimSetScriptStringParam simSetScriptStringParam;
+extern ptrSimAddScript simAddScript;
+extern ptrSimRemoveScript simRemoveScript;
+extern ptrSimAssociateScriptWithObject simAssociateScriptWithObject;
+extern ptrSimPersistentDataWrite simPersistentDataWrite;
+extern ptrSimPersistentDataRead simPersistentDataRead;
+extern ptrSimGetPersistentDataTags simGetPersistentDataTags;
 
 #ifdef SIM_INTERFACE_OLD
 #include "simLib-old2.h"

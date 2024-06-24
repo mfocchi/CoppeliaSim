@@ -69,8 +69,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -81,9 +81,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,'')
     end
 end
 function setColor(red,green,blue,spec)
@@ -228,8 +228,8 @@ function getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -241,8 +241,8 @@ function getAvailableMasterConveyors()
     local retL={}
     for i=1,#l,1 do
         if l[i]~=model then
-            local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-            if data then
+            local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+            if data and #data > 0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
@@ -673,7 +673,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -695,29 +695,29 @@ function sysCall_init()
     writeInfo(_info)
     
     rotJoints={}
-    rotJoints[1]=sim.getObject('./genericConveyorTypeA_jointB')
-    rotJoints[2]=sim.getObject('./genericConveyorTypeA_jointC')
+    rotJoints[1]=sim.getObject('../genericConveyorTypeA_jointB')
+    rotJoints[2]=sim.getObject('../genericConveyorTypeA_jointC')
 
     middleParts={}
-    middleParts[1]=sim.getObject('./genericConveyorTypeA_sides')
-    middleParts[2]=sim.getObject('./genericConveyorTypeA_textureA')
-    middleParts[3]=sim.getObject('./genericConveyorTypeA_forwarderA')
+    middleParts[1]=sim.getObject('../genericConveyorTypeA_sides')
+    middleParts[2]=sim.getObject('../genericConveyorTypeA_textureA')
+    middleParts[3]=sim.getObject('../genericConveyorTypeA_forwarderA')
     
     endParts={}
-    endParts[1]=sim.getObject('./genericConveyorTypeA_textureB')
-    endParts[2]=sim.getObject('./genericConveyorTypeA_textureC')
-    endParts[3]=sim.getObject('./genericConveyorTypeA_B')
-    endParts[4]=sim.getObject('./genericConveyorTypeA_C')
-    endParts[5]=sim.getObject('./genericConveyorTypeA_forwarderB')
-    endParts[6]=sim.getObject('./genericConveyorTypeA_forwarderC')
+    endParts[1]=sim.getObject('../genericConveyorTypeA_textureB')
+    endParts[2]=sim.getObject('../genericConveyorTypeA_textureC')
+    endParts[3]=sim.getObject('../genericConveyorTypeA_B')
+    endParts[4]=sim.getObject('../genericConveyorTypeA_C')
+    endParts[5]=sim.getObject('../genericConveyorTypeA_forwarderB')
+    endParts[6]=sim.getObject('../genericConveyorTypeA_forwarderC')
 
     sides={}
-    sides[1]=sim.getObject('./genericConveyorTypeA_leftSide')
-    sides[2]=sim.getObject('./genericConveyorTypeA_rightSide')
-    sides[3]=sim.getObject('./genericConveyorTypeA_frontSide')
-    sides[4]=sim.getObject('./genericConveyorTypeA_backSide')
+    sides[1]=sim.getObject('../genericConveyorTypeA_leftSide')
+    sides[2]=sim.getObject('../genericConveyorTypeA_rightSide')
+    sides[3]=sim.getObject('../genericConveyorTypeA_frontSide')
+    sides[4]=sim.getObject('../genericConveyorTypeA_backSide')
 
-    textureHolder=sim.getObject('./genericConveyorTypeA_textureHolder')
+    textureHolder=sim.getObject('../genericConveyorTypeA_textureHolder')
 
 	
     updatePluginRepresentation()
@@ -725,7 +725,7 @@ function sysCall_init()
 end
 
 showOrHideUiIfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg()
     else

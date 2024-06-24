@@ -71,8 +71,8 @@ function getDefaultInfoForNonExistingFields(info)
 end
 
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.PARTFEEDER)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.PARTFEEDER)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -83,9 +83,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.PARTFEEDER,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.PARTFEEDER,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.PARTFEEDER,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.PARTFEEDER,'')
     end
 end
 
@@ -250,19 +250,19 @@ function getAvailableSensors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
-        if not data then
-            data=sim.readCustomDataBlock(l[i],'XYZ_STATICPICKWINDOW_INFO')
-            if data then
+        if not data or data == '' then
+            data=sim.readCustomStringData(l[i],'XYZ_STATICPICKWINDOW_INFO')
+            if data and #data > 0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
         if not data then
-            data=sim.readCustomDataBlock(l[i],simBWF.modelTags.OLDSTATICPLACEWINDOW)
-            if data then
+            data=sim.readCustomStringData(l[i],simBWF.modelTags.OLDSTATICPLACEWINDOW)
+            if data and #data > 0 then
                 retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
             end
         end
@@ -274,8 +274,8 @@ function getAvailableConveyors()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],simBWF.modelTags.CONVEYOR)
-        if data then
+        local data=sim.readCustomStringData(l[i],simBWF.modelTags.CONVEYOR)
+        if data and #data > 0 then
             retL[#retL+1]={sim.getObjectAlias(l[i],1),l[i]}
         end
     end
@@ -775,7 +775,7 @@ end
 
 function sysCall_init()
     dlgMainTabIndex=0
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     _MODELVERSION_=0
     _CODEVERSION_=0
     local _info=readInfo()
@@ -791,14 +791,14 @@ function sysCall_init()
     end
     ----------------------------------------
     writeInfo(_info)
-    functionalPartHolder=sim.getObject('./genericFeeder_functional')
+    functionalPartHolder=sim.getObject('../genericFeeder_functional')
 	
     updatePluginRepresentation()
     previousDlgPos,algoDlgSize,algoDlgPos,distributionDlgSize,distributionDlgPos,previousDlg1Pos=simBWF.readSessionPersistentObjectData(model,"dlgPosAndSize")
 end
 
 showOrHideUi1IfNeeded=function()
-    local s=sim.getObjectSelection()
+    local s=sim.getObjectSel()
     if s and #s>=1 and s[#s]==model then
         showDlg1()
     else

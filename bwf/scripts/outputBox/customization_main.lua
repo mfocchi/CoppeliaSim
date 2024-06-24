@@ -15,7 +15,7 @@ function model.readAndApplySignalState()
     if simBWF.isInTestMode() then
         resp='ok'
         retData={}
-        retData.state=math.floor(0.5+math.mod(sim.getSystemTimeInMs(-1)/2000,1))==1
+        retData.state=math.floor(0.5+math.mod(sim.getSystemTime()*1000/2000,1))==1
     else
         resp,retData=simBWF.query('outbox_getState',data)
         if resp~='ok' then

@@ -656,20 +656,20 @@ function model.actions.getSceneScreenShot(fromTop)
     local rgb=nil
     local res= {1280,780} -- {640,480}
     if not fromTop then
-        if sim.getObject('./DefaultCamera@silentError') ~=-1 then
-            camera = sim.getObject('./DefaultCamera@silentError')
+        if sim.getObject('../DefaultCamera@silentError') ~=-1 then
+            camera = sim.getObject('../DefaultCamera@silentError')
         else
-            camera = sim.getObject('./Camera@silentError')
+            camera = sim.getObject('../Camera@silentError')
         end
         local vs=sim.createVisionSensor(1+2+128,{res[1],res[2],0,0},{0.1,50,60*math.pi/180,0.1,0.1,0.1,255,255,255,0,0})
         sim.setObjectOrientation(vs,camera,{0,0,0})
         sim.setObjectPosition(vs,camera,{0,0,0})
         sim.handleVisionSensor(vs)
         rgb=sim.getVisionSensorCharImage(vs)
-        sim.removeObject(vs)
+        sim.removeObjects({vs})
     end
     if fromTop then
-        local fl=sim.getObject('./Floor')
+        local fl=sim.getObject('../Floor')
         local prop=sim.getModelProperty(fl)
         sim.setModelProperty(fl,sim.modelproperty_not_visible)
         local parentless=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,2)
@@ -714,7 +714,7 @@ function model.actions.getSceneScreenShot(fromTop)
         sim.handleVisionSensor(vs)
         sim.setModelProperty(fl,prop)
         rgb=sim.getVisionSensorCharImage(vs)
-        sim.removeObject(vs)
+        sim.removeObjects({vs})
     end
     if rgb then
         local pngData=sim.saveImage(rgb,res,0,'.png',-1)

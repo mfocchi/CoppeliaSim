@@ -127,14 +127,14 @@ end
 sim.switchThread = sim.step
 sim.yield = sim.step
 
-sim.readCustomDataBlock = wrap(sim.readCustomDataBlock, function(origFunc)
-    -- via the remote API, we should always return a string:
-    return function(obj, tag)
-        local retVal = origFunc(obj, tag)
-        if retVal == nil then retVal = '' end
-        return retVal
+function sim.readCustomDataBlock(obj, tag)
+    -- via the remote API, we should always return a string, for backw. comp.
+    local retVal = sim.readCustomStringData(obj, tag)
+    if retVal == nil then
+        retVal = '' 
     end
-end)
+    return retVal
+end
 
 function tobin(data)
     local d = {data = data}
@@ -173,6 +173,18 @@ function tomap(data)
             return cbor.TYPE.MAP(self.data)
         end,
     })
+    return d
+end
+
+cbornil = {
+    __tocbor = function(self)
+        return cbor.SIMPLE.null()
+    end,
+}
+
+function tonil()
+    local d = {}
+    setmetatable(d, cbornil)
     return d
 end
 
@@ -289,17 +301,36 @@ function zmqRemoteApi.handleRequest(req)
                 -- more in sysCall_init and zmqRemoteApi.require
             end
 
-            -- Handle function arguments and possible nil values:
+            -- Handle function arguments (up to a depth of 2), and possible nil values:
             for i = 1, #args, 1 do
                 if type(args[i]) == 'string' then
+                    -- depth 1
                     if args[i]:sub(-5) == "@func" then
                         local nm = args[i]:sub(1, -6)
                         args[i] = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
                     elseif args[i] == '_*NIL*_' then
                         args[i] = nil
                     end
+                else
+                    if type(args[i]) == 'table' then
+                        -- depth 2
+                        local cnt = 0
+                        for k, v in pairs(args[i]) do
+                            if type(v) == 'string' and v:sub(-5) == "@func" then
+                                local nm = v:sub(1, -6)
+                                v = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
+                                args[i][k] = v
+                            end
+                            cnt = cnt + 1
+                            if cnt >= 16 then
+                                break -- parse no more than 16 items
+                            end
+                        end
+                    end
                 end
             end
+            
+            
 
             local function errHandler(err)
                 local trace = debug.traceback(err)
@@ -313,21 +344,33 @@ function zmqRemoteApi.handleRequest(req)
                 return trace
             end
             local status, retvals = xpcall(function()
-                local ret = {func(unpack(args, 1, req.argsL))}
+                local pret = table.pack(func(unpack(args, 1, req.argsL)))
+                local ret = {}
+                for i = 1, pret.n do
+                    if pret[i] ~= nil then
+                        ret[i] = pret[i]
+                    else
+                        ret[i] = tonil()
+                    end
+                end
+                --local ret = {func(unpack(args, 1, req.argsL))}
+                
                 -- Try to assign correct types to text and buffers:
                 local args = returnTypes[reqFunc]
                 if args then
                     local cnt = math.min(#ret, #args)
                     for i = 1, cnt, 1 do
-                        if args[i] == 1 then
+                        if args[i] == 1 and type(ret[i]) == 'string' then
                             ret[i] = totxt(ret[i])
-                        elseif args[i] == 2 then
+                        elseif args[i] == 2 and type(ret[i]) == 'string' then
                             ret[i] = tobin(ret[i])
                         elseif type(ret[i]) == 'table' then
-                            if table.isarray(ret[i]) then
-                                ret[i] = toarray(ret[i])
-                            else
-                                ret[i] = tomap(ret[i])
+                            if (not isbuffer(ret[i])) and (getmetatable(ret[i]) ~= cbornil) then 
+                                if table.isarray(ret[i]) then
+                                    ret[i] = toarray(ret[i])
+                                else
+                                    ret[i] = tomap(ret[i])
+                                end
                             end
                         end
                     end
@@ -368,7 +411,7 @@ function zmqRemoteApi.receive()
     if receiveIsNext then
         local rc, dat = simZMQ.recv(rpcSocket, 0)
         receiveIsNext = false
-        rc, retVal = pcall(cbor.decode, dat)
+        rc, retVal = pcall(cbor.decode, tostring(dat))
         if not rc then
             if #dat < 2000 then
                 error(retVal .. "\n" .. sim.transformBuffer(dat, sim.buffer_uint8, 1, 0, sim.buffer_base64))
@@ -539,16 +582,18 @@ function sysCall_init()
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
     zmqRemoteApi.parseFuncsReturnTypes('sim')
     zmqRemoteApi.parseFuncsReturnTypes('simZMQ')
-    rpcPort = sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
+    local defaultRpcPort = 23000 + sim.getInt32Param(sim.intparam_processid)
+    local rpcPort = sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or defaultRpcPort
+    sim.setNamedInt32Param('zmqRemoteApi.rpcPort', rpcPort)
     msgQueueTimeout_idle = 0.05
     msgQueueTimeout_running = 0.002
 
-    if zmqRemoteApi.verbose() > 0 then
+--    if zmqRemoteApi.verbose() > 0 then
         sim.addLog(
             sim.verbosity_scriptinfos,
             string.format('ZeroMQ Remote API server starting (rpcPort=%d)...', rpcPort)
         )
-    end
+--    end
     cbor = require 'org.conman.cbor'
     context = simZMQ.ctx_new()
     rpcSocket = simZMQ.socket(context, simZMQ.REP)
@@ -617,7 +662,7 @@ end
 
 function sysCall_cleanup()
     if initSuccessful then
-        sim.setScriptInt32Param(sim.handle_self, sim.scriptintparam_autorestartonerror, 1)
+        sim.setObjectInt32Param(sim.getScript(sim.handle_self), sim.scriptintparam_autorestartonerror, 1)
     end
     if simZMQ then
         simZMQ.close(rpcSocket)
@@ -634,6 +679,10 @@ end
 
 function sysCall_addOnScriptSuspended()
     return {cmd = 'cleanup'}
+end
+
+function sysCall_suspended()
+    return sysCall_nonSimulation()
 end
 
 function sysCall_nonSimulation()

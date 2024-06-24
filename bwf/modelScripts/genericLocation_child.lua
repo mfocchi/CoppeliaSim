@@ -1,7 +1,7 @@
 simBWF=require('simBWF')
 function readInfo()
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.OLDLOCATION)
-    if data then
+    local data=sim.readCustomStringData(model,simBWF.modelTags.OLDLOCATION)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -11,9 +11,9 @@ end
 
 function writeInfo(data)
     if data then
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDLOCATION,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDLOCATION,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model,simBWF.modelTags.OLDLOCATION,'')
+        sim.writeCustomStringData(model,simBWF.modelTags.OLDLOCATION,'')
     end
 end
 
@@ -21,8 +21,8 @@ function getAvailableBuckets()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_BUCKET_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_BUCKET_INFO')
+        if data and #data > 0 then
             retL[#retL+1]=l[i]
         end
     end
@@ -33,8 +33,8 @@ function getAvailableTransporters()
     local l=sim.getObjectsInTree(sim.handle_scene,sim.handle_all,0)
     local retL={}
     for i=1,#l,1 do
-        local data=sim.readCustomDataBlock(l[i],'XYZ_TRANSPORTER_INFO')
-        if data then
+        local data=sim.readCustomStringData(l[i],'XYZ_TRANSPORTER_INFO')
+        if data and #data > 0 then
             retL[#retL+1]=l[i]
         end
     end
@@ -64,7 +64,7 @@ function isATransporterWithinRange()
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
+    model=sim.getObject('..')
     buckets=getAvailableBuckets()
     transporters=getAvailableTransporters()
 end

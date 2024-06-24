@@ -34,9 +34,8 @@ coppeliaRobotics
                   |__ simSkeleton
                   |__ simSkel
                   |__ simCHAI3D
-                  |__ simConvexDecompose
+                  |__ simConvex
                   |__ simPovRay
-                  |__ simQHull
                   |__ simQML
                   |__ simVision
                   |__ simIM
@@ -168,14 +167,11 @@ Various plugins:
 -   'simCHAI3D' (requires 'include'):
     https://github.com/CoppeliaRobotics/simCHAI3D
 
--   'simConvexDecompose' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simConvexDecompose
+-   'simConvex' (requires 'include'):
+    https://github.com/CoppeliaRobotics/simConvex
 
 -   'simPovRay' (requires 'include'):
     https://github.com/CoppeliaRobotics/simPovRay
-
--   'simQHull' (requires 'include'):
-    https://github.com/CoppeliaRobotics/simQHull
 
 -   'simOpenMesh' (requires 'include'):
     https://github.com/CoppeliaRobotics/simOpenMesh

@@ -148,7 +148,7 @@ namespace sim
     int getObjectFromUid(long long int uid, int options);
     int getObjectFromUid(long long int uid, bool noError);
 
-    int getScriptHandleEx(int scriptType, int objHandle, std::optional<std::string> scriptName = {});
+    int getScriptHandleEx(int scriptType, int objHandle = -1, std::optional<std::string> scriptName = {});
 
     void removeObjects(const std::vector<int> &objectHandles);
 
@@ -181,8 +181,8 @@ namespace sim
     void saveScene(const char *filename);
     void saveScene(const std::string &filename);
 
-    void loadModel(const char *filename);
-    void loadModel(const std::string &filename);
+    int loadModel(const char *filename);
+    int loadModel(const std::string &filename);
 
     void saveModel(int baseOfModelHandle, const char *filename);
     void saveModel(int baseOfModelHandle, const std::string &filename);
@@ -945,7 +945,8 @@ namespace sim
 
     // subtractObjectFromPointCloud
 
-    // checkOctreePointOccupancy
+    bool checkOctreePointOccupancy(int octreeHandle, int options, const double *pts, int ptCnt, unsigned int *tag = nullptr, unsigned long long int *location = nullptr);
+    bool checkOctreePointOccupancy(int octreeHandle, int options, const std::vector<double> &pts, unsigned int *tag = nullptr, unsigned long long int *location = nullptr);
 
     // applyTexture
 

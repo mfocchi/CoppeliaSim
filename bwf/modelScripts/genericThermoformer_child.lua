@@ -1,8 +1,8 @@
 simBWF=require('simBWF')
 function getTriggerType()
     if stopTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(stopTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStopTriggerState then
@@ -15,8 +15,8 @@ function getTriggerType()
         end
     end
     if startTriggerSensor~=-1 then
-        local data=sim.readCustomDataBlock(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
-        if data then
+        local data=sim.readCustomStringData(startTriggerSensor,'XYZ_BINARYSENSOR_INFO')
+        if data and #data > 0 then
             data=sim.unpackTable(data)
             local state=data['detectionState']
             if not lastStartTriggerState then
@@ -50,7 +50,7 @@ getPartMass=function(part)
         if sim.getObjectType(handle)==sim.object_shape_type then
             local p=sim.getObjectInt32Param(handle,sim.shapeintparam_static)
             if p==0 then
-                local m0,i0,com0=sim.getShapeMassAndInertia(handle)
+                local m0=sim.getShapeMass(handle)
                 currentMass=currentMass+m0
             end
         end
@@ -110,13 +110,13 @@ checkSensor=function()
 end
 
 handlePartAtLocation=function(h)
-    local wrappingMass=sim.getShapeMassAndInertia(h)
+    local wrappingMass=sim.getShapeMass(h)
     sim.setObjectPosition(sensor,h,{0,0,-depth})
     local part=checkSensor()
     local mass=0
     if part>=0 then
         mass=getPartMass(part)
-        sim.removeObject(part)
+        sim.removeObjects({part})
     end
     local s=sim.createPureShape(0,8,{width,length,depth},mass+wrappingMass)
     sim.setObjectPosition(s,h,{0,0,0})
@@ -127,19 +127,19 @@ handlePartAtLocation=function(h)
     local p=sim.getObjectProperty(s)
     p=(p|sim.objectproperty_dontshowasinsidemodel)
     sim.setObjectProperty(s,p)
-    local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+    local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
     data=sim.unpackTable(data)
     data['palletPattern']=0 -- none
-    sim.writeCustomDataBlock(s,simBWF.modelTags.PART,sim.packTable(data))
+    sim.writeCustomStringData(s,simBWF.modelTags.PART,sim.packTable(data))
     sim.setObjectParent(s,partHolder,true)
     local partData={s,sim.getSimulationTime(),sim.getObjectPosition(s,-1),false,true} -- handle, lastMovingTime, lastPosition, isModel, isActive
     allProducedParts[#allProducedParts+1]=partData
-    sim.removeObject(h)
+    sim.removeObjects({h})
 end
 
 function sysCall_init()
-    model=sim.getObject('.')
-    local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+    model=sim.getObject('..')
+    local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
     data=sim.unpackTable(data)
     stopTriggerSensor=simBWF.getReferencedObjectHandle(model,1)
     startTriggerSensor=simBWF.getReferencedObjectHandle(model,2)
@@ -155,9 +155,9 @@ function sysCall_init()
     color=data['color']
     dwellTime=data['dwellTime']
     timeForIdlePartToDeactivate=simBWF.modifyPartDeactivationTime(data['deactivationTime'])
-    sampleHolder=sim.getObject('./genericThermoformer_sampleHolder')
-    partHolder=sim.getObject('./genericThermoformer_partHolder')
-    sensor=sim.getObject('./genericThermoformer_sensor')
+    sampleHolder=sim.getObject('../genericThermoformer_sampleHolder')
+    partHolder=sim.getObject('../genericThermoformer_partHolder')
+    sensor=sim.getObject('../genericThermoformer_sensor')
     beltVelocity=0
     totShift=0
     movementUnderway=false
@@ -170,7 +170,7 @@ function sysCall_actuation()
     local t=sim.getSimulationTime()
     local dt=sim.getSimulationTimeStep()
     if movementUnderway then
-        local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         local enabled=(data['bitCoded']&64)>0
         local stopRequests=data['stopRequests']
@@ -187,25 +187,25 @@ function sysCall_actuation()
         if enabled then
             if not rmlPosObj then
                 posVelAccel={posVelAccel[1],0,0}
-                rmlPosObj=sim.rmlPos(1,0.0001,-1,posVelAccel,{maxVel,accel,999999},{1},{movementDist,0})
+                rmlPosObj=sim.ruckigPos(1,0.0001,-1,posVelAccel,{maxVel,accel,999999},{1},{movementDist,0})
             end
-            res,posVelAccel=sim.rmlStep(rmlPosObj,dt)
+            res,posVelAccel=sim.ruckigStep(rmlPosObj,dt)
             if res>0 then
-                sim.rmlRemove(rmlPosObj)
+                sim.ruckigRemove(rmlPosObj)
                 rmlPosObj=nil
                 movementUnderway=false
                 dwellStart=t
             end
         else
             if rmlPosObj then
-                sim.rmlRemove(rmlPosObj)
+                sim.ruckigRemove(rmlPosObj)
                 rmlPosObj=nil
                 rmlVelObj=sim.rmlVel(1,0.0001,-1,posVelAccel,{accel,999999},{1},{0})
             end
             if rmlVelObj then
-                res,posVelAccel=sim.rmlStep(rmlVelObj,dt)
+                res,posVelAccel=sim.ruckigStep(rmlVelObj,dt)
                 if res>0 then
-                    sim.rmlRemove(rmlVelObj)
+                    sim.ruckigRemove(rmlVelObj)
                     rmlVelObj=nil
                 end
             end
@@ -219,13 +219,13 @@ function sysCall_actuation()
             p[2]=p[2]+dShift
             sim.setObjectPosition(partsToMove[i],model,p)
         end
-        local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         data['encoderDistance']=totShift
-        sim.writeCustomDataBlock(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
+        sim.writeCustomStringData(model,simBWF.modelTags.CONVEYOR,sim.packTable(data))
 
     else
-        local data=sim.readCustomDataBlock(model,simBWF.modelTags.CONVEYOR)
+        local data=sim.readCustomStringData(model,simBWF.modelTags.CONVEYOR)
         data=sim.unpackTable(data)
         enabled=(data['bitCoded']&64)>0
         if enabled then
@@ -255,16 +255,16 @@ function sysCall_actuation()
                     sim.setObjectInt32Param(objects[i],sim.shapeintparam_respondable,1)
                     sim.setObjectParent(objects[i],partHolder,true)
                     partsToMove[#partsToMove+1]=objects[i]
-                    local dta=sim.readCustomDataBlock(objects[i],simBWF.modelTags.PART)
+                    local dta=sim.readCustomStringData(objects[i],simBWF.modelTags.PART)
                     dta=sim.unpackTable(dta)
                     dta['instanciated']=true
-                    sim.writeCustomDataBlock(objects[i],simBWF.modelTags.PART,sim.packTable(dta))
+                    sim.writeCustomStringData(objects[i],simBWF.modelTags.PART,sim.packTable(dta))
                 end
                 maxVel=data['velocity']
                 accel=data['acceleration']
                 posVelAccel={0,0,0}
                 lastRelPos=0
-                rmlPosObj=sim.rmlPos(1,0.0001,-1,posVelAccel,{maxVel,accel,999999},{1},{movementDist,0})
+                rmlPosObj=sim.ruckigPos(1,0.0001,-1,posVelAccel,{maxVel,accel,999999},{1},{movementDist,0})
                 movementUnderway=true
             end
         end
@@ -274,7 +274,7 @@ function sysCall_actuation()
     while i<=#allProducedParts do
         local h=allProducedParts[i][1]
         if sim.isHandle(h) then
-            local data=sim.readCustomDataBlock(h,simBWF.modelTags.PART)
+            local data=sim.readCustomStringData(h,simBWF.modelTags.PART)
             data=sim.unpackTable(data)
             local p=sim.getObjectPosition(h,-1)
             if allProducedParts[i][5] then

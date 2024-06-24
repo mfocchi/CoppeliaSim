@@ -58,7 +58,7 @@ end
 
 function model.createNewJob()
     -- Create new job menu bar cmd
-    local sel=sim.getObjectSelection()
+    local sel=sim.getObjectSel()
     local oldJob=model.currentJob
     model.currentJob='default' --=sim.getStringParam(sim.stringparam_job)
     local cmd='createNewJob'
@@ -70,7 +70,7 @@ end
 
 function model.deleteJob()
     -- Delete current job menu bar cmd
-    local sel=sim.getObjectSelection()
+    local sel=sim.getObjectSel()
     local oldJob=model.currentJob
     model.currentJob='default' --=sim.getStringParam(sim.stringparam_job)
     local cmd='deleteJob'
@@ -82,7 +82,7 @@ end
 
 function model.renameJob()
     -- Rename job menu bar cmd
-    local sel=sim.getObjectSelection()
+    local sel=sim.getObjectSel()
     local oldJob=model.currentJob
     model.currentJob='default' --=sim.getStringParam(sim.stringparam_job)
     local cmd='renameJob'
@@ -94,7 +94,7 @@ end
 
 function model.switchJob()
     -- Switch job menu bar cmd
-    local sel=sim.getObjectSelection()
+    local sel=sim.getObjectSel()
     local oldJob=model.currentJob
     model.currentJob='default' --=sim.getStringParam(sim.stringparam_job)
     local cmd='switchJob'

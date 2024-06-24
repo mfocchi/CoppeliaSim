@@ -3,8 +3,8 @@
 function model.readInfo()
     -- Read all the data stored in the model
     
-    local data=sim.readCustomDataBlock(model.handle,model.tagName)
-    if data then
+    local data=sim.readCustomStringData(model.handle,model.tagName)
+    if data and #data > 0 then
         data=sim.unpackTable(data)
     else
         data={}
@@ -56,9 +56,9 @@ function model.writeInfo(data)
     -- Write all the data stored in the model. Before writing, make sure to always first read with readInfo()
     
     if data then
-        sim.writeCustomDataBlock(model.handle,model.tagName,sim.packTable(data))
+        sim.writeCustomStringData(model.handle,model.tagName,sim.packTable(data))
     else
-        sim.writeCustomDataBlock(model.handle,model.tagName,'')
+        sim.writeCustomStringData(model.handle,model.tagName,'')
     end
 end
 
@@ -93,16 +93,16 @@ model.handles={}
 
 local isPick=(model.readInfo()['type']==0)
 if isPick then
-    model.handles.frameShape=sim.getObject('./pickLocationFrame_shape')
+    model.handles.frameShape=sim.getObject('../pickLocationFrame_shape')
 else
-    model.handles.frameShape=sim.getObject('./placeLocationFrame_shape')
+    model.handles.frameShape=sim.getObject('../placeLocationFrame_shape')
 end
 
 model.handles.calibrationBalls={}
 for i=1,3,1 do
     if isPick then
-        model.handles.calibrationBalls[i]=sim.getObject('./pickLocationFrame_calibrationBall'..i)
+        model.handles.calibrationBalls[i]=sim.getObject('../pickLocationFrame_calibrationBall'..i)
     else
-        model.handles.calibrationBalls[i]=sim.getObject('./placeLocationFrame_calibrationBall'..i)
+        model.handles.calibrationBalls[i]=sim.getObject('../placeLocationFrame_calibrationBall'..i)
     end
 end

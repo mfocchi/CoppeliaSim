@@ -43,6 +43,6 @@ end
 -------------------------------------------------------
 model.specHandles={}
 
-model.specHandles.connection=sim.getObject('./genericTray_borderConnection')
+model.specHandles.connection=sim.getObject('../genericTray_borderConnection')
 model.specHandles.border=sim.getObjectChild(model.specHandles.connection,0)
-model.specHandles.borderElement=sim.getObject('./genericTray_borderElement')
+model.specHandles.borderElement=sim.getObject('../genericTray_borderElement')

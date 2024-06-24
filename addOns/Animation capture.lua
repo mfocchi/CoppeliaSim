@@ -52,8 +52,8 @@ function sysCall_selChange(inData)
     local s = inData.sel
     local show = false
     if #s == 1 then
-        local inf = sim.readCustomDataBlock(s[1], '__info__')
-        if inf == nil or sim.unpackTable(inf).type ~= 'animation' then
+        local inf = sim.readCustomBufferData(s[1], '__info__')
+        if inf == nil or #inf == 0 or sim.unpackTable(inf).type ~= 'animation' then
             local tmp = sim.getObjectsInTree(s[1])
             local cnt = 0
             for i = 1, #tmp, 1 do
@@ -195,9 +195,8 @@ function sysCall_afterSimulation()
             dummy, sim.objectproperty_collapsed | sim.objectproperty_selectable |
                 sim.objectproperty_canupdatedna
         )
-        local s = sim.addScript(sim.scripttype_customizationscript)
-        sim.setScriptText(s, "require('animator_customization')")
-        sim.associateScriptWithObject(s, dummy)
+        local s = sim.createScript(sim.scripttype_customization, "require('models.animator_customization-2')")
+        sim.setObjectParent(s, dummy, false)
         local animationData = {
             times = modelData.times,
             poses = {modelData.objects[1].poses},
@@ -214,8 +213,8 @@ function sysCall_afterSimulation()
         end
         modelData = nil
 
-        sim.writeCustomDataBlock(dummy, 'animationData', sim.packTable(animationData))
-        sim.writeCustomDataBlock(dummy, '__info__', sim.packTable({type = 'animation'}, 1))
+        sim.writeCustomBufferData(dummy, 'animationData', sim.packTable(animationData))
+        sim.writeCustomBufferData(dummy, '__info__', sim.packTable({type = 'animation'}, 1))
         sim.setReferencedHandles(dummy, handles)
         sim.setObjectAlias(dummy, "animatedModel")
         local s = sim.getModelBB(dummy)
@@ -225,11 +224,10 @@ function sysCall_afterSimulation()
         p[1] = p[1] + s
         p[2] = p[2] + s
         sim.setObjectPosition(dummy, p)
-        sim.removeObjectFromSelection(sim.handle_all, -1)
-        sim.addObjectToSelection(sim.handle_single, dummy)
+        sim.setObjectSel({dummy})
         local txt = "Animation model '" .. sim.getObjectAlias(dummy, 1) .. "' was created!"
         sim.addLog(sim.verbosity_scriptinfos, txt)
-        sim.msgBox(sim.dlgstyle_message, sim.msgbox_buttons_ok, 'Animation model', txt)
+        simUI.msgBox(simUI.msgbox_type.info, sim.msgbox_buttons.ok, 'Animation model', txt)
     end
 end
 

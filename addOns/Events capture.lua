@@ -37,14 +37,15 @@ function sysCall_event(eventData)
 end
 
 function export()
-    local scenePath = sim.getStringParameter(sim.stringparam_scene_path)
-    local sceneName = sim.getStringParameter(sim.stringparam_scene_name):match("(.+)%..+")
+    local scenePath = sim.getStringParam(sim.stringparam_scene_path)
+    local sceneName = sim.getStringParam(sim.stringparam_scene_name):match("(.+)%..+")
     if sceneName == nil then sceneName = 'untitled' end
-    local fileName = sim.fileDialog(
-                         sim.filedlg_type_save, 'Export events dump...', scenePath,
+    local fileNames = simUI.fileDialog(
+                         simUI.filedialog_type.save, 'Export events dump...', scenePath,
                          sceneName .. '.cbor', 'CBOR file', 'cbor'
                      )
-    if fileName == nil then return end
+    if #fileNames == 0 then return end
+    local fileName = fileNames[1]
     local file = io.open(fileName, 'w')
     data = data .. string.char(255)
     file:write(data)

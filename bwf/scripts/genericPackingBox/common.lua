@@ -52,12 +52,12 @@ end
 -------------------------------------------------------
 model.specHandles={}
 
-model.specHandles.bb=sim.getObject('./genericPackingBox_bb')
-model.specHandles.sideConnection=sim.getObject('./genericPackingBox_sideConnection')
+model.specHandles.bb=sim.getObject('../genericPackingBox_bb')
+model.specHandles.sideConnection=sim.getObject('../genericPackingBox_sideConnection')
 model.specHandles.sides=sim.getObjectChild(model.specHandles.sideConnection,0)
 model.specHandles.joints={}
 model.specHandles.lids={}
 for i=1,4,1 do
-    model.specHandles.joints[i]=sim.getObject('./genericPackingBox_j'..i)
+    model.specHandles.joints[i]=sim.getObject('../genericPackingBox_j'..i)
     model.specHandles.lids[i]=sim.getObjectChild(model.specHandles.joints[i],0)
 end

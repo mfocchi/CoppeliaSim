@@ -63,9 +63,9 @@ function model.realCamDisp.updateDisplay()
         data.type=tp[model.imgToDisplay+1]
         data.frequency=-2+1000/model.imgUpdateFrequMs
        
-        local dt=sim.getSystemTimeInMs(model.lastImgUpdateTimeInMs)
+        local dt=sim.getSystemTime()*1000 - model.lastImgUpdateTimeInMs
         if (dt>model.imgUpdateFrequMs) and (model.realCamDisp.ui~=nil) and data.type~='none' then
-            model.lastImgUpdateTimeInMs=sim.getSystemTimeInMs(-1)
+            model.lastImgUpdateTimeInMs=sim.getSystemTime()*1000
 
             
             local result,retData=simBWF.query('ragnarCamera_getRealImage',data)

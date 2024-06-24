@@ -1,7 +1,7 @@
 function sysCall_init()
     model.codeVersion=1
     model.online=simBWF.isSystemOnline()
-    model.startTime_real=sim.getSystemTimeInMs(-1)
+    model.startTime_real=sim.getSystemTime()*1000
 end
 
 function sysCall_sensing()
@@ -43,13 +43,13 @@ function sysCall_sensing()
     
     
     if model.timeDlg.ui then
-        local t={sim.getSimulationTime(),sim.getSystemTimeInMs(model.startTime_real)/1000}
+        local t={sim.getSimulationTime(),(sim.getSystemTime()*1000 - model.startTime_real)/1000}
         local cnt=2
         if model.simplifiedTimeDisplay or model.online then
             cnt=1
         end
         if model.online then
-            t={sim.getSystemTimeInMs(model.startTime_real)/1000}
+            t={(sim.getSystemTime()*1000 - model.startTime_real)/1000}
         end
         for i=1,cnt,1 do
             local v=t[i]
@@ -60,7 +60,7 @@ function sysCall_sensing()
             local second=math.floor(v)
             v=v-second
             local hs=math.floor(v*100)
-            local str=simBWF.format("%02d",hour)..':'..simBWF.format("%02d",minute)..':'..simBWF.format("%02d",second)..'.'..simBWF.format("%02d",hs)
+            local str=simBWF.format("%02d",hour)..':'..simBWF.format("%02d",minute)..':'..simBWF.format("%02d",second).."."..simBWF.format("%02d",hs)
             simUI.setLabelText(model.timeDlg.ui,i,str,true)
         end
     end

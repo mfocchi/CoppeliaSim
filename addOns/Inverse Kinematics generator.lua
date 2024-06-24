@@ -1,5 +1,7 @@
 sim = require 'sim'
 
+require 'functional'
+
 require 'addOns.jointGroup'
 
 function sysCall_info()
@@ -11,7 +13,7 @@ function sysCall_init()
     simIK = require 'simIK'
     ui = simUI.create(
              [[<ui title="Inverse Kinematics generator" closeable="true" on-close="onClose" layout="vbox" modal="true">
-        <label wordwrap="true" text="This addon generates a script for solving inverse kinematics for the given tip/target/params. The script will be placed in an 'IK' object under the robot model. Choose the params below and click 'Generate'." />
+        <label wordwrap="true" text="This addon generates a script for solving inverse kinematics for the given tip/target/params. The script will be placed in an 'IK' script object child of the robot model. Choose the params below and click 'Generate'." />
         <group flat="true" content-margins="0,0,0,0" layout="form">
             <label text="Robot model:" />
             <combobox id="${ui_comboRobotModel}" on-change="onModelChanged" />
@@ -24,7 +26,7 @@ function sysCall_init()
             <label text="Joint group:" />
             <group flat="true" content-margins="0,0,0,0" layout="vbox">
                 <combobox id="${ui_comboJointGroup}" on-change="updateUi" />
-                <label text="(leave empty to use all joints)" />
+                <label text="(leave empty to use all joints in the tip-target chain)" />
             </group>
             <label text="Constraint:" />
             <group flat="true" content-margins="0,0,0,0" layout="form">
@@ -51,6 +53,7 @@ function sysCall_init()
                 <checkbox id="${ui_chkAvoidJointLimits}" text="Actively avoid joint limits" on-change="updateUi" />
                 <checkbox id="${ui_chkAbortOnJointLimitsHit}" text="Abort on joint limits hit" on-change="updateUi" />
                 <checkbox id="${ui_chkAllowError}" text="Allow error" checked="true" on-change="updateUi" />
+                <checkbox id="${ui_chkOutputErrors}" text="Output errors" checked="false" on-change="updateUi" />
             </group>
             <label text="Handling:" />
             <group flat="true" content-margins="0,0,0,0" layout="vbox">
@@ -68,7 +71,7 @@ function sysCall_init()
     </ui>]]
          )
     updateUi()
-    local sel = sim.getObjectSelection()
+    local sel = sim.getObjectSel()
     if #sel == 1 then
         local idx = table.find(comboRobotModelHandle, sel[1])
         if idx then simUI.setComboboxSelectedIndex(ui, ui_comboRobotModel, idx - 1, false) end
@@ -100,23 +103,23 @@ function onModelChanged()
             needsUpdateUi = true
         end
 
-        -- find 'tip' within model:
-        local tip = sim.getObject('./tip', {proxy = robotModel, noError = true})
-        if tip ~= -1 then
-            local idx = table.find(comboRobotTipHandle, tip)
-            if idx then
-                simUI.setComboboxSelectedIndex(ui, ui_comboRobotTip, idx - 1)
-                needsUpdateUi = true
-            end
-        end
-
-        -- find 'target' within model:
-        local target = sim.getObject('./target', {proxy = robotModel, noError = true})
-        if target ~= -1 then
-            local idx = table.find(comboRobotTargetHandle, target)
-            if idx then
-                simUI.setComboboxSelectedIndex(ui, ui_comboRobotTarget, idx - 1)
-                needsUpdateUi = true
+        -- find 'tip'/'target' within model:
+        for _, prefix in ipairs{'', 'ik', 'arm'} do
+            local cap = prefix == '' and identity or string.capitalize
+            local tip = sim.getObject('./' .. prefix .. cap 'tip', {proxy = robotModel, noError = true})
+            local target = sim.getObject('./' .. prefix .. cap 'target', {proxy = robotModel, noError = true})
+            if tip ~= -1 and target ~= -1 then
+                local tip_idx = table.find(comboRobotTipHandle, tip)
+                if tip_idx then
+                    simUI.setComboboxSelectedIndex(ui, ui_comboRobotTip, tip_idx - 1)
+                    needsUpdateUi = true
+                end
+                local target_idx = table.find(comboRobotTargetHandle, target)
+                if target_idx then
+                    simUI.setComboboxSelectedIndex(ui, ui_comboRobotTarget, target_idx - 1)
+                    needsUpdateUi = true
+                end
+                break
             end
         end
 
@@ -277,10 +280,6 @@ function onClose()
 end
 
 function generate()
-    local scriptText = ''
-    local function appendLine(...)
-        scriptText = scriptText .. string.format(...) .. '\n'
-    end
     local robotModel = getRobotModelHandle()
     local simBase = getRobotBaseHandle()
     local simTip = getRobotTipHandle()
@@ -306,14 +305,20 @@ function generate()
     local avoidJointLimits = simUI.getCheckboxValue(ui, ui_chkAvoidJointLimits) > 0
     local abortOnJointLimitsHit = simUI.getCheckboxValue(ui, ui_chkAbortOnJointLimitsHit) > 0
     local allowError = simUI.getCheckboxValue(ui, ui_chkAllowError) > 0
+    local outputErrors = simUI.getCheckboxValue(ui, ui_chkOutputErrors) > 0
     local genIKVars = simUI.getCheckboxValue(ui, ui_chkGenIKVars) > 0
 
-    local ikDummy = sim.createDummy(0.01)
-    sim.setObjectAlias(ikDummy, 'IK')
-    sim.setObjectParent(ikDummy, robotModel, false)
-    sim.setObjectPose(ikDummy, {0, 0, 0, 0, 0, 0, 1}, robotModel)
-    sim.setObjectInt32Param(ikDummy, sim.objintparam_visibility_layer, 0)
-    sim.setObjectInt32Param(ikDummy, sim.objintparam_manipulation_permissions, 0)
+    local ikScript = sim.createScript(sim.scripttype_customization, '')
+    sim.setObjectAlias(ikScript, 'IK')
+    sim.setObjectParent(ikScript, robotModel, false)
+    sim.setObjectPose(ikScript, {0, 0, 0, 0, 0, 0, 1}, robotModel)
+    sim.setObjectInt32Param(ikScript, sim.objintparam_visibility_layer, 0)
+    sim.setObjectInt32Param(ikScript, sim.objintparam_manipulation_permissions, 0)
+
+    local scriptText = ''
+    local function appendLine(...)
+        scriptText = scriptText .. string.format(...) .. '\n'
+    end
 
     appendLine("sim = require 'sim'")
     appendLine("simIK = require 'simIK'")
@@ -321,12 +326,12 @@ function generate()
     appendLine("function sysCall_init()")
     appendLine("    self = sim.getObject '.'")
     appendLine("")
-    appendLine("    simBase = sim.getObject '%s'", sim.getObjectAliasRelative(simBase, ikDummy, 1))
-    appendLine("    simTip = sim.getObject '%s'", sim.getObjectAliasRelative(simTip, ikDummy, 1))
-    appendLine("    simTarget = sim.getObject '%s'", sim.getObjectAliasRelative(simTarget, ikDummy, 1))
+    appendLine("    simBase = sim.getObject '%s'", sim.getObjectAliasRelative(simBase, ikScript, 1))
+    appendLine("    simTip = sim.getObject '%s'", sim.getObjectAliasRelative(simTip, ikScript, 1))
+    appendLine("    simTarget = sim.getObject '%s'", sim.getObjectAliasRelative(simTarget, ikScript, 1))
     if jointGroup then
         appendLine(
-            "    jointGroup = sim.getObject '%s'", sim.getObjectAliasRelative(jointGroup, ikDummy, 1)
+            "    jointGroup = sim.getObject '%s'", sim.getObjectAliasRelative(jointGroup, ikScript, 1)
         )
         appendLine("    simJoints = sim.getReferencedHandles(jointGroup)")
     end
@@ -398,9 +403,11 @@ function generate()
     appendLine("")
     appendLine("function handleIk()")
     appendLine("    local result, failureReason = simIK.handleGroup(ikEnv, ikGroup, ikOptions)")
-    appendLine("    if result ~= simIK.result_success then")
-    appendLine("        sim.addLog(sim.verbosity_errors, 'IK failed: ' .. simIK.getFailureDescription(failureReason))")
-    appendLine("    end")
+    if outputErrors then
+        appendLine("    if result ~= simIK.result_success then")
+        appendLine("        sim.addLog(sim.verbosity_errors, 'IK failed: ' .. simIK.getFailureDescription(failureReason))")
+        appendLine("    end")
+    end
     appendLine("end")
 
     appendLine("")
@@ -505,15 +512,15 @@ function generate()
     appendLine("    return simHandleMap[ikHandle]")
     appendLine("end")
 
-    local script = sim.addScript(sim.scripttype_customizationscript)
-    sim.setScriptStringParam(script, sim.scriptstringparam_text, scriptText)
-    sim.associateScriptWithObject(script, ikDummy)
+    sim.setObjectStringParam(ikScript, sim.scriptstringparam_text, scriptText)
 
-    if not sim.readCustomDataBlock(simTip, 'ikTip') then
-        sim.writeCustomDataBlock(simTip, 'ikTip', sim.packInt32Table {1})
+    local dat = sim.readCustomBufferData(simTip, 'ikTip')
+    if not dat or #dat == 0 then
+        sim.writeCustomBufferData(simTip, 'ikTip', sim.packInt32Table {1})
     end
-    if not sim.readCustomDataBlock(simTarget, 'ikTarget') then
-        sim.writeCustomDataBlock(simTarget, 'ikTarget', sim.packInt32Table {1})
+    local dat = sim.readCustomBufferData(simTarget, 'ikTarget')
+    if not dat or #dat == 0 then
+        sim.writeCustomBufferData(simTarget, 'ikTarget', sim.packInt32Table {1})
     end
 
     sim.announceSceneContentChange()
